@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingPageImg from './LandingPage.jpg';
+import VLogo from './VLogo.png';
 import './LandingPage.css';
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ const LandingPage = () => {
   return (
     <div className="landing-page">
       <div className="logo">
-        <img src="/venture-lab-logo.png" alt="Venture Lab" />
+        <img src={VLogo} alt="Venture Lab" />
       </div>
       
       <div className="landing-content">

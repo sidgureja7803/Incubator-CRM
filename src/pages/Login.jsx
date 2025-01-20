@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginImg from './Login.png';
+import VLogo from './VLogo.png';
 import './Login.css';
 const Login = () => {
   const navigate = useNavigate();
@@ -15,7 +16,6 @@ const Login = () => {
       [e.target.name]: e.target.value
     });
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     // Add your login logic here
@@ -25,7 +25,7 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="logo">
-        <img src="/venture-lab-logo.png" alt="Venture Lab" />
+        <img src={VLogo} alt="Venture Lab" />
       </div>
 
       <div className="login-container">

@@ -146,3 +146,12 @@
     border-radius: 20px 20px 0 0;
   }
 }
+
+.logo{
+  padding: 10px;
+}
+
+.logo img {
+  height: 40px;
+}
+

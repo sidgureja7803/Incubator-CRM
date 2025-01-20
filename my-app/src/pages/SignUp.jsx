@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import VLogo from './VLogo.png';
-import StartupIcon from './Startup.png';
-import IncubatorIcon from './Incubator.png';
+import VLogo from '../assets/VLogo.png';
+import StartupIcon from '../assets/Startup.png';
+import IncubatorIcon from '../assets/Incubator.png';
 import './SignUp.css';
 
 const SignUp = () => {
@@ -133,4 +133,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignUp; 
