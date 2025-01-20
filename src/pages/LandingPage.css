@@ -1,0 +1,90 @@
+.landing-page {
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #ffffff;
+}
+
+.logo {
+  padding: 1rem;
+}
+
+.logo img {
+  height: 40px;
+}
+
+.landing-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 4rem auto;
+  padding: 0 2rem;
+}
+
+.text-content {
+  flex: 1;
+  padding-right: 4rem;
+}
+
+.text-content h1 {
+  font-size: 3.5rem;
+  color: #000;
+  margin-bottom: 0.5rem;
+}
+
+.text-content h2 {
+  font-size: 2.5rem;
+  color: #1e3a8a;
+  margin-bottom: 1.5rem;
+}
+
+.text-content p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.next-button {
+  background-color: #1e3a8a;
+  color: white;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.next-button:hover {
+  background-color: #1e4620;
+}
+
+.image-content {
+  flex: 1;
+}
+
+.image-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .landing-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 0 1rem;
+  }
+
+  .text-content {
+    padding-right: 0;
+    margin-bottom: 2rem;
+  }
+
+  .text-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .text-content h2 {
+    font-size: 1.8rem;
+  }
+}
