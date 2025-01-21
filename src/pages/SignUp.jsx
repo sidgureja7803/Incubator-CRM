@@ -4,6 +4,8 @@ import VLogo from './VLogo.png';
 import StartupIcon from './Startup.png';
 import IncubatorIcon from './Incubator.png';
 import './SignUp.css';
+import axios from 'axios';
+import config from '../config';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const SignUp = () => {
     password: '',
     confirmPassword: ''
   });
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     setFormData({
@@ -23,9 +26,26 @@ const SignUp = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', { userType, ...formData });
+    
+    if (!userType) {
+      setError('Please select whether you are a Startup or Incubator');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${config.api_base_url}${config.endpoints.signup}`, {
+        ...formData,
+        role: userType
+      });
+
+      if (response.status === 200) {
+        navigate('/verify-otp', { state: { email: formData.email } });
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || 'Signup failed. Please try again.');
+    }
   };
 
   return (
