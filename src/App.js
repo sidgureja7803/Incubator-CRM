@@ -5,6 +5,7 @@ import OtpVerification from './pages/OtpVerification';
 import Login from './pages/Login';
 import StartupLanding from './pages/StartupLanding';
 import IncubatorLanding from './pages/IncubatorLanding';
+import StartupProfile from './components/startups/components/StartupProfile/StartupProfile';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/startup-landing" element={<StartupLanding />} />
           <Route path="/incubator-landing" element={<IncubatorLanding />} />
+          <Route path="/startup-profile" element={<StartupProfile />} />
           <Route path="/" element={<Navigate to="/signup" replace />} />
         </Routes>
       </div>
