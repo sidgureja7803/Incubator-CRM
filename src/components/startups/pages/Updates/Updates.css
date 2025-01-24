@@ -1,0 +1,219 @@
+.updates-container {
+  padding: 2rem;
+  background-color: #f9fafb;
+}
+
+.updates-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+}
+
+.add-update-button {
+  padding: 0.5rem 1rem;
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.3s;
+}
+
+.add-update-button:hover {
+  background-color: #1e4620;
+}
+
+.updates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.update-card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.update-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.update-description p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.update-form {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+/* Custom Select Styles */
+.custom-select {
+  position: relative;
+}
+
+.select-header {
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.select-header::after {
+  content: '▼';
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  margin-top: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.select-option {
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.select-option:hover {
+  background-color: #f3f4f6;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.form-group textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 1px #1e3a8a;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.save-button {
+  padding: 0.5rem 2rem;
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.save-button:hover {
+  background-color: #1e4620;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .updates-container {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+}
