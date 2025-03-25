@@ -19,7 +19,7 @@ The **Incubator CRM System** is a comprehensive web application designed to mana
 - Axios: For API requests.
 ```
 
-### Backend (if applicable)
+### Backend
 ```bash
 - Node.js + Express (recommended for API development).
 - MongoDB / PostgreSQL (database options).
@@ -59,5 +59,5 @@ MIT License
 
 ---
 
-For any inquiries, contact **yourname@example.com**.
+For any inquiries, contact **sgureja_be22@thapar.edu**.
 
