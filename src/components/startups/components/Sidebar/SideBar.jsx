@@ -1,12 +1,11 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import VLogo from '../../../../assets/VLogo.png';
+import VLogo from '.../VLogo.png';
 import './SideBar.css';
 
 const SideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
   const menuItems = [
     { id: 1, name: 'Dashboard', path: '/dashboard', icon: '🏠' },
     { id: 2, name: 'Startup Profile', path: '/startup-profile', icon: '👤' },

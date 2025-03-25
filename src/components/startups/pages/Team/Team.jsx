@@ -17,6 +17,8 @@ const Team = () => {
     company_email: '',
     profile_image: null
   });
+
+  
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
