@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'utils/httpClient';
-import config from 'config';
-import './Programs.css';
+import axios from 'axios';
+import config from '../../../../config';
+import './Cohorts.css';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
-import { useIncubatorContext } from '../../../../context/IncubatorContext';
 
-const Cohorts = () => {
+const Programs = () => {
   const { setIncubatorPeople } = useIncubatorContext();
   const [programs, setPrograms] = useState([]);
   const [people, setPeople] = useState([]);
@@ -19,6 +18,7 @@ const Cohorts = () => {
   const [selectedCohort, setSelectedCohort] = useState(null);
   const [showRemoveAdminModal, setShowRemoveAdminModal] = useState(false);
   const [showAddProgramModal, setShowAddProgramModal] = useState(false);
+  const [activeCohortTab, setActiveCohortTab] = useState('members');
   const [newProgramData, setNewProgramData] = useState({
     program_name: '',
     description: '',
@@ -52,22 +52,24 @@ const Cohorts = () => {
   const [showAssignTaskModal, setShowAssignTaskModal] = useState(false);
   const [showAddDocumentModal, setShowAddDocumentModal] = useState(false);
   const [taskData, setTaskData] = useState({
-  task_name: '',
-  description: '',
-  due_date: '',
-  startup_person_ids: []
-    });
+    task_name: '',
+    description: '',
+    due_date: '',
+    startup_person_ids: []
+  });
 
-    const [documentData, setDocumentData] = useState({
-        name: '',
-        description: '',
-        file: null
-          });
+  const [documentData, setDocumentData] = useState({
+    name: '',
+    description: '',
+    file: null
+  });
 
   const [documents, setDocuments] = useState([]);
-
+  const [tasks, setTasks] = useState([]);
   const [showAddNewDocModal, setShowAddNewDocModal] = useState(false);
   const [isEditingDoc, setIsEditingDoc] = useState(false);
+  const [showCohortContent, setShowCohortContent] = useState(false);
+  const [activeCohort, setActiveCohort] = useState(null);
 
   const resetForm = () => {
     setFormData({
@@ -106,7 +108,6 @@ const Cohorts = () => {
     fetchCohortPeople(cohort.id); // Fetch cohort people when opening the modal
     setShowAssignTaskModal(true);
   };
-
 
   const fetchPrograms = async () => {
     try {
@@ -610,9 +611,49 @@ const Cohorts = () => {
     }
   };
 
+  // Toggle program expansion
+  const toggleProgram = (programId) => {
+    setExpandedProgram(prev => ({
+      ...prev,
+      [programId]: !prev[programId]
+    }));
+  };
+
+  // Handle selecting a cohort for detailed view
+  const handleSelectCohort = (cohort) => {
+    setActiveCohort(cohort);
+    setActiveCohortTab('members');
+    setShowCohortContent(true);
+    fetchCohortPeople(cohort.id);
+    fetchDocuments(cohort.id);
+    fetchTasks(cohort.id);
+  };
+
+  // New function to fetch tasks
+  const fetchTasks = async (cohortId) => {
+    try {
+      const response = await axios.get(
+        `${config.api_base_url}/programadmin/tasks/${cohortId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+          }
+        }
+      );
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setErrorMessage('Error fetching tasks');
+    }
+  };
+
   return (
     <div className="broad-container">
       <div className="header-container">
+        <h1 className="page-title">Programs</h1>
+        <div className="breadcrumb">
+          <span>Programs</span>
+        </div>
         <button 
           className="add-program-btn"
           onClick={() => setShowAddProgramModal(true)}
@@ -621,159 +662,393 @@ const Cohorts = () => {
         </button>
       </div>
 
-      <div className="programs-container">
-        {programs.map(program => (
-          <div key={program.id} className="program-section">
-            <div className="program-header">
-              <div className="program-info" onClick={() => toggleProgram(program.id)}>
-                <div className="program-title">
-                  {expandedProgram[program.id] ? 
-                    <KeyboardArrowUp className="arrow-icon" /> : 
-                    <KeyboardArrowDown className="arrow-icon" />
-                  }
-                  <h3>{program.program_name}</h3>
-                  <span className={`status-badge ${program.is_active ? 'active' : 'inactive'}`}>
-                    {program.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-                <p className="program-description">{program.description}</p>
-                {program.admin && (
-                  <div className="admin-info">
-                    Admin: {program.admin.first_name} {program.admin.last_name}
+      {/* Programs list with cohorts */}
+      {!showCohortContent && (
+        <div className="programs-container">
+          {programs.map(program => (
+            <div key={program.id} className="program-section">
+              <div className="program-header">
+                <div className="program-info" onClick={() => toggleProgram(program.id)}>
+                  <div className="program-title">
+                    {expandedProgram[program.id] ? 
+                      <KeyboardArrowUp className="arrow-icon" /> : 
+                      <KeyboardArrowDown className="arrow-icon" />
+                    }
+                    <h3>{program.program_name}</h3>
+                    <span className={`status-badge ${program.is_active ? 'active' : 'inactive'}`}>
+                      {program.is_active ? 'Active' : 'Inactive'}
+                    </span>
                   </div>
-                )}
-              </div>
-              <div className="program-actions">
-                <button 
-                  className="edit-program-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setProgramToUpdate(program);
-                    setShowUpdateProgramModal(true);
-                  }}
-                >
-                  Edit Program
-                </button>
-                <button 
-                  className="add-cohort-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!program.is_active) {
-                      setErrorMessage('Cannot add cohort to an inactive program');
-                      return;
-                    }
-                    if (program.id) {
+                  <p className="program-description">{program.description}</p>
+                  {program.admin && (
+                    <div className="admin-info">
+                      Admin: {program.admin.first_name} {program.admin.last_name}
+                    </div>
+                  )}
+                </div>
+                <div className="program-actions">
+                  <button 
+                    className="edit-program-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setProgramToUpdate(program);
+                      setShowUpdateProgramModal(true);
+                    }}
+                  >
+                    Edit Program
+                  </button>
+                  <button 
+                    className="add-cohort-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!program.is_active) {
+                        setErrorMessage('Cannot add cohort to an inactive program');
+                        return;
+                      }
+                      if (program.id) {
+                        setSelectedProgram(program.id);
+                        setShowAddCohortModal(true);
+                      } else {
+                        setErrorMessage('Invalid program selected');
+                      }
+                    }}
+                  >
+                    Add Cohort
+                  </button>
+                  <button 
+                    className="assign-admin-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setSelectedProgram(program.id);
-                      setShowAddCohortModal(true);
-                    } else {
-                      setErrorMessage('Invalid program selected');
-                    }
-                  }}
-                >
-                  Add Cohort
-                </button>
-                <button 
-                  className="assign-admin-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedProgram(program.id);
-                    setShowAssignAdminModal(true);
-                  }}
-                >
-                  Assign Admin
-                </button>
+                      setShowAssignAdminModal(true);
+                    }}
+                  >
+                    Assign Admin
+                  </button>
+                </div>
               </div>
+
+              {expandedProgram[program.id] && (
+                <div className="cohorts-container">
+                  {program.cohorts?.length > 0 ? (
+                    program.cohorts.map(cohort => (
+                      <div 
+                        key={cohort.id} 
+                        className={`cohort-card ${activeCohort?.id === cohort.id ? 'selected' : ''}`}
+                        onClick={() => handleSelectCohort(cohort)}
+                      >
+                        <div className="cohort-info">
+                          <h4>{cohort.cohort_name}</h4>
+                          <div className="cohort-details">
+                            <p><strong>Start Date:</strong> {new Date(cohort.start_date).toLocaleDateString()}</p>
+                            <p><strong>End Date:</strong> {new Date(cohort.end_date).toLocaleDateString()}</p>
+                            <p><strong>Status:</strong> <span className={`status-pill ${cohort.status}`}>{cohort.status}</span></p>
+                          </div>
+                        </div>
+                        <div className="cohort-actions">
+                          <div className="button-row">
+                            <button 
+                              className="edit-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCohortToUpdate(cohort);
+                                setShowUpdateCohortModal(true);
+                              }}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="delete-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCohort(cohort.id);
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                          <div className="button-row">
+                            <button 
+                              className="add-people-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCohortId(cohort.id);
+                                setShowAddPeopleModal(true);
+                                fetchStartups();
+                                fetchStartupPeople();
+                              }}
+                            >
+                              Add People
+                            </button>
+                            <button 
+                              className="assign-task-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCohort(cohort);
+                                setShowAssignTaskModal(true);
+                              }}
+                            >
+                              Add Cohort
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-cohorts">No cohorts found for this program</div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Cohort details view with tabs */}
+      {showCohortContent && activeCohort && (
+        <div className="cohort-detail-view">
+          <div className="back-navigation">
+            <button 
+              className="back-button"
+              onClick={() => {
+                setShowCohortContent(false);
+                setActiveCohort(null);
+              }}
+            >
+              ← Back to Programs
+            </button>
+          </div>
+          
+          <div className="cohort-header">
+            <h2>{activeCohort.cohort_name}</h2>
+            <div className="cohort-meta">
+              <span>Start: {new Date(activeCohort.start_date).toLocaleDateString()}</span>
+              <span>End: {new Date(activeCohort.end_date).toLocaleDateString()}</span>
+              <span className={`status-pill ${activeCohort.status}`}>{activeCohort.status}</span>
+            </div>
+          </div>
+
+          <div className="cohort-content">
+            <div className="cohort-tabs">
+              <button 
+                className={`cohort-tab ${activeCohortTab === 'members' ? 'active' : ''}`}
+                onClick={() => setActiveCohortTab('members')}
+              >
+                Members
+              </button>
+              <button 
+                className={`cohort-tab ${activeCohortTab === 'documents' ? 'active' : ''}`}
+                onClick={() => setActiveCohortTab('documents')}
+              >
+                Documents
+              </button>
+              <button 
+                className={`cohort-tab ${activeCohortTab === 'tasks' ? 'active' : ''}`}
+                onClick={() => setActiveCohortTab('tasks')}
+              >
+                Tasks
+              </button>
             </div>
 
-            {expandedProgram[program.id] && (
-              <div className="cohorts-container">
-                {program.cohorts?.length > 0 ? (
-                  program.cohorts.map(cohort => (
-                    <div key={cohort.id} className="cohort-card">
-                      <div className="cohort-info">
-                          <h4>{cohort.cohort_name}</h4>
-                        <div className="cohort-details">
-                          <p><strong>Start Date:</strong> {new Date(cohort.start_date).toLocaleDateString()}</p>
-                          <p><strong>End Date:</strong> {new Date(cohort.end_date).toLocaleDateString()}</p>
-                          <p><strong>Status:</strong> <span className={`status-pill ${cohort.status}`}>{cohort.status}</span></p>
-                        </div>
-                      </div>
-                      <div className="cohort-actions">
-                        
-                        
-                        
-
-                        <div className="button-row">
-                    <button className="delete-btn">Delete</button>
-                    <button 
-                    className="assign-task-btn"
+            {/* Members Tab Content */}
+            {activeCohortTab === 'members' && (
+              <div className="tab-content">
+                <div className="tab-header">
+                  <button 
+                    className="add-button"
                     onClick={() => {
-                    setSelectedCohort(cohort);
-                    setShowAssignTaskModal(true);
-                      }}
-                    >
-      Assign Task
-    </button>
-    <button 
-      className="documents-btn"
-      onClick={() => {
-        setSelectedCohort(cohort);
-        fetchDocuments(cohort.id);
-        setShowDocumentsModal(true);
-      }}
-    >
-      Documents
-    </button>
-                        </div>
+                      setSelectedCohortId(activeCohort.id);
+                      setShowAddPeopleModal(true);
+                      fetchStartups();
+                      fetchStartupPeople();
+                    }}
+                  >
+                    Add Members
+                  </button>
+                </div>
+                
+                <div className="members-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Phone Number</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cohortPeople.length > 0 ? (
+                        cohortPeople.map(person => (
+                          <tr key={person.id}>
+                            <td>{person.first_name} {person.last_name}</td>
+                            <td>{person.startup_name}</td>
+                            <td>{person.personal_phone}</td>
+                            <td>{person.personal_email}</td>
+                            <td className="action-buttons">
+                              <button className="edit-btn small">Edit</button>
+                              <button className="delete-btn small">Delete</button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="no-data">No members found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="pagination">
+                  <div className="rows-per-page">
+                    <span>Rows per page:</span>
+                    <select className="rows-select">
+                      <option>10</option>
+                      <option>20</option>
+                      <option>50</option>
+                    </select>
+                  </div>
+                  <div className="pagination-controls">
+                    <button className="pagination-btn">‹</button>
+                    <button className="pagination-btn">›</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                        <div className = "button-row">
-                        <button 
-                          className="edit-btn"
-                          onClick={() => {
-                            setCohortToUpdate(cohort);
-                            setShowUpdateCohortModal(true);
-                          }}
-                        >
-                          Edit
-                        </button>
+            {/* Documents Tab Content */}
+            {activeCohortTab === 'documents' && (
+              <div className="tab-content">
+                <div className="tab-header">
+                  <button 
+                    className="add-button"
+                    onClick={() => setShowAddNewDocModal(true)}
+                  >
+                    Add Documents
+                  </button>
+                </div>
+                
+                <div className="documents-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {documents.length > 0 ? (
+                        documents.map(doc => (
+                          <tr key={doc.id}>
+                            <td>{doc.name}</td>
+                            <td>{doc.description}</td>
+                            <td>
+                              <a href={doc.document_url} download className="download-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                </svg>
+                              </a>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="3" className="no-data">No documents found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="pagination">
+                  <div className="rows-per-page">
+                    <span>Rows per page:</span>
+                    <select className="rows-select">
+                      <option>10</option>
+                      <option>20</option>
+                      <option>50</option>
+                    </select>
+                  </div>
+                  <div className="pagination-controls">
+                    <button className="pagination-btn">‹</button>
+                    <button className="pagination-btn">›</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                        <button 
-                          className="add-people-btn"
-                          onClick={() => {
-                            setSelectedCohortId(cohort.id);
-                            setShowAddPeopleModal(true);
-                            fetchStartups();
-                            fetchStartupPeople();
-                          }}
-                        >
-                          Add People
-                        </button>
-
-                        <button 
-                          className="view-people-btn"
-                          onClick={() => {
-                            setSelectedCohortId(cohort.id);
-                            setShowViewPeopleModal(true);
-                            fetchCohortPeople(cohort.id);
-                          }}
-                        >
-                          View People
-                        </button>
-                        </div>
-                        
-
-
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="no-cohorts">No cohorts found for this program</div>
-                )}
+            {/* Tasks Tab Content */}
+            {activeCohortTab === 'tasks' && (
+              <div className="tab-content">
+                <div className="tab-header">
+                  <button 
+                    className="add-button"
+                    onClick={() => {
+                      setSelectedCohort(activeCohort);
+                      setShowAssignTaskModal(true);
+                    }}
+                  >
+                    Add Tasks
+                  </button>
+                </div>
+                
+                <div className="tasks-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Responses</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tasks.length > 0 ? (
+                        tasks.map(task => (
+                          <tr key={task.id}>
+                            <td>{task.task_name}</td>
+                            <td>{new Date(task.due_date).toLocaleDateString()}</td>
+                            <td>{task.description}</td>
+                            <td>{task.responses || 'No responses'}</td>
+                            <td className="action-buttons">
+                              <button className="edit-btn small">Edit</button>
+                              <button className="delete-btn small">Delete</button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="no-data">No tasks found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="pagination">
+                  <div className="rows-per-page">
+                    <span>Rows per page:</span>
+                    <select className="rows-select">
+                      <option>10</option>
+                      <option>20</option>
+                      <option>50</option>
+                    </select>
+                  </div>
+                  <div className="pagination-controls">
+                    <button className="pagination-btn">‹</button>
+                    <button className="pagination-btn">›</button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {/* Add Program Modal */}
       {showAddProgramModal && (
@@ -843,12 +1118,13 @@ const Cohorts = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Add New Cohort</h2>
+              <h2>Add Cohort !</h2>
               <button 
                 className="close-button"
                 onClick={() => {
                   setShowAddCohortModal(false);
                   setErrorMessage(''); // Clear any error messages
+                  resetForm();
                 }}
               >
                 ×
@@ -861,7 +1137,7 @@ const Cohorts = () => {
             )}
             <form onSubmit={handleAddCohort}>
               <div className="form-row">
-                <label>Cohort Name</label>
+                <label>Cohorts</label>
                 <input
                   type="text"
                   value={formData.cohort_name}
@@ -869,58 +1145,74 @@ const Cohorts = () => {
                     ...formData,
                     cohort_name: e.target.value
                   })}
-                  placeholder="Enter cohort name"
+                  placeholder="Enter the IP Type"
                   required
                 />
               </div>
               <div className="form-row">
                 <label>Start Date</label>
-                <input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    start_date: e.target.value
-                  })}
-                  required
-                />
+                <div className="date-input-container">
+                  <input
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      start_date: e.target.value
+                    })}
+                    placeholder="11-08-2023"
+                    required
+                  />
+                  <svg className="calendar-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                  </svg>
+                </div>
               </div>
               <div className="form-row">
-                <label>End Date</label>
-                <input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    end_date: e.target.value
-                  })}
-                  required
-                />
+                <label>Start Date</label>
+                <div className="date-input-container">
+                  <input
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      end_date: e.target.value
+                    })}
+                    placeholder="11-12-2024"
+                    required
+                  />
+                  <svg className="calendar-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                  </svg>
+                </div>
               </div>
               <div className="form-row">
                 <label>Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    status: e.target.value
-                  })}
-                  required
-                >
-                  <option value="">Select Status</option>
-                  <option value="active">Active</option>
-                  <option value="closed">Closed</option>
-                </select>
+                <div className="switch-toggle">
+                  <button
+                    type="button"
+                    className={`switch-option ${formData.status === 'active' ? 'active' : ''}`}
+                    onClick={() => setFormData({
+                      ...formData,
+                      status: 'active'
+                    })}
+                  >
+                    Active
+                  </button>
+                  <button
+                    type="button"
+                    className={`switch-option ${formData.status === 'closed' ? 'active' : ''}`}
+                    onClick={() => setFormData({
+                      ...formData,
+                      status: 'closed'
+                    })}
+                  >
+                    Closed
+                  </button>
+                </div>
               </div>
               <div className="form-actions">
-                <button 
-                  type="button" 
-                  onClick={() => setShowAddCohortModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit">
-                  Add Cohort
+                <button type="submit" className="save-btn">
+                  Save
                 </button>
               </div>
             </form>
@@ -1141,60 +1433,89 @@ const Cohorts = () => {
   <div className="modal-overlay">
     <div className="modal-content">
       <div className="modal-header">
-        <h2>Assign Task</h2>
+        <h2>Upload Tasks !</h2>
         <button onClick={() => setShowAssignTaskModal(false)}>×</button>
       </div>
       <form onSubmit={handleAssignTask}>
         <div className="form-row">
-          <label>Task Name</label>
+          <label>Add file</label>
+          <div className="file-upload-container">
+            <span className="file-placeholder">Upload File here</span>
+            <button type="button" className="upload-btn">
+              Upload
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className="form-row">
+          <label>Name</label>
           <input
             type="text"
             value={taskData.task_name}
             onChange={(e) => setTaskData({ ...taskData, task_name: e.target.value })}
+            placeholder="Enter Name of the Task here !"
             required
           />
+        </div>
+        <div className="form-row">
+          <label>Due Date</label>
+          <div className="date-input-container">
+            <input
+              type="date"
+              value={taskData.due_date}
+              onChange={(e) => setTaskData({ ...taskData, due_date: e.target.value })}
+              placeholder="Choose the due date !"
+              required
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="calendar-icon">
+              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+            </svg>
+          </div>
         </div>
         <div className="form-row">
           <label>Description</label>
           <textarea
             value={taskData.description}
             onChange={(e) => setTaskData({ ...taskData, description: e.target.value })}
-            required
-          />
-        </div>
-        <div className="form-row">
-          <label>Due Date</label>
-          <input
-            type="date"
-            value={taskData.due_date}
-            onChange={(e) => setTaskData({ ...taskData, due_date: e.target.value })}
+            placeholder="Enter a short Description of the Document !"
             required
           />
         </div>
         <div className="form-row">
           <label>Select People from Cohort</label>
-          <select
-            multiple
-            value={taskData.startup_person_ids}
-            onChange={(e) => {
-              const options = e.target.options;
-              const selectedIds = [];
-              for (let i = 0; i < options.length; i++) {
-                if (options[i].selected) {
-                  selectedIds.push(options[i].value);
-                }
-              }
-              setTaskData({ ...taskData, startup_person_ids: selectedIds });
-            }}
-          >
+          <div className="people-select-list">
             {cohortPeople.map(person => (
-              <option key={person.id} value={person.id}>{person.name}</option>
+              <label key={person.id} className="checkbox-label">
+                <input
+                  type="checkbox"
+                  value={person.id}
+                  checked={taskData.startup_person_ids.includes(person.id)}
+                  onChange={(e) => {
+                    const personId = person.id;
+                    setTaskData(prev => ({
+                      ...prev,
+                      startup_person_ids: e.target.checked
+                        ? [...prev.startup_person_ids, personId]
+                        : prev.startup_person_ids.filter(id => id !== personId)
+                    }));
+                  }}
+                />
+                {person.first_name} {person.last_name}
+              </label>
             ))}
-          </select>
+          </div>
         </div>
         <div className="form-actions">
-          <button type="button" onClick={() => setShowAssignTaskModal(false)}>Cancel</button>
-          <button type="submit">Assign Task</button>
+          <button 
+            type="submit" 
+            className="save-btn"
+            disabled={taskData.startup_person_ids.length === 0}
+          >
+            Save
+          </button>
         </div>
       </form>
     </div>
@@ -1300,7 +1621,7 @@ const Cohorts = () => {
   <div className="modal-overlay">
     <div className="modal-content">
       <div className="modal-header">
-        <h2>{isEditingDoc ? 'Edit Document' : 'Add New Document'}</h2>
+        <h2>Upload Documents !</h2>
         <button onClick={() => {
           setShowAddNewDocModal(false);
           setIsEditingDoc(false);
@@ -1309,11 +1630,31 @@ const Cohorts = () => {
       </div>
       <form onSubmit={isEditingDoc ? handleUpdateDocument : handleAddDocument}>
         <div className="form-row">
+          <label>Add Document</label>
+          <div className="file-upload-container">
+            <span className="file-placeholder">Upload your Document here</span>
+            <button type="button" className="upload-btn">
+              Upload
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+              </svg>
+            </button>
+            <input
+              type="file"
+              onChange={(e) => setDocumentData({ ...documentData, file: e.target.files[0] })}
+              required={!isEditingDoc}
+              className="hidden-file-input"
+            />
+          </div>
+        </div>
+        <div className="form-row">
           <label>Document Name</label>
           <input
             type="text"
             value={documentData.name}
             onChange={(e) => setDocumentData({ ...documentData, name: e.target.value })}
+            placeholder="Enter Name of the Document here !"
             required
           />
         </div>
@@ -1322,25 +1663,13 @@ const Cohorts = () => {
           <textarea
             value={documentData.description}
             onChange={(e) => setDocumentData({ ...documentData, description: e.target.value })}
+            placeholder="Enter a short Description of the Document !"
             required
           />
         </div>
-        <div className="form-row">
-          <label>{isEditingDoc ? 'Update Document (optional)' : 'Document File'}</label>
-          <input
-            type="file"
-            onChange={(e) => setDocumentData({ ...documentData, file: e.target.files[0] })}
-            required={!isEditingDoc}
-          />
-        </div>
         <div className="form-actions">
-          <button type="button" onClick={() => {
-            setShowAddNewDocModal(false);
-            setIsEditingDoc(false);
-            setDocumentData({ name: '', description: '', file: null });
-          }}>Cancel</button>
-          <button type="submit">
-            {isEditingDoc ? 'Update Document' : 'Add Document'}
+          <button type="submit" className="save-btn">
+            Save
           </button>
         </div>
       </form>
@@ -1354,7 +1683,7 @@ const Cohorts = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Add People to Cohort</h2>
+              <h2>Add Members !</h2>
               <button 
                 className="close-button"
                 onClick={() => {
@@ -1367,63 +1696,71 @@ const Cohorts = () => {
             </div>
             <form onSubmit={handleAddPersonToCohort}>
               <div className="form-row">
-                <label>Select Startup</label>
-                <select
-                  value={selectedStartup}
-                  onChange={(e) => {
-                    setSelectedStartup(e.target.value);
-                    setSelectedPeople([]);
-                  }}
-                  required
-                >
-                  <option value="">Choose a startup</option>
-                  {startupPeople.map(startup => (
-                    <option key={startup.startup_name} value={startup.startup_name}>
-                      {startup.startup_name}
-                    </option>
-                  ))}
-                </select>
+                <label>Startups</label>
+                <div className="select-container">
+                  <select
+                    value={selectedStartup}
+                    onChange={(e) => {
+                      setSelectedStartup(e.target.value);
+                      setSelectedPeople([]);
+                    }}
+                    required
+                  >
+                    <option value="">Enter the startup</option>
+                    {startupPeople.map(startup => (
+                      <option key={startup.startup_name} value={startup.startup_name}>
+                        {startup.startup_name}
+                      </option>
+                    ))}
+                  </select>
+                  <svg className="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                  </svg>
+                </div>
               </div>
               
               {selectedStartup && (
-      <div className="form-row">
-    <label>Select People</label>
-    <div className="people-select-list">
-      {startupPeople
-        .find(s => s.startup_name === selectedStartup)
-        ?.people.map(person => (
-          <label key={person.person_id} className="checkbox-label">
-            <input
-              type="checkbox"
-              value={person.person_id}
-              checked={selectedPeople.includes(person.person_id)}
-              onChange={(e) => {
-                const personId = person.person_id;
-                setSelectedPeople(prev =>
-                  e.target.checked
-                    ? [...prev, personId] // Add person if checked
-                    : prev.filter(id => id !== personId) // Remove person if unchecked
-                );
-              }}
-            />
-            {person.person_name}
-          </label>
-        ))}
-    </div>
-  </div>
-)}
-
-
+                <div className="form-row">
+                  <label>Members</label>
+                  <div className="select-container">
+                    <select
+                      multiple
+                      value={selectedPeople}
+                      onChange={(e) => {
+                        const options = e.target.options;
+                        const selected = [];
+                        for (let i = 0; i < options.length; i++) {
+                          if (options[i].selected) {
+                            selected.push(options[i].value);
+                          }
+                        }
+                        setSelectedPeople(selected);
+                      }}
+                      className="members-select"
+                    >
+                      <option value="">Enter the Members</option>
+                      {startupPeople
+                        .find(s => s.startup_name === selectedStartup)
+                        ?.people.map(person => (
+                          <option key={person.person_id} value={person.person_id}>
+                            {person.person_name}
+                          </option>
+                        ))}
+                    </select>
+                    <svg className="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
               
               <div className="form-actions">
                 <button 
                   type="submit"
+                  className="save-btn"
                   disabled={selectedPeople.length === 0}
                 >
-                  Add Selected People
-                </button>
-                <button type="button" onClick={() => setShowAddPeopleModal(false)}>
-                  Cancel
+                  Save
                 </button>
               </div>
             </form>
@@ -1470,4 +1807,4 @@ const Cohorts = () => {
   );
 };
 
-export default Cohorts;
+export default Programs;
