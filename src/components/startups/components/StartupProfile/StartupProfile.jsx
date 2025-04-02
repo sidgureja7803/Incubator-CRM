@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import StartupInfo from './StartupInfo';
 import './StartupProfile.css';
-import Awards from '../../pages/Awards/Awards';
+import Awards from '../../pages/Incubators/Admins/Awards/Awards';
 
 const StartupProfile = () => {
   const [activeTab, setActiveTab] = useState('info');

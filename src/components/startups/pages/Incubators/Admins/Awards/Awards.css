@@ -1,0 +1,110 @@
+.awards-container {
+  padding: 1.5rem;
+}
+
+.awards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.awards-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.add-award-btn {
+  background-color: #1e40af;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-award-btn:hover {
+  background-color: #1e3a8a;
+}
+
+.awards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 2rem;
+}
+
+.award-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.award-banner {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+}
+
+.award-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-award-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background-color: white;
+  color: #111827;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-award-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.award-details {
+  padding: 1.5rem;
+}
+
+.award-detail-row {
+  margin-bottom: 1rem;
+}
+
+.award-detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.detail-value.description {
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .awards-grid {
+    grid-template-columns: 1fr;
+  }
+} 

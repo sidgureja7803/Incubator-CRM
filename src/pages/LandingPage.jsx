@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingPageImg from './LandingPage.jpg';
-import VLogo from './VLogo.png';
+import VLogo from '../assets/VLogo.png';
 import './LandingPage.css';
+
 const LandingPage = () => {
   const navigate = useNavigate();
 

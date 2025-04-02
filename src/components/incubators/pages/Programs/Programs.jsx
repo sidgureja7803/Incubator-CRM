@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import config from '../../../../config';
-import './Cohorts.css';
+import axios from 'utils/httpClient';
+import config from "config";
+import './Programs.css';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
+import React, { useState, useEffect } from 'react';
 
 const Programs = () => {
-  const { setIncubatorPeople } = useIncubatorContext();
+  // const { setIncubatorPeople } = useIncubatorContext();
   const [programs, setPrograms] = useState([]);
   const [people, setPeople] = useState([]);
   const [expandedProgram, setExpandedProgram] = useState({});
@@ -609,14 +609,6 @@ const Programs = () => {
       console.error("Error updating document:", error);
       setErrorMessage(error.response?.data?.message || 'Error updating document');
     }
-  };
-
-  // Toggle program expansion
-  const toggleProgram = (programId) => {
-    setExpandedProgram(prev => ({
-      ...prev,
-      [programId]: !prev[programId]
-    }));
   };
 
   // Handle selecting a cohort for detailed view
@@ -1445,7 +1437,7 @@ const Programs = () => {
               Upload
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 0-.708-.708l3-3z"/>
               </svg>
             </button>
           </div>

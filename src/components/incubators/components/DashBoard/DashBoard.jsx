@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import config from '../../../../config';
+import axios from 'utils/httpClient';
+import config from "config";
 import './DashBoard.css';
 import { FaUsers, FaBuilding, FaPeopleCarry } from 'react-icons/fa';
 import { BsLinkedin, BsTwitter, BsInstagram } from 'react-icons/bs';

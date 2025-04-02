@@ -1,4 +1,4 @@
-// import axios from 'axios';
+// import axios from 'utils/httpClient';
 // import config from 'config';
 
 // // Helper function to get CSRF token from meta tags or cookies
@@ -53,7 +53,7 @@
 
 // ====================================
 import axios from 'axios';
-import config from 'config';
+import config from '../config';
 
 // Helper function to get CSRF token from meta tags or cookies
 const getCSRFToken = () => {
