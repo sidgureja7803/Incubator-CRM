@@ -1,0 +1,395 @@
+.dashboard-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+  font-size: 24px;
+  color: #1A1A1A;
+  margin: 0;
+  font-weight: 600;
+}
+
+.notification-icon {
+  background-color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  border: 1px solid #E0E0E0;
+}
+
+.bell-icon {
+  font-size: 20px;
+  color: #666;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #E0E0E0;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.stat-icon.incubator {
+  background-color: #E8F4FF;
+}
+
+.stat-icon.external {
+  background-color: #E6F7ED;
+}
+
+.stat-icon.employees {
+  background-color: #F8EBFF;
+}
+
+.stat-icon.revenue {
+  background-color: #FFF4E5;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-content h3 {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1A1A1A;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 18px;
+  color: #1A1A1A;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
+
+/* Incubators Section */
+.incubators-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+  position: relative;
+  background-color: #F8F9FA;
+  padding: 24px;
+  border-radius: 12px;
+}
+
+.incubator-card {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  border: 1px solid #E0E0E0;
+}
+
+.incubator-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.incubator-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.incubator-name {
+  font-weight: 500;
+  color: #1A1A1A;
+  text-align: center;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  position: absolute;
+  right: 24px;
+  top: -40px;
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid #E0E0E0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover {
+  background-color: #F5F5F5;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Info Sections */
+.info-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-box {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #E0E0E0;
+  flex: 1;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-row {
+  border-bottom: 1px solid #E0E0E0;
+  padding: 12px 0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #1A1A1A;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Team Members */
+.team-members-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.team-member-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #E0E0E0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.member-photo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.member-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-detail {
+  margin-bottom: 4px;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #1A1A1A;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #1A1A1A;
+  font-size: 14px;
+}
+
+.member-role {
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.member-social {
+  display: flex;
+  gap: 8px;
+}
+
+.social-link {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.social-link img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* User Profile */
+.user-profile {
+  position: fixed;
+  bottom: 0;
+  left: 250px;
+  right: 0;
+  background-color: #fff;
+  padding: 16px 24px;
+  border-top: 1px solid #E0E0E0;
+  display: flex;
+  justify-content: flex-start;
+  z-index: 10;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 500;
+  color: #1A1A1A;
+  font-size: 14px;
+}
+
+.user-email {
+  color: #666;
+  font-size: 13px;
+}
+
+.loading, .error, .no-data {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.error {
+  color: #D32F2F;
+}
+
+@media (max-width: 1200px) {
+  .stats-grid, .incubators-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .info-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid, .incubators-container, .team-members-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .user-profile {
+    left: 0;
+  }
+} 

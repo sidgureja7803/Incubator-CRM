@@ -73,7 +73,15 @@
   margin-bottom: 1.5rem;
 }
 
-.form-group input {
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 0.8rem;
   border: 1px solid #E5E7EB;
@@ -81,14 +89,65 @@
   font-size: 1rem;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   border-color: #1e3a8a;
   outline: none;
 }
 
-.next-button,
-.continue-button {
+.form-group-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group-half {
+  flex: 1;
+}
+
+.upload-container {
+  display: flex;
+  position: relative;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.file-input {
+  position: absolute;
   width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.8rem;
+}
+
+.upload-button {
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.next-button,
+.continue-button,
+.save-button {
+  flex: 1;
   padding: 0.8rem;
   background: #1e3a8a;
   color: white;
@@ -99,9 +158,26 @@
   transition: background-color 0.3s;
 }
 
+.back-button {
+  flex: 1;
+  padding: 0.8rem;
+  background: #E5E7EB;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
 .next-button:hover,
-.continue-button:hover {
+.continue-button:hover,
+.save-button:hover {
   background: #1e4620;
+}
+
+.back-button:hover {
+  background: #d1d5db;
 }
 
 @media (max-width: 768px) {
@@ -116,5 +192,10 @@
 
   .text-section h2 {
     font-size: 1.5rem;
+  }
+  
+  .form-group-row {
+    flex-direction: column;
+    gap: 1.5rem;
   }
 } 

@@ -1,51 +1,56 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import VLogo from '.../VLogo.png';
-import './SideBar.css';
+import React from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import "./SideBar.css";
+import VLogo from '../../../../assets/VLogo.png';
 
-const SideBar = () => {
+export default function Sidebar() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const menuItems = [
-    { id: 1, name: 'Dashboard', path: '/dashboard', icon: '🏠' },
-    { id: 2, name: 'Startup Profile', path: '/startup-profile', icon: '👤' },
-    { id: 3, name: 'Incubators', path: '/incubators', icon: '🏢' },
-    { id: 4, name: 'Accelerators', path: '/accelerators', icon: '🚀' }
-  ];
 
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <img src={VLogo} alt="Venture Lab" className="logo" />
-      </div>
-
-      <div className="sidebar-menu">
-        {menuItems.map((item) => (
-          <div
-            key={item.id}
-            className={`menu-item ${location.pathname === item.path ? 'active' : ''}`}
-            onClick={() => navigate(item.path)}
-          >
-            <span className="menu-icon">{item.icon}</span>
-            <span className="menu-text">{item.name}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="sidebar-footer">
-        <div className="menu-item logout" onClick={handleLogout}>
-          <span className="menu-icon">🚪</span>
-          <span className="menu-text">Log Out</span>
+    <div className="mainContainer">
+      <div className="startup-sidebar">
+        <div className="sidebar-logo">
+          <img src={VLogo} alt="Venture Lab" />
         </div>
+
+        <div className="sidebar-links">
+          <NavLink to="/startup/dashboard" className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+            <span className="icon">🏠</span>
+            Dashboard
+          </NavLink>
+
+          <NavLink to="/startup/profile" className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+            <span className="icon">👤</span>
+            Startup Profile
+          </NavLink>
+
+          <NavLink to="/startup/incubators" className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+            <span className="icon">🏢</span>
+            Incubators
+          </NavLink>
+
+          <NavLink to="/startup/accelerators" className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+            <span className="icon">🚀</span>
+            Accelerators
+          </NavLink>
+        </div>
+
+        <div className="logout-section">
+          <button className="logout-button" onClick={handleLogout}>
+            <span className="icon">🚪</span>
+            Log Out
+          </button>
+        </div>
+      </div>
+      <div className="content-container">
+        <Outlet />
       </div>
     </div>
   );
-};
-
-export default SideBar;
+}

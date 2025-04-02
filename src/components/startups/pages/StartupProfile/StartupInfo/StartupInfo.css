@@ -1,0 +1,142 @@
+.startup-info-container {
+  width: 100%;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 12px;
+}
+
+.edit-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
+.edit-btn {
+  background-color: transparent;
+  color: #1976D2;
+  border: 1px solid #1976D2;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background-color: #F5F9FF;
+}
+
+.startup-info-content {
+  width: 100%;
+}
+
+.startup-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.startup-logo {
+  width: 64px;
+  height: 64px;
+  margin-right: 16px;
+  overflow: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F8F9FA;
+}
+
+.startup-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.startup-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #1A1A1A;
+  font-weight: 600;
+}
+
+.startup-details {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.details-section {
+  border-radius: 8px;
+  padding: 0;
+}
+
+.details-section h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 18px;
+  color: #1A1A1A;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.details-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #1976D2;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.value {
+  font-size: 14px;
+  color: #1A1A1A;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .startup-info-container {
+    padding: 16px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .startup-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .startup-logo {
+    margin-right: 0;
+  }
+} 

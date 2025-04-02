@@ -21,30 +21,30 @@
   padding: 0 2rem;
 }
 
-.text-content {
+.text-content, .left-content {
   flex: 1;
   padding-right: 4rem;
 }
 
-.text-content h1 {
+.text-content h1, .left-content h1 {
   font-size: 3.5rem;
   color: #000;
   margin-bottom: 0.5rem;
 }
 
-.text-content h2 {
+.text-content h2, .left-content h2 {
   font-size: 2.5rem;
   color: #000;
   margin-bottom: 1.5rem;
 }
 
-.text-content p {
+.text-content p, .left-content p {
   font-size: 1.2rem;
   color: #1e3a8a;
   margin-bottom: 2rem;
 }
 
-.next-button {
+.next-button, .continue-button {
   background-color: #1e3a8a;
   color: white;
   padding: 0.8rem 2rem;
@@ -53,9 +53,10 @@
   font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s;
+  width: 100%;
 }
 
-.next-button:hover {
+.next-button:hover, .continue-button:hover {
   background-color: #1e4620;
 }
 
@@ -68,6 +69,68 @@
   height: auto;
 }
 
+/* Right content / form container */
+.right-content, .form-section {
+  flex: 1;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.error-message {
+  color: #e53e3e;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Progress bar */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.progress {
+  height: 100%;
+  background-color: #1e3a8a;
+  border-radius: 4px;
+}
+
 @media (max-width: 768px) {
   .landing-content {
     flex-direction: column;
@@ -75,16 +138,20 @@
     padding: 0 1rem;
   }
 
-  .text-content {
+  .text-content, .left-content {
     padding-right: 0;
     margin-bottom: 2rem;
   }
 
-  .text-content h1 {
+  .text-content h1, .left-content h1 {
     font-size: 2.5rem;
   }
 
-  .text-content h2 {
+  .text-content h2, .left-content h2 {
     font-size: 1.8rem;
+  }
+  
+  .right-content, .form-section {
+    width: 100%;
   }
 }

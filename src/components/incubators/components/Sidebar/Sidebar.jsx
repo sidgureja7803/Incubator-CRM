@@ -1,52 +1,79 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Sidebar.css';
-import { FaHome, FaBuilding, FaUsers, FaSignOutAlt } from 'react-icons/fa';
-import { MdDashboard } from 'react-icons/md';
+import VLogo from '../../../../assets/VLogo.png';
 
-const Sidebar = () => {
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    sessionStorage.removeItem('access_token');
-    window.location.href = '/login';
+const SideBar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (path) => {
+    return location.pathname.includes(path);
   };
 
   return (
     <div className="sidebar">
       <div className="logo">
-        <img src="/logo.png" alt="Venture Lab" />
+        <img src={VLogo} alt="Venture Lab" />
       </div>
-      
-      <nav className="nav-menu">
-        <NavLink to="/dashboard" className="nav-link">
-          <MdDashboard />
-          <span>Dashboard</span>
-        </NavLink>
-        
-        <NavLink to="/incubator-profile" className="nav-link">
-          <FaBuilding />
-          <span>Incubator Profile</span>
-        </NavLink>
-        
-        <NavLink to="/programs" className="nav-link">
-          <FaHome />
-          <span>Programs</span>
-        </NavLink>
-        
-        <NavLink to="/startups" className="nav-link">
-          <FaUsers />
-          <span>Startups</span>
-        </NavLink>
-      </nav>
-      
-      <div className="logout-section">
-        <button onClick={handleLogout} className="logout-button">
-          <FaSignOutAlt />
-          <span>Log Out</span>
+
+      <div className="nav-links">
+        <button 
+          className={`nav-item ${isActive('/incubator/dashboard') ? 'active' : ''}`}
+          onClick={() => navigate('/incubator/dashboard')}
+        >
+          <span className="icon">🏠</span>
+          Dashboard
         </button>
+
+        <button 
+          className={`nav-item ${isActive('/incubator/profile') ? 'active' : ''}`}
+          onClick={() => navigate('/incubator/profile')}
+        >
+          <span className="icon">👤</span>
+          Incubator Profile
+        </button>
+
+        <button 
+          className={`nav-item ${isActive('/incubator/programs') ? 'active' : ''}`}
+          onClick={() => navigate('/incubator/programs')}
+        >
+          <span className="icon">📚</span>
+          Programs
+        </button>
+
+        <button 
+          className={`nav-item ${isActive('/incubator/startups') ? 'active' : ''}`}
+          onClick={() => navigate('/incubator/startups')}
+        >
+          <span className="icon">🚀</span>
+          Startups
+        </button>
+
+        <button 
+          className="nav-item"
+          onClick={() => {
+            localStorage.clear();
+            sessionStorage.clear();
+            navigate('/login');
+          }}
+        >
+          <span className="icon">↪️</span>
+          Log Out
+        </button>
+      </div>
+
+      <div className="user-profile">
+        <div className="profile-info">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" />
+          <div className="user-details">
+            <span className="name">Admin</span>
+            <span className="email">admin@venturelabs.com</span>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Sidebar;
+export default SideBar;

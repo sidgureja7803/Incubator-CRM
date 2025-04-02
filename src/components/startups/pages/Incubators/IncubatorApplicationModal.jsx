@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import axios from 'axios';
-import config from '../../../../config';
+import axios from 'utils/httpClient';
+import config from "config";
 
 const IncubatorApplicationModal = ({ 
   isOpen, 

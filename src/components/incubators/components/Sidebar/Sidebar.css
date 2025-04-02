@@ -1,54 +1,92 @@
 .sidebar {
-  width: 250px;
+  width: 280px;
   height: 100vh;
   background: white;
-  padding: 24px 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #eee;
+  border-right: 1px solid #e0e0e0;
   position: fixed;
-  left: 0;
-  top: 0;
 }
 
 .logo {
-  padding: 0 16px;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  padding: 10px;
 }
 
 .logo img {
-  max-width: 150px;
+  width: 150px;
   height: auto;
 }
 
-.nav-menu {
-  flex: 1;
+.nav-links {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.nav-link {
+.nav-item {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  color: #666;
-  text-decoration: none;
+  padding: 12px 20px;
   border-radius: 8px;
-  margin-bottom: 8px;
-  transition: all 0.2s;
+  border: none;
+  background: none;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  width: 100%;
 }
 
-.nav-link svg {
+.nav-item:hover {
+  background-color: #f5f5f5;
+}
+
+.nav-item.active {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.icon {
   margin-right: 12px;
   font-size: 20px;
 }
 
-.nav-link:hover {
-  background: #f0f7ff;
-  color: #0066cc;
+.user-profile {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
 }
 
-.nav-link.active {
-  background: #0066cc;
-  color: white;
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-info img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-weight: 600;
+  color: #333;
+}
+
+.email {
+  font-size: 12px;
+  color: #666;
 }
 
 .logout-section {
@@ -90,18 +128,18 @@
     padding: 0 8px;
   }
   
-  .nav-link span,
+  .nav-item span,
   .logout-button span {
     display: none;
   }
   
-  .nav-link svg,
+  .nav-item svg,
   .logout-button svg {
     margin-right: 0;
     font-size: 24px;
   }
   
-  .nav-link {
+  .nav-item {
     justify-content: center;
   }
   

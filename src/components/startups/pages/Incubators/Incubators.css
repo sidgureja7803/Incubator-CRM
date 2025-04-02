@@ -117,20 +117,17 @@
 .program-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
 }
 
 .program-title h3 {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #111827;
-  margin: 0;
+  margin-right: 8px;
 }
 
 .arrow-icon {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 12px;
   color: #6b7280;
-  font-size: 1.25rem;
 }
 
 .program-meta {

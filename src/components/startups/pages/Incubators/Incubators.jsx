@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import config from '../../../../config';
+import axios from 'utils/httpClient';
+import config from "config";
 import './Incubators.css';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 
 const Incubators = () => {
   const [activeTab, setActiveTab] = useState('my-incubators');
@@ -113,10 +112,9 @@ const Incubators = () => {
                 >
                   <div className="program-title">
                     <h3>{program.name}</h3>
-                    {expandedPrograms[program.id] ? 
-                      <KeyboardArrowUp className="arrow-icon" /> : 
-                      <KeyboardArrowDown className="arrow-icon" />
-                    }
+                    <span className="arrow-icon">
+                      {expandedPrograms[program.id] ? '▲' : '▼'}
+                    </span>
                   </div>
                   <div className="program-meta">
                     <span className="program-date">Start: {new Date(program.start_date).toLocaleDateString()}</span>
