@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 import VLogo from '../../../../assets/VLogo.png';
@@ -6,9 +6,20 @@ import VLogo from '../../../../assets/VLogo.png';
 const SideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 
   const isActive = (path) => {
     return location.pathname.includes(path);
+  };
+
+  const handleLogout = () => {
+    setShowLogoutPopup(true);
+  };
+
+  const confirmLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate('/login');
   };
 
   return (
@@ -52,11 +63,7 @@ const SideBar = () => {
 
         <button 
           className="nav-item"
-          onClick={() => {
-            localStorage.clear();
-            sessionStorage.clear();
-            navigate('/login');
-          }}
+          onClick={handleLogout}
         >
           <span className="icon">↪️</span>
           Log Out
@@ -72,6 +79,19 @@ const SideBar = () => {
           </div>
         </div>
       </div>
+
+      {showLogoutPopup && (
+        <div className="logout-popup">
+          <div className="logout-popup-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to logout?</p>
+            <div className="logout-popup-actions">
+              <button onClick={() => setShowLogoutPopup(false)}>No</button>
+              <button onClick={confirmLogout}>Yes</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
