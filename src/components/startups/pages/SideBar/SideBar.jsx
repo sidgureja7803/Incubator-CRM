@@ -1,12 +1,18 @@
-import React from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import "./SideBar.css";
 import VLogo from '../../../../assets/VLogo.png';
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 
   const handleLogout = () => {
+    setShowLogoutPopup(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
     navigate("/login");
@@ -51,6 +57,19 @@ export default function Sidebar() {
       <div className="content-container">
         <Outlet />
       </div>
+
+      {showLogoutPopup && (
+        <div className="logout-popup">
+          <div className="logout-popup-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to logout?</p>
+            <div className="logout-popup-actions">
+              <button onClick={() => setShowLogoutPopup(false)}>Cancel</button>
+              <button onClick={confirmLogout}>Logout</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

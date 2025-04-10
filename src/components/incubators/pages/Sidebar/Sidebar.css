@@ -1,0 +1,164 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background: #fff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+}
+
+.sidebar-top {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-logo {
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+}
+
+.sidebar-links {
+  flex: 1;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #666;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  gap: 12px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebar-link:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.sidebar-link.active {
+  background: #f0f7ff;
+  color: #0066cc;
+  border-right: 3px solid #0066cc;
+}
+
+.sidebar-link i {
+  font-size: 18px;
+  width: 24px;
+}
+
+.sidebar-link span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sidebar-bottom {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.logout-button {
+  color: #dc3545 !important;
+}
+
+.logout-button:hover {
+  background: #fff1f1 !important;
+}
+
+.logout-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.logout-popup-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logout-popup-content h3 {
+  margin: 0 0 15px;
+  color: #333;
+}
+
+.logout-popup-content p {
+  margin: 0 0 20px;
+  color: #666;
+}
+
+.logout-popup-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.logout-popup-actions button {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.logout-popup-actions button:first-child {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.logout-popup-actions button:first-child:hover {
+  background: #e0e0e0;
+}
+
+.logout-popup-actions button:last-child {
+  background: #dc3545;
+  color: white;
+}
+
+.logout-popup-actions button:last-child:hover {
+  background: #c82333;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .content {
+    margin-left: 0;
+  }
+}
