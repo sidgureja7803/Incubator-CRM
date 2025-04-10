@@ -1,22 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStartupContext } from '../../../../context/StartupContext';
 import './Dashboard.css';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import IncubatorLogo from './IncuabtorImage.png';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import config from '../../../../config';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { 
     startupInfo, 
     incubatorFunding, 
     externalFunding, 
     teamMembers, 
-    incubators, 
     loading, 
     error 
   } = useStartupContext();
   
   const [currentIncubatorPage, setCurrentIncubatorPage] = useState(0);
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
+  const [incubators, setIncubators] = useState([]);
   const incubatorsPerPage = 4;
+
+  useEffect(() => {
+    fetchIncubators();
+  }, []);
+
+  const fetchIncubators = async () => {
+    try {
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+      const response = await axios.get(`${config.api_base_url}/startup/startupincubator/`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setIncubators(response.data);
+    } catch (error) {
+      console.error('Error fetching incubators:', error);
+    }
+  };
 
   const handleNextIncubatorPage = () => {
     if ((currentIncubatorPage + 1) * incubatorsPerPage < incubators.length) {
@@ -35,21 +64,32 @@ const Dashboard = () => {
     (currentIncubatorPage + 1) * incubatorsPerPage
   );
 
-  // Display loading indicator
+  const handleLogout = () => {
+    setOpenLogoutDialog(true);
+  };
+
+  const handleConfirmLogout = () => {
+    localStorage.removeItem('access_token');
+    sessionStorage.removeItem('access_token');
+    navigate('/login');
+  };
+
+  const handleCloseLogoutDialog = () => {
+    setOpenLogoutDialog(false);
+  };
+
   if (loading) return (
     <div className="dashboard-content">
       <div className="loading">Loading dashboard data...</div>
     </div>
   );
 
-  // Display error message
   if (error) return (
     <div className="dashboard-content">
       <div className="error">{error}</div>
     </div>
   );
 
-  // If no startup data is available
   if (!startupInfo) return (
     <div className="dashboard-content">
       <div className="no-data">No startup data available</div>
@@ -74,6 +114,7 @@ const Dashboard = () => {
               <path d="M12 6v6l4 2" />
             </svg>
           </div>
+          
           <div className="stat-content">
             <h3>Incubator Funding</h3>
             <p className="stat-value">{incubatorFunding}</p>
@@ -82,12 +123,14 @@ const Dashboard = () => {
         </div>
         
         <div className="stat-card">
+
           <div className="stat-icon external">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <path d="M16 12l-4-4-4 4M12 8v8" />
             </svg>
           </div>
+
           <div className="stat-content">
             <h3>External Funding</h3>
             <p className="stat-value">{externalFunding}</p>
@@ -102,9 +145,10 @@ const Dashboard = () => {
               <circle cx="12" cy="7" r="4" />
             </svg>
           </div>
+
           <div className="stat-content">
             <h3>Employment Generated</h3>
-            <p className="stat-value">{teamMembers.length}</p>
+            <p className="stat-value">{startupInfo.employment_generated || teamMembers.length}</p>
             <p className="stat-label">Total Employees</p>
           </div>
         </div>
@@ -128,15 +172,15 @@ const Dashboard = () => {
       <h2 className="section-title">Incubaors / Accubators</h2>
       <div className="incubators-container">
         {currentIncubators && currentIncubators.length > 0 ? (
-          currentIncubators.map((incubator, index) => (
-            <div key={incubator.id || index} className="incubator-card">
+          currentIncubators.map((incubator, idx) => (
+            <div key={incubator.id || `incubator-${idx}`} className="incubator-card">
               <div className="incubator-logo">
                 <img 
                   src={IncubatorLogo} 
-                  alt={incubator.name || `Incubator ${index + 1}`} 
+                  alt={incubator.incubator_name || `Incubator ${idx + 1}`} 
                 />
               </div>
-              <div className="incubator-name">{incubator.name || `THAPAR INNOVATE`}</div>
+              <div className="incubator-name">{incubator.incubator_name || `THAPAR INNOVATE`}</div>
             </div>
           ))
         ) : (
@@ -146,8 +190,8 @@ const Dashboard = () => {
             { name: "C. R. E. A. T. E" },
             { name: "NMIMS AIC" },
             { name: "SRM IAIC" }
-          ].map((incubator, index) => (
-            <div key={index} className="incubator-card">
+          ].map((incubator, idx) => (
+            <div key={idx} className="incubator-card">
               <div className="incubator-logo">
                 <img src={IncubatorLogo} alt={incubator.name} />
               </div>
@@ -300,17 +344,34 @@ const Dashboard = () => {
       {/* User Profile */}
       <div className="user-profile">
         <div className="user-info">
-          <img 
-            src={startupInfo.image_url || "https://randomuser.me/api/portraits/men/32.jpg"} 
-            alt={startupInfo.startup_name || 'User'} 
-            className="user-avatar" 
-          />
           <div className="user-details">
-            <div className="user-name">{startupInfo.startup_name || 'Kanishk Dadwal'}</div>
-            <div className="user-email">{startupInfo.email || 'kanishkdadwal@gmail.com'}</div>
+            <div className="user-name">{startupInfo.startup_name || 'Startup Name'}</div>
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={openLogoutDialog}
+        onClose={handleCloseLogoutDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Confirm Logout"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to log out?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseLogoutDialog}>Cancel</Button>
+          <Button onClick={handleConfirmLogout} autoFocus>
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

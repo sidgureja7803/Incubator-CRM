@@ -29,10 +29,7 @@ const Programs = () => {
         `${config.api_base_url}/startup/programs/${programId}`,
         {
           headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem('access_token') ||
-              sessionStorage.getItem('access_token')
-            }`,
+            Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`,
           },
         }
       );
@@ -48,10 +45,7 @@ const Programs = () => {
         `${config.api_base_url}/startup/programs/${programId}/cohorts`,
         {
           headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem('access_token') ||
-              sessionStorage.getItem('access_token')
-            }`,
+            Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`,
           },
         }
       );
@@ -102,14 +96,14 @@ const Programs = () => {
               className={`cohort-card ${selectedCohort?.id === cohort.id ? 'active' : ''}`}
               onClick={() => handleCohortSelect(cohort)}
             >
-              <h3>{cohort.name}</h3>
+              <h3>COHORT {cohort.name}</h3>
               <div className="cohort-meta">
-                <span>Start: {new Date(cohort.start_date).toLocaleDateString()}</span>
-                <span>End: {new Date(cohort.end_date).toLocaleDateString()}</span>
+                <span>Start Date: {new Date(cohort.start_date).toLocaleDateString()}</span>
+                <span>End Date: {new Date(cohort.end_date).toLocaleDateString()}</span>
               </div>
-              <span className={`status-badge ${cohort.status.toLowerCase()}`}>
-                {cohort.status}
-              </span>
+              <div className="status-badge">
+                Status: {cohort.status}
+              </div>
             </div>
           ))}
         </div>
@@ -172,9 +166,14 @@ const Programs = () => {
               <div className="members-list">
                 {members.map((member) => (
                   <div key={member.id} className="member-card">
-                    <h4>{member.name}</h4>
-                    <p>{member.email}</p>
-                    <p>{member.role}</p>
+                    <div className="member-photo">
+                      <img src={member.photo_url || "https://via.placeholder.com/150"} alt={member.name} />
+                    </div>
+                    <div className="member-info">
+                      <h4>{member.name}</h4>
+                      <p>{member.role}</p>
+                      <p>{member.email}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -184,9 +183,14 @@ const Programs = () => {
               <div className="mentors-list">
                 {mentors.map((mentor) => (
                   <div key={mentor.id} className="mentor-card">
-                    <h4>{mentor.name}</h4>
-                    <p>{mentor.expertise}</p>
-                    <p>{mentor.email}</p>
+                    <div className="mentor-photo">
+                      <img src={mentor.photo_url || "https://via.placeholder.com/150"} alt={mentor.name} />
+                    </div>
+                    <div className="mentor-info">
+                      <h4>{mentor.name}</h4>
+                      <p>{mentor.expertise}</p>
+                      <p>{mentor.email}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -196,9 +200,14 @@ const Programs = () => {
               <div className="admins-list">
                 {admins.map((admin) => (
                   <div key={admin.id} className="admin-card">
-                    <h4>{admin.name}</h4>
-                    <p>{admin.email}</p>
-                    <p>{admin.role}</p>
+                    <div className="admin-photo">
+                      <img src={admin.photo_url || "https://via.placeholder.com/150"} alt={admin.name} />
+                    </div>
+                    <div className="admin-info">
+                      <h4>{admin.name}</h4>
+                      <p>{admin.role}</p>
+                      <p>{admin.email}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -208,11 +217,14 @@ const Programs = () => {
               <div className="documents-list">
                 {documents.map((document) => (
                   <div key={document.id} className="document-card">
-                    <h4>{document.name}</h4>
-                    <p>{document.description}</p>
-                    <a href={document.url} target="_blank" rel="noopener noreferrer">
-                      Download
-                    </a>
+                    <div className="document-icon">📄</div>
+                    <div className="document-info">
+                      <h4>{document.name}</h4>
+                      <p>{document.description}</p>
+                      <a href={document.url} target="_blank" rel="noopener noreferrer" className="download-link">
+                        Download
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>

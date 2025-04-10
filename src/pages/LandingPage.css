@@ -1,7 +1,10 @@
 .landing-page {
   min-height: 100vh;
+  width: 100%;
   padding: 2rem;
   background-color: #ffffff;
+  flex-direction: column;
+  display: flex;
 }
 
 .logo {
@@ -13,11 +16,13 @@
 }
 
 .landing-content {
+  flex: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 1200px;
-  margin: 4rem auto;
+  margin: 0 auto;
+  width: 100%;
   padding: 0 2rem;
 }
 

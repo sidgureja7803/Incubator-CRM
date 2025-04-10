@@ -20,14 +20,15 @@ const months = [
 
 const Updates = () => {
   const [updates, setUpdates] = useState([]);
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [description, setDescription] = useState('');
+  const [message, setMessage] = useState('');
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    month: '',
-    year: new Date().getFullYear(),
-    description: ''
-  });
-  const [errors, setErrors] = useState({});
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [editingUpdate, setEditingUpdate] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchUpdates();
@@ -35,90 +36,117 @@ const Updates = () => {
 
   const fetchUpdates = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      const response = await axios.get(`${config.api_base_url}/startup/add-regular-update/`, {
+      const response = await axios.get(`${config.api_base_url}/startup/regular-update/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUpdates(response.data);
     } catch (error) {
       console.error('Error fetching updates:', error);
+      setMessage('No updates added or found');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const handleMonthSelect = (month) => {
-    setFormData(prev => ({ ...prev, month: month.value }));
-    setIsDropdownOpen(false);
-    if (errors.month) {
-      setErrors(prev => ({ ...prev, month: '' }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.month) newErrors.month = 'Month is required';
-    if (!formData.year) newErrors.year = 'Year is required';
-    if (!formData.description) newErrors.description = 'Description is required';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
     try {
+      setLoading(true);
       const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      await axios.post(
-        `${config.api_base_url}/startup/add-regular-update/`,
-        formData,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      fetchUpdates();
+      const updateData = {
+        month: selectedMonth || month,
+        year,
+        description
+      };
+
+      if (editingUpdate) {
+        // Update existing update
+        await axios.patch(
+          `${config.api_base_url}/startup/regular-update/${editingUpdate.id}/`,
+          updateData,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setMessage('Update successfully edited!');
+      } else {
+        // Add new update
+        await axios.post(
+          `${config.api_base_url}/startup/regular-update/`,
+          updateData,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setMessage('Update successfully added!');
+      }
+
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        setShowSuccessPopup(false);
+        setMessage('');
+      }, 3000);
+
+      // Reset form
+      setMonth('');
+      setYear(new Date().getFullYear().toString());
+      setDescription('');
+      setSelectedMonth('');
+      setEditingUpdate(null);
       setShowModal(false);
-      setFormData({
-        month: '',
-        year: new Date().getFullYear(),
-        description: ''
-      });
+
+      // Refresh updates list
+      fetchUpdates();
     } catch (error) {
       console.error('Error saving update:', error);
+      setMessage('Failed to save update');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getMonthLabel = (value) => {
-    const month = months.find(m => m.value === value);
-    return month ? month.label : '';
+  const handleEdit = (update) => {
+    setEditingUpdate(update);
+    setMonth(update.month);
+    setYear(update.year);
+    setDescription(update.description);
+    setSelectedMonth(update.month);
+    setShowModal(true);
+  };
+
+  const handleMonthSelect = (selectedMonth) => {
+    setMonth(selectedMonth.value);
+    setSelectedMonth(selectedMonth.value);
   };
 
   return (
     <div className="updates-container">
       <div className="updates-header">
+        <h2>Updates</h2>
         <button className="add-update-button" onClick={() => setShowModal(true)}>
-          Add Updates
+          Add Update
         </button>
       </div>
 
+      {loading && <div className="loading">Loading...</div>}
+      {message && (
+        <div className={`message ${showSuccessPopup ? 'success' : 'error'}`}>
+          {message}
+        </div>
+      )}
+
       <div className="updates-list">
-        {updates.map((update, index) => (
-          <div key={index} className="update-card">
+        {updates.map((update) => (
+          <div key={update.id} className="update-card">
             <div className="update-header">
-              <h3>{getMonthLabel(update.month)} {update.year}</h3>
+              <h3>{months.find(m => m.value === update.month)?.label} {update.year}</h3>
+              <button className="edit-button" onClick={() => handleEdit(update)}>
+                Edit
+              </button>
             </div>
-            <div className="update-description">
+            <div className="update-content">
               <p>{update.description}</p>
             </div>
           </div>
@@ -129,62 +157,54 @@ const Updates = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Add Updates !</h2>
-              <button className="close-button" onClick={() => setShowModal(false)}>&times;</button>
+              <h3>{editingUpdate ? 'Edit Update' : 'Add New Update'}</h3>
+              <button className="close-button" onClick={() => {
+                setShowModal(false);
+                setEditingUpdate(null);
+              }}>×</button>
             </div>
-            <form onSubmit={handleSubmit} className="update-form">
+            <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Month</label>
-                <div className="custom-select">
-                  <div 
-                    className="select-header" 
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  >
-                    {formData.month ? getMonthLabel(formData.month) : 'Enter the Months'}
-                  </div>
-                  {isDropdownOpen && (
-                    <div className="select-options">
-                      {months.map((month) => (
-                        <div
-                          key={month.value}
-                          className="select-option"
-                          onClick={() => handleMonthSelect(month)}
-                        >
-                          {month.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {errors.month && <span className="error">{errors.month}</span>}
+                <select
+                  value={selectedMonth || month}
+                  onChange={(e) => handleMonthSelect({ value: e.target.value })}
+                  required
+                >
+                  <option value="">Select Month</option>
+                  {months.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
                 <label>Year</label>
                 <input
-                  type="text"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleInputChange}
-                  placeholder="Enter the Years"
+                  type="number"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  min="2000"
+                  max="2100"
+                  required
                 />
-                {errors.year && <span className="error">{errors.year}</span>}
               </div>
 
               <div className="form-group">
                 <label>Description</label>
                 <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Enter your Update here !!"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                  rows="4"
                 />
-                {errors.description && <span className="error">{errors.description}</span>}
               </div>
 
               <div className="form-actions">
-                <button type="submit" className="save-button">
-                  Add
+                <button type="submit" className="submit-button" disabled={loading}>
+                  {loading ? 'Saving...' : editingUpdate ? 'Save Changes' : 'Add Update'}
                 </button>
               </div>
             </form>
