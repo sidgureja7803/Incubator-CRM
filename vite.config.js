@@ -15,6 +15,16 @@ export default defineConfig({
       'assets': path.resolve(__dirname, './src/assets'),
       'pages': path.resolve(__dirname, './src/pages'),
       'routes': path.resolve(__dirname, './src/routes')
+    },
+    extensions: ['.js', '.jsx', '.json']
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html')
+      }
     }
   },
   server: {
