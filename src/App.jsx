@@ -8,7 +8,7 @@ import OtpVerification from './pages/OtpVerification';
 import Login from './pages/Login';
 
 // Startup Components
-import SideBar from './components/startups/components/SideBar/SideBar'; 
+import SideBar from './components/startups/components/SideBar/SideBar.jsx';
 import Dashboard from './components/startups/pages/Dashboard/Dashboard';
 import StartupProfile from './components/startups/pages/StartupProfile/StartupProfile';
 import StartupInfo from './components/startups/pages/StartupProfile/StartupInfo/StartupInfo';
