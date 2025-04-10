@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 import { useIncubatorContext } from '../../../../context/IncubatorContext';
-import axios from 'utils/httpClient';
+import axios from 'axios';
 import config from '../../../../config';
 import './Dashboard.css';
-import { FaUsers, FaBuilding, FaPeopleCarry } from 'react-icons/fa';
-import { BsLinkedin, BsTwitter, BsInstagram } from 'react-icons/bs';
+import { 
+  FaUsers, FaBuilding, FaMoneyBillWave, 
+  FaBriefcase, FaFileAlt, FaHandshake,
+  FaChartLine, FaUniversity
+} from 'react-icons/fa';
+import { BsLinkedin, BsTwitter, BsInstagram, BsYoutube } from 'react-icons/bs';
 
 const Dashboard = () => {
   const { 
@@ -72,49 +76,144 @@ const Dashboard = () => {
     }
   };
 
+  const stats = [
+    {
+      icon: <FaBuilding />,
+      title: "Number of Startups",
+      value: startups?.length || "100000",
+      subtitle: "Total Partners"
+    },
+    {
+      icon: <FaUsers />,
+      title: "Employment Generated",
+      value: "20000",
+      subtitle: "By all the startups"
+    },
+    {
+      icon: <FaFileAlt />,
+      title: "Number of Patents",
+      value: "3",
+      subtitle: "By all the startups"
+    },
+    {
+      icon: <FaHandshake />,
+      title: "Number of Partners",
+      value: "10,00,000",
+      subtitle: "People"
+    },
+    {
+      icon: <FaMoneyBillWave />,
+      title: "Fund Distributed",
+      value: "₹100000",
+      subtitle: "By the Incubator"
+    },
+    {
+      icon: <FaBriefcase />,
+      title: "External Funds",
+      value: "₹20000",
+      subtitle: "Raised by Startups"
+    },
+    {
+      icon: <FaChartLine />,
+      title: "Valuation of Startups",
+      value: "3",
+      subtitle: "Total for all the Startups"
+    },
+    {
+      icon: <FaUniversity />,
+      title: "Revenue Generated",
+      value: "₹10,00,000",
+      subtitle: "By all the startups"
+    }
+  ];
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h1>Dashboard</h1>
-        <div className="breadcrumb">
-          <span>Dashboard</span>
-        </div>
       </div>
 
-      <div className="dashboard-stats">
-        <div className="stat-card">
-          <h3>Total Team Members</h3>
-          <p>{incubatorTeam?.length || 0}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Total Startups</h3>
-          <p>{startups?.length || 0}</p>
-        </div>
+      <div className="stats-grid">
+        {stats.map((stat, index) => (
+          <div key={index} className="stat-card">
+            <div className="stat-icon">
+              {stat.icon}
+            </div>
+            <div className="stat-content">
+              <h3>{stat.title}</h3>
+              <p className="stat-value">{stat.value}</p>
+              <p className="stat-subtitle">{stat.subtitle}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="dashboard-sections">
-        <div className="section">
-          <h2>Recent Team Members</h2>
-          <div className="team-list">
-            {incubatorTeam?.slice(0, 5).map((member) => (
-              <div key={member.id} className="team-member-card">
-                <div className="member-info">
-                  <h4>{member.first_name} {member.last_name}</h4>
-                  <p>{member.designation}</p>
-                </div>
+      <div className="info-sections">
+        <div className="info-section">
+          <h2>Incubator Information</h2>
+          <div className="info-content">
+            <div className="info-row">
+              <div className="info-field">
+                <span className="info-label">Name</span>
+                <span className="info-value">Venture Lab</span>
               </div>
-            ))}
+              <div className="info-field">
+                <span className="info-label">LinkedIn</span>
+                <span className="info-value">{incubatorInfo?.linkedin || 'https://www.venturelab.org.in/'}</span>
+              </div>
+            </div>
+            <div className="info-row">
+              <div className="info-field">
+                <span className="info-label">Website</span>
+                <span className="info-value">{incubatorInfo?.website || 'https://www.venturelab.org.in/'}</span>
+              </div>
+              <div className="info-field">
+                <span className="info-label">Twitter</span>
+                <span className="info-value">{incubatorInfo?.twitter || 'https://www.venturelab.org.in/'}</span>
+              </div>
+            </div>
+            <div className="info-row">
+              <div className="info-field">
+                <span className="info-label">Address</span>
+                <span className="info-value">
+                  {incubatorInfo?.address || 'C/O POONAM PASWAN, SHAMAN VIHAAR APARTMENT, DWARKA, SECTOR-23 NA DELHI, South West, Delhi, DL, 110075, IN'}
+                </span>
+              </div>
+              <div className="info-field">
+                <span className="info-label">Instagram</span>
+                <span className="info-value">{incubatorInfo?.instagram || 'https://www.venturelab.org.in/'}</span>
+              </div>
+            </div>
+            <div className="info-row">
+              <div className="info-field">
+                <span className="info-label">Youtube</span>
+                <span className="info-value">{incubatorInfo?.youtube || 'https://www.venturelab.org.in/'}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="section">
-          <h2>Recent Startups</h2>
-          <div className="startup-list">
-            {startups?.slice(0, 5).map((startup) => (
-              <div key={startup.id} className="startup-card">
-                <div className="startup-info">
-                  <h4>{startup.startup_name}</h4>
-                  <p>{startup.description}</p>
+        <div className="info-section">
+          <h2>Team Members</h2>
+          <div className="team-grid">
+            {incubatorTeam?.slice(0, 4).map((member, index) => (
+              <div key={index} className="team-member-card">
+                <img 
+                  src={member.profile_picture || 'https://randomuser.me/api/portraits/women/79.jpg'} 
+                  alt={member.name} 
+                  className="member-photo"
+                />
+                <div className="member-info">
+                  <div className="member-header">
+                    <span className="member-label">Name:</span>
+                    <span className="member-name">{member.first_name} {member.last_name || 'Kanishk Dadwal'}</span>
+                  </div>
+                  <div className="member-role">{member.designation || 'CEO/Founder'}</div>
+                  <div className="member-social">
+                    <a href={member.linkedin} target="_blank" rel="noopener noreferrer"><BsLinkedin /></a>
+                    <a href={member.instagram} target="_blank" rel="noopener noreferrer"><BsInstagram /></a>
+                    <a href={member.twitter} target="_blank" rel="noopener noreferrer"><BsTwitter /></a>
+                  </div>
                 </div>
               </div>
             ))}
@@ -125,4 +224,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard; 

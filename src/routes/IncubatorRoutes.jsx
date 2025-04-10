@@ -9,7 +9,7 @@ import Infrastructure from '../components/incubators/pages/IncubatorProfile/Infr
 import Awards from '../components/incubators/pages/IncubatorProfile/Awards/Awards';
 import Programs from '../components/incubators/pages/Programs/Programs';
 import Startups from '../components/incubators/pages/Startups/Startups';
-import SideBar from '../components/incubators/components/Sidebar/Sidebar';
+import SideBar from '../components/incubators/pages/Sidebar/Sidebar';
 import './IncubatorRoutes.css';
 
 const IncubatorLayout = ({ children }) => {

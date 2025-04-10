@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
 import './IncubatorInfo.css';
-import image from '../../../../assets/images/image.png';
+import image from './image.png';
 
 const IncubatorInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
