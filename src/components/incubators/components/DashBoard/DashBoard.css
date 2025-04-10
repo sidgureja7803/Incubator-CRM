@@ -3,6 +3,7 @@
   max-width: 100%;
   overflow-x: hidden;
   font-family: 'Inter', sans-serif;
+  background-color: #f8f9fa;
 }
 
 .dashboard-header {
@@ -15,13 +16,20 @@
 .dashboard-header h1 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
   margin: 0;
 }
 
 .notification-icon {
-  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Stats Grid */
@@ -33,11 +41,11 @@
 }
 
 .stat-card {
-  background: #fff;
+  background: white;
   border-radius: 12px;
   padding: 1.5rem;
+  border: 1px solid #e0e4e8;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e0e0e0;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
@@ -46,17 +54,17 @@
 .stat-icon {
   width: 40px;
   height: 40px;
+  border-radius: 8px;
+  background: #f0f2f5;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: #f5f5f5;
+  color: #2563eb;
 }
 
 .stat-icon svg {
-  width: 24px;
-  height: 24px;
-  color: #333;
+  width: 20px;
+  height: 20px;
 }
 
 .stat-content {
@@ -65,21 +73,21 @@
 
 .stat-content h3 {
   font-size: 0.875rem;
-  font-weight: 500;
-  color: #666;
+  color: #4b5563;
   margin: 0 0 0.5rem 0;
+  font-weight: 500;
 }
 
 .stat-value {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
   margin: 0 0 0.25rem 0;
 }
 
 .stat-label {
   font-size: 0.75rem;
-  color: #666;
+  color: #6b7280;
   margin: 0;
 }
 
@@ -88,21 +96,20 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
-  margin-top: 2rem;
 }
 
 .info-section {
-  background: #fff;
+  background: white;
   border-radius: 12px;
   padding: 1.5rem;
+  border: 1px solid #e0e4e8;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e0e0e0;
 }
 
 .info-section h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #2563eb;
@@ -124,15 +131,30 @@
 .info-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #666;
+  color: #4b5563;
 }
 
 .info-value {
   font-size: 0.875rem;
-  color: #333;
+  color: #1a1a1a;
 }
 
-/* Team Members Grid */
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.social-links a {
+  color: #4b5563;
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  color: #2563eb;
+}
+
+/* Team Grid */
 .team-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -143,8 +165,9 @@
   display: flex;
   gap: 1rem;
   padding: 1rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e0e4e8;
   border-radius: 8px;
+  background: #f8f9fa;
 }
 
 .member-photo {
@@ -166,17 +189,17 @@
 }
 
 .member-name span:first-child {
-  color: #666;
+  color: #6b7280;
 }
 
 .member-name span:last-child {
-  color: #333;
+  color: #1a1a1a;
   font-weight: 500;
 }
 
 .member-role {
   font-size: 0.75rem;
-  color: #666;
+  color: #6b7280;
   margin-bottom: 0.5rem;
 }
 
@@ -185,9 +208,13 @@
   gap: 0.5rem;
 }
 
-.member-social img {
-  width: 20px;
-  height: 20px;
+.member-social a {
+  color: #4b5563;
+  text-decoration: none;
+}
+
+.member-social a:hover {
+  color: #2563eb;
 }
 
 /* Responsive Design */
