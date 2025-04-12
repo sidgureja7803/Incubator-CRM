@@ -23,6 +23,9 @@ import StartupFunding from './components/startups/pages/StartupProfile/Funding/F
 import StartupTeam from './components/startups/pages/StartupProfile/Team/Team';
 import StartupIntellectualProperties from './components/startups/pages/StartupProfile/IntelluctualProperties/IntelluctualProperties';
 import StartupUpdates from './components/startups/pages/StartupProfile/Updates/Updates';
+import MyIncubators from './components/startups/pages/Incubators/MyIncubators/MyIncubators';
+import ApplyIncubation from './components/startups/pages/Incubators/ApplyIncubation/ApplyIncubation';
+import Programs from './components/startups/pages/Incubators/Programs/Programs';
 
 // Incubator Components
 import IncubatorSidebar from './components/incubators/pages/Sidebar/Sidebar';
@@ -98,19 +101,19 @@ function App() {
             <Route path="intellectual-properties" element={<StartupIntellectualProperties />} />
             <Route path="updates" element={<StartupUpdates />} />
           </Route>
-          <Route path="incubators" element={<div>Incubators</div>}>
-            <Route path=":incubatorId">
-              <Route path="programs/:programId">
-                <Route path="cohorts/:cohortId">
-                  <Route path="tasks" element={<Tasks />} />
-                  <Route path="members" element={<Members />} />
-                  <Route path="mentors" element={<Mentors />} />
-                  <Route path="admins" element={<Admins />} />
-                  <Route path="documents" element={<Documents />} />
-                </Route>
-              </Route>
-            </Route>
+          <Route path="incubators" element={<Navigate to="incubators/my-incubators" replace />} />
+          <Route path="incubators/my-incubators" element={<MyIncubators />} />
+          <Route path="incubators/apply" element={<ApplyIncubation />} />
+          <Route path="incubators/:incubatorId/programs/:programId" element={<Programs />} />
+          <Route path="incubators/:incubatorId/programs/:programId/cohorts/:cohortId" element={<Outlet />}>
+            <Route index element={<Navigate to="tasks" replace />} />
+            <Route path="tasks" element={<Tasks />} />
+            <Route path="members" element={<Members />} />
+            <Route path="mentors" element={<Mentors />} />
+            <Route path="admins" element={<Admins />} />
+            <Route path="documents" element={<Documents />} />
           </Route>
+          <Route path="accelerators" element={<div>Accelerators</div>} />
         </Route>
 
         {/* Incubator Routes */}

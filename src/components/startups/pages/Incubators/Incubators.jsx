@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'utils/httpClient';
 import config from "config";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, NavLink, Outlet } from 'react-router-dom';
 import './Incubators.css';
 import IncubatorLogo from '../../pages/Dashboard/IncuabtorImage.png';
+import MyIncubators from './MyIncubators/MyIncubators';
+import ApplyIncubation from './ApplyIncubation/ApplyIncubation';
 
 const Incubators = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('my-incubators');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(
+    location.pathname.includes('apply') ? 'apply' : 'my-incubators'
+  );
   const [incubators, setIncubators] = useState([]);
   const [selectedIncubator, setSelectedIncubator] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -167,191 +172,35 @@ const Incubators = () => {
     });
   };
 
-  return (
-    <div className="incubators-page">
-      <div className="breadcrumb">
-        <span>Incubators</span>
-        {activeTab === 'my-incubators' && <span>/ My Incubators</span>}
-        {activeTab === 'apply' && <span>/ Apply For Incubation</span>}
-      </div>
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'my-incubators') {
+      navigate('/startup/incubators/my-incubators');
+    } else if (tab === 'apply') {
+      navigate('/startup/incubators/apply');
+    }
+  };
 
-      <div className="tabs">
-        <button
-          className={`tab ${activeTab === 'my-incubators' ? 'active' : ''}`}
-          onClick={() => setActiveTab('my-incubators')}
+  return (
+    <div className="incubators-container">
+      <h2 className="page-title">Incubators</h2>
+      
+      <div className="tab-navigation">
+        <NavLink 
+          to="/startup/incubators/my-incubators" 
+          className={({ isActive }) => `tab-button ${isActive ? 'active' : ''}`}
         >
           My Incubators
-        </button>
-        <button
-          className={`tab ${activeTab === 'apply' ? 'active' : ''}`}
-          onClick={() => setActiveTab('apply')}
+        </NavLink>
+        <NavLink 
+          to="/startup/incubators/apply" 
+          className={({ isActive }) => `tab-button ${isActive ? 'active' : ''}`}
         >
-          Apply For Incubation
-        </button>
+          Apply
+        </NavLink>
       </div>
-
-      {activeTab === 'my-incubators' && (
-        <div className="my-incubators-content">
-          <div className="incubators-grid">
-            {incubators.map((incubator) => (
-              <div
-                key={incubator.id}
-                className={`incubator-card ${selectedIncubator?.id === incubator.id ? 'active' : ''}`}
-                onClick={() => handleIncubatorClick(incubator)}
-              >
-                <div className="incubator-logo">
-                  <img src={IncubatorLogo} alt={incubator.incubator_name} />
-                </div>
-                <div className="incubator-info">
-                  <h3>{incubator.incubator_name}</h3>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {selectedIncubator && (
-            <div className="programs-section">
-              <h2>{selectedIncubator.incubator_name} Programs</h2>
-              <div className="programs-list">
-                {selectedIncubator.programs?.map((program) => (
-                  <div
-                    key={program.id}
-                    className={`program-card ${selectedProgram?.id === program.id ? 'active' : ''}`}
-                    onClick={() => handleProgramClick(program)}
-                  >
-                    <h3>{program.name}</h3>
-                    <p>{program.description}</p>
-                    <div className="program-meta">
-                      <span>Start: {new Date(program.start_date).toLocaleDateString()}</span>
-                      <span>End: {new Date(program.end_date).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {selectedProgram && (
-            <div className="cohorts-section">
-              <h2>Cohorts under {selectedProgram.name}</h2>
-              <div className="cohorts-grid">
-                {selectedProgram.cohorts?.map((cohort) => (
-                  <div
-                    key={cohort.id}
-                    className={`cohort-card ${selectedCohort?.id === cohort.id ? 'active' : ''}`}
-                    onClick={() => handleCohortClick(cohort)}
-                  >
-                    <h4>COHORT {cohort.name}</h4>
-                    <div className="cohort-details">
-                      <p>Start Date: {new Date(cohort.start_date).toLocaleDateString()}</p>
-                      <p>End Date: {new Date(cohort.end_date).toLocaleDateString()}</p>
-                      <p>Status: <span className={`status-badge ${cohort.status?.toLowerCase()}`}>{cohort.status}</span></p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {selectedCohort && (
-            <div className="cohort-details-section">
-              <div className="cohort-tabs">
-                <button
-                  className={`tab ${cohortTab === 'documents' ? 'active' : ''}`}
-                  onClick={() => setCohortTab('documents')}
-                >
-                  Documents
-                </button>
-                <button
-                  className={`tab ${cohortTab === 'members' ? 'active' : ''}`}
-                  onClick={() => setCohortTab('members')}
-                >
-                  Members
-                </button>
-                <button
-                  className={`tab ${cohortTab === 'mentors' ? 'active' : ''}`}
-                  onClick={() => setCohortTab('mentors')}
-                >
-                  Mentors
-                </button>
-                <button
-                  className={`tab ${cohortTab === 'admins' ? 'active' : ''}`}
-                  onClick={() => setCohortTab('admins')}
-                >
-                  Admins
-                </button>
-                <button
-                  className={`tab ${cohortTab === 'tasks' ? 'active' : ''}`}
-                  onClick={() => setCohortTab('tasks')}
-                >
-                  Tasks
-                </button>
-              </div>
-              <div className="cohort-tab-content">
-                {/* Content for each tab will be rendered here */}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'apply' && (
-        <div className="apply-incubation-content">
-          <div className="available-incubators">
-            {incubators.map((incubator) => (
-              <div
-                key={incubator.id}
-                className={`incubator-card ${selectedIncubator?.id === incubator.id ? 'active' : ''}`}
-                onClick={() => handleIncubatorClick(incubator)}
-              >
-                <div className="incubator-logo">
-                  <img src={IncubatorLogo} alt={incubator.name} />
-                </div>
-                <h3>{incubator.name}</h3>
-                <div className="expand-icon">+</div>
-              </div>
-            ))}
-          </div>
-
-          {selectedIncubator && questions.length > 0 && (
-            <div className="application-form">
-              <h2>Apply to {selectedIncubator.name}</h2>
-              <form onSubmit={(e) => e.preventDefault()}>
-                {questions.map((question) => (
-                  <div key={question.id} className="form-group">
-                    <label>{question.question}</label>
-                    <textarea
-                      name={question.id}
-                      value={formData[question.id] || ''}
-                      onChange={handleInputChange}
-                      placeholder="Enter your answer"
-                      required
-                    />
-                  </div>
-                ))}
-                <div className="form-actions">
-                  <button 
-                    type="button" 
-                    className="save-button" 
-                    onClick={handleSave}
-                    disabled={isLoading}
-                  >
-                    Save as Draft
-                  </button>
-                  <button 
-                    type="button" 
-                    className="submit-button" 
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                  >
-                    Submit Application
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-        </div>
-      )}
+      
+      <Outlet />
 
       {isSuccessPopupVisible && (
         <div className="success-popup">
