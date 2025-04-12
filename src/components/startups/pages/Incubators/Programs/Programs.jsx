@@ -1,30 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'utils/httpClient';
-import config from "config";
+import config from "../../../../../config";
 import './Programs.css';
+import IncubatorLogo from '../../Dashboard/IncuabtorImage.png';
 
 const Programs = () => {
-  const { programId } = useParams();
+  const { incubatorId, programId } = useParams();
+  const navigate = useNavigate();
   const [program, setProgram] = useState(null);
   const [cohorts, setCohorts] = useState([]);
   const [selectedCohort, setSelectedCohort] = useState(null);
-  const [activeTab, setActiveTab] = useState('tasks');
-  const [tasks, setTasks] = useState([]);
-  const [members, setMembers] = useState([]);
-  const [mentors, setMentors] = useState([]);
-  const [admins, setAdmins] = useState([]);
-  const [documents, setDocuments] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const cohortsPerPage = 4;
 
   useEffect(() => {
-    if (programId) {
+    if (incubatorId && programId) {
       fetchProgramDetails();
       fetchCohorts();
     }
-  }, [programId]);
+  }, [incubatorId, programId]);
 
   const fetchProgramDetails = async () => {
     try {
+      // Mocked program details for demonstration
+      setProgram({
+        id: programId,
+        name: "ACCELERATE",
+        description: "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet.",
+        start_date: "2023-02-11",
+        end_date: "2023-04-05",
+        website: "https://venturelab.org.in/ignite-launch-accelerate"
+      });
+      
+      /*
+      // Uncomment to use the actual API
       const response = await axios.get(
         `${config.api_base_url}/startup/programs/${programId}`,
         {
@@ -34,6 +44,7 @@ const Programs = () => {
         }
       );
       setProgram(response.data);
+      */
     } catch (error) {
       console.error('Error fetching program details:', error);
     }
@@ -41,6 +52,19 @@ const Programs = () => {
 
   const fetchCohorts = async () => {
     try {
+      // Mocked cohort data for demonstration
+      const mockedCohorts = Array(8).fill().map((_, index) => ({
+        id: index + 1,
+        name: `04`,
+        start_date: "2021-12-08",
+        end_date: "2022-04-08",
+        status: "Active"
+      }));
+      
+      setCohorts(mockedCohorts);
+      
+      /*
+      // Uncomment to use the actual API
       const response = await axios.get(
         `${config.api_base_url}/startup/programs/${programId}/cohorts`,
         {
@@ -50,188 +74,115 @@ const Programs = () => {
         }
       );
       setCohorts(response.data);
+      */
     } catch (error) {
       console.error('Error fetching cohorts:', error);
     }
   };
 
-  const fetchCohortDetails = async (cohortId) => {
-    try {
-      const [tasksRes, membersRes, mentorsRes, adminsRes, documentsRes] = await Promise.all([
-        axios.get(`${config.api_base_url}/startup/cohorts/${cohortId}/tasks`),
-        axios.get(`${config.api_base_url}/startup/cohorts/${cohortId}/members`),
-        axios.get(`${config.api_base_url}/startup/cohorts/${cohortId}/mentors`),
-        axios.get(`${config.api_base_url}/startup/cohorts/${cohortId}/admins`),
-        axios.get(`${config.api_base_url}/startup/cohorts/${cohortId}/documents`),
-      ]);
+  const handleCohortSelect = (cohort) => {
+    setSelectedCohort(cohort);
+    navigate(`/startup/incubators/${incubatorId}/programs/${programId}/cohorts/${cohort.id}/tasks`);
+  };
 
-      setTasks(tasksRes.data);
-      setMembers(membersRes.data);
-      setMentors(mentorsRes.data);
-      setAdmins(adminsRes.data);
-      setDocuments(documentsRes.data);
-    } catch (error) {
-      console.error('Error fetching cohort details:', error);
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
-  const handleCohortSelect = (cohort) => {
-    setSelectedCohort(cohort);
-    fetchCohortDetails(cohort.id);
+  const handleNextPage = () => {
+    if ((currentPage + 1) * cohortsPerPage < cohorts.length) {
+      setCurrentPage(currentPage + 1);
+    }
   };
 
+  const displayedCohorts = cohorts.slice(
+    currentPage * cohortsPerPage,
+    (currentPage + 1) * cohortsPerPage
+  );
+
+  if (!program) {
+    return <div className="programs-loading">Loading program details...</div>;
+  }
+
   return (
-    <div className="programs-container">
-      <div className="program-header">
-        <h1>{program?.name}</h1>
-        <p className="program-description">{program?.description}</p>
+    <div className="program-container">
+      <div className="program-info">
+        <div className="program-header">
+          <div className="program-logo">
+            <img src={IncubatorLogo} alt="Program Logo" />
+          </div>
+          <div className="program-title">
+            <h2>{program.name}</h2>
+            <p className="program-description">{program.description}</p>
+          </div>
+        </div>
+        
+        <div className="program-meta">
+          <div className="meta-item">
+            <h4>Start Date</h4>
+            <p>{new Date(program.start_date).toLocaleDateString()}</p>
+          </div>
+          <div className="meta-item">
+            <h4>End Date</h4>
+            <p>{new Date(program.end_date).toLocaleDateString()}</p>
+          </div>
+          <div className="meta-item website">
+            <h4>Website Link</h4>
+            <a href={program.website} target="_blank" rel="noopener noreferrer">
+              {program.website}
+            </a>
+          </div>
+        </div>
       </div>
 
       <div className="cohorts-section">
-        <h2>Cohorts</h2>
-        <div className="cohorts-list">
-          {cohorts.map((cohort) => (
+        <div className="cohorts-grid">
+          {displayedCohorts.map((cohort) => (
             <div
               key={cohort.id}
-              className={`cohort-card ${selectedCohort?.id === cohort.id ? 'active' : ''}`}
+              className="cohort-card"
               onClick={() => handleCohortSelect(cohort)}
             >
               <h3>COHORT {cohort.name}</h3>
-              <div className="cohort-meta">
-                <span>Start Date: {new Date(cohort.start_date).toLocaleDateString()}</span>
-                <span>End Date: {new Date(cohort.end_date).toLocaleDateString()}</span>
-              </div>
-              <div className="status-badge">
-                Status: {cohort.status}
+              <div className="cohort-details">
+                <div className="date-group">
+                  <span className="label">Start Date :</span>
+                  <span className="value">{new Date(cohort.start_date).toLocaleDateString()}</span>
+                </div>
+                <div className="date-group">
+                  <span className="label">End Date :</span>
+                  <span className="value">{new Date(cohort.end_date).toLocaleDateString()}</span>
+                </div>
+                <div className="status-group">
+                  <span className="label">Status :</span>
+                  <span className="value">{cohort.status}</span>
+                </div>
               </div>
             </div>
           ))}
         </div>
+        
+        {cohorts.length > cohortsPerPage && (
+          <div className="pagination-controls">
+            <button 
+              className="pagination-btn prev" 
+              onClick={handlePrevPage}
+              disabled={currentPage === 0}
+            >
+              &lt;
+            </button>
+            <button 
+              className="pagination-btn next" 
+              onClick={handleNextPage}
+              disabled={(currentPage + 1) * cohortsPerPage >= cohorts.length}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
-
-      {selectedCohort && (
-        <div className="cohort-details">
-          <div className="tabs">
-            <button
-              className={`tab ${activeTab === 'tasks' ? 'active' : ''}`}
-              onClick={() => setActiveTab('tasks')}
-            >
-              Tasks
-            </button>
-            <button
-              className={`tab ${activeTab === 'members' ? 'active' : ''}`}
-              onClick={() => setActiveTab('members')}
-            >
-              Members
-            </button>
-            <button
-              className={`tab ${activeTab === 'mentors' ? 'active' : ''}`}
-              onClick={() => setActiveTab('mentors')}
-            >
-              Mentors
-            </button>
-            <button
-              className={`tab ${activeTab === 'admins' ? 'active' : ''}`}
-              onClick={() => setActiveTab('admins')}
-            >
-              Admins
-            </button>
-            <button
-              className={`tab ${activeTab === 'documents' ? 'active' : ''}`}
-              onClick={() => setActiveTab('documents')}
-            >
-              Documents
-            </button>
-          </div>
-
-          <div className="tab-content">
-            {activeTab === 'tasks' && (
-              <div className="tasks-list">
-                {tasks.map((task) => (
-                  <div key={task.id} className="task-card">
-                    <h4>{task.name}</h4>
-                    <p>{task.description}</p>
-                    <div className="task-meta">
-                      <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
-                      <span className={`status-badge ${task.status.toLowerCase()}`}>
-                        {task.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'members' && (
-              <div className="members-list">
-                {members.map((member) => (
-                  <div key={member.id} className="member-card">
-                    <div className="member-photo">
-                      <img src={member.photo_url || "https://via.placeholder.com/150"} alt={member.name} />
-                    </div>
-                    <div className="member-info">
-                      <h4>{member.name}</h4>
-                      <p>{member.role}</p>
-                      <p>{member.email}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'mentors' && (
-              <div className="mentors-list">
-                {mentors.map((mentor) => (
-                  <div key={mentor.id} className="mentor-card">
-                    <div className="mentor-photo">
-                      <img src={mentor.photo_url || "https://via.placeholder.com/150"} alt={mentor.name} />
-                    </div>
-                    <div className="mentor-info">
-                      <h4>{mentor.name}</h4>
-                      <p>{mentor.expertise}</p>
-                      <p>{mentor.email}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'admins' && (
-              <div className="admins-list">
-                {admins.map((admin) => (
-                  <div key={admin.id} className="admin-card">
-                    <div className="admin-photo">
-                      <img src={admin.photo_url || "https://via.placeholder.com/150"} alt={admin.name} />
-                    </div>
-                    <div className="admin-info">
-                      <h4>{admin.name}</h4>
-                      <p>{admin.role}</p>
-                      <p>{admin.email}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'documents' && (
-              <div className="documents-list">
-                {documents.map((document) => (
-                  <div key={document.id} className="document-card">
-                    <div className="document-icon">📄</div>
-                    <div className="document-info">
-                      <h4>{document.name}</h4>
-                      <p>{document.description}</p>
-                      <a href={document.url} target="_blank" rel="noopener noreferrer" className="download-link">
-                        Download
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -51,6 +51,8 @@ const Dashboard = () => {
   const handleConfirmLogout = () => {
     localStorage.removeItem('access_token');
     sessionStorage.removeItem('access_token');
+    localStorage.removeItem('user_role');
+    sessionStorage.removeItem('user_role');
     navigate('/login');
   };
 
@@ -97,7 +99,7 @@ const Dashboard = () => {
           
           <div className="stat-content">
             <h3>Incubator Funding</h3>
-            <p className="stat-value">{incubatorFunding}</p>
+            <p className="stat-value">₹{incubatorFunding.toLocaleString()}</p>
             <p className="stat-label">Rupees</p>
           </div>
         </div>
@@ -112,7 +114,7 @@ const Dashboard = () => {
 
           <div className="stat-content">
             <h3>External Funding</h3>
-            <p className="stat-value">{externalFunding}</p>
+            <p className="stat-value">₹{externalFunding.toLocaleString()}</p>
             <p className="stat-label">Rupees</p>
           </div>
         </div>
@@ -141,59 +143,48 @@ const Dashboard = () => {
           </div>
           <div className="stat-content">
             <h3>Annual Revenue</h3>
-            <p className="stat-value">{startupInfo.annual_revenue || '10,00,000'}</p>
+            <p className="stat-value">₹{startupInfo.annual_revenue || '10,00,000'}</p>
             <p className="stat-label">Rupees</p>
           </div>
         </div>
       </div>
 
       {/* Incubators Section */}
-      <h2 className="section-title">Incubaors / Accubators</h2>
+      <h2 className="section-title">Incubators / Accelerators</h2>
       <div className="incubators-container">
-        {currentIncubators && currentIncubators.length > 0 ? (
+        {incubators && incubators.length > 0 ? (
           currentIncubators.map((incubator, idx) => (
             <div key={incubator.id || `incubator-${idx}`} className="incubator-card">
               <div className="incubator-logo">
                 <img 
-                  src={IncubatorLogo} 
+                  src={incubator.logo || IncubatorLogo} 
                   alt={incubator.incubator_name || `Incubator ${idx + 1}`} 
                 />
               </div>
-              <div className="incubator-name">{incubator.incubator_name || `THAPAR INNOVATE`}</div>
+              <div className="incubator-name">{incubator.incubator_name || `Incubator ${idx + 1}`}</div>
             </div>
           ))
         ) : (
-          // Fallback to default incubators if none are available from API
-          [
-            { name: "VENTURE LABS" },
-            { name: "C. R. E. A. T. E" },
-            { name: "NMIMS AIC" },
-            { name: "SRM IAIC" }
-          ].map((incubator, idx) => (
-            <div key={idx} className="incubator-card">
-              <div className="incubator-logo">
-                <img src={IncubatorLogo} alt={incubator.name} />
-              </div>
-              <div className="incubator-name">{incubator.name}</div>
-            </div>
-          ))
+          <div className="no-incubators">No incubators associated with this startup.</div>
         )}
-        <div className="pagination-controls">
-          <button 
-            className="pagination-btn prev" 
-            onClick={handlePrevIncubatorPage}
-            disabled={currentIncubatorPage === 0}
-          >
-            <ChevronLeft />
-          </button>
-          <button 
-            className="pagination-btn next" 
-            onClick={handleNextIncubatorPage}
-            disabled={(currentIncubatorPage + 1) * incubatorsPerPage >= incubators.length}
-          >
-            <ChevronRight />
-          </button>
-        </div>
+        {incubators.length > incubatorsPerPage && (
+          <div className="pagination-controls">
+            <button 
+              className="pagination-btn prev" 
+              onClick={handlePrevIncubatorPage}
+              disabled={currentIncubatorPage === 0}
+            >
+              <ChevronLeft />
+            </button>
+            <button 
+              className="pagination-btn next" 
+              onClick={handleNextIncubatorPage}
+              disabled={(currentIncubatorPage + 1) * incubatorsPerPage >= incubators.length}
+            >
+              <ChevronRight />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Info Sections - Two columns */}
@@ -220,14 +211,14 @@ const Dashboard = () => {
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">Registration Address:</div>
-                  <div className="info-value">{startupInfo?.registration_address || 'Not specified'}</div>
+                  <div className="info-value">{startupInfo?.registration_address || startupInfo?.address || 'Not specified'}</div>
                 </div>
               </div>
 
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">CIN Number:</div>
-                  <div className="info-value">{startupInfo?.cin_number || 'Not specified'}</div>
+                  <div className="info-value">{startupInfo?.cin_number || startupInfo?.cin_no || 'Not specified'}</div>
                 </div>
               </div>
 
@@ -250,7 +241,7 @@ const Dashboard = () => {
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">DPIIT No.:</div>
-                  <div className="info-value">{startupInfo?.dpiit_number || 'Not specified'}</div>
+                  <div className="info-value">{startupInfo?.dpiit_number || startupInfo?.dpiit_no || 'Not specified'}</div>
                 </div>
               </div>
             </div>
@@ -262,18 +253,18 @@ const Dashboard = () => {
           <h2 className="section-title">Team Members</h2>
           <div className="team-members-grid">
             {teamMembers && teamMembers.length > 0 ? (
-              teamMembers.map((member) => (
-                <div key={member.id} className="team-member-card">
+              teamMembers.map((member, index) => (
+                <div key={member.id || `member-${index}`} className="team-member-card">
                   <div className="member-photo">
                     <img 
-                      src={member.image_url || "https://randomuser.me/api/portraits/women/44.jpg"} 
-                      alt={`${member.first_name} ${member.last_name}`}
+                      src={member.profile_image || member.image_url || "https://randomuser.me/api/portraits/women/44.jpg"} 
+                      alt={member.name || `${member.first_name || ''} ${member.last_name || ''}`}
                     />
                   </div>
                   <div className="member-info">
                     <div className="member-detail">
                       <span className="detail-label">Name:</span> 
-                      <span className="detail-value">{member.first_name} {member.last_name}</span>
+                      <span className="detail-value">{member.name || `${member.first_name || ''} ${member.last_name || ''}`}</span>
                     </div>
                     <div className="member-role">({member.primary_role || 'Team Member'})</div>
                   </div>

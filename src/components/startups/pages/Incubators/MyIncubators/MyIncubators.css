@@ -1,75 +1,191 @@
 .my-incubators-container {
-  padding: 2rem;
+  padding: 1rem 0;
 }
 
-.incubators-list {
+.my-incubators-container h2 {
+  margin-bottom: 2rem;
+  color: #333;
+  font-size: 1.75rem;
+}
+
+.incubators-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 3rem;
 }
 
 .incubator-card {
-  background: white;
+  background-color: white;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e0e0e0;
 }
 
 .incubator-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .incubator-card.active {
-  border: 2px solid #1a73e8;
+  border: 2px solid #1976D2;
+  background-color: #f8f9fa;
 }
 
 .incubator-logo {
   width: 80px;
   height: 80px;
   margin-bottom: 1rem;
-}
-
-.incubator-logo img {
-  width: 100%;
-  height: 100%;
   object-fit: contain;
 }
 
+.card-content {
+  text-align: center;
+  width: 100%;
+}
+
+.card-content h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.joining-date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
 .programs-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-top: 2rem;
+}
+
+.programs-section h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
 }
 
 .programs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 2rem;
-  margin-top: 1.5rem;
 }
 
 .program-card {
-  background: white;
+  background-color: white;
   border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
 }
 
 .program-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.program-meta {
+.program-header {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  background-color: #f8f9fa;
+  gap: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.program-logo {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.program-logo img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.program-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.program-description {
+  padding: 1.25rem;
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  flex-grow: 1;
+  border-bottom: 1px solid #eee;
+}
+
+.program-footer {
+  padding: 1.25rem;
+}
+
+.program-dates {
   display: flex;
   justify-content: space-between;
-  margin-top: 1rem;
-  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.date-label {
+  font-size: 0.85rem;
   color: #666;
+}
+
+.date-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.program-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.website-label {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.website-url {
+  font-size: 0.85rem;
+  color: #1976D2;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.website-url:hover {
+  text-decoration: underline;
 }
 
 .status-badge {
@@ -78,7 +194,23 @@
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 500;
-  background-color: #e8f0fe;
-  color: #1a73e8;
+  background-color: #e3f2fd;
+  color: #1976D2;
   margin-top: 1rem;
+}
+
+.status-badge.active {
+  background-color: #e8f5e9;
+  color: #43a047;
+}
+
+.status-badge.pending {
+  background-color: #fff8e1;
+  color: #ffa000;
+}
+
+@media (max-width: 768px) {
+  .incubators-grid, .programs-grid {
+    grid-template-columns: 1fr;
+  }
 } 
