@@ -19,19 +19,10 @@ const IncubatorProfile = () => {
     return location.pathname === path;
   };
 
-  const getCurrentTab = () => {
-    const currentPath = location.pathname.split('/').pop();
-    const currentTab = tabs.find(tab => tab.id === currentPath);
-    return currentTab ? currentTab.label : '';
-  };
-
   return (
     <div className="incubator-profile">
       <div className="profile-header">
-        <div className="breadcrumb">
-          <span>Incubator Profile</span>
-          {getCurrentTab() && <span> / {getCurrentTab()}</span>}
-        </div>
+        <h1>Incubator Profile</h1>
       </div>
 
       <div className="profile-tabs">
