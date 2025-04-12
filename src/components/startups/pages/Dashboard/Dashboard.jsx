@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useStartupContext } from '../../../../context/StartupContext';
 import './Dashboard.css';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
@@ -10,8 +10,6 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import config from '../../../../config';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -20,32 +18,14 @@ const Dashboard = () => {
     incubatorFunding, 
     externalFunding, 
     teamMembers, 
+    incubators,
     loading, 
     error 
   } = useStartupContext();
   
   const [currentIncubatorPage, setCurrentIncubatorPage] = useState(0);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
-  const [incubators, setIncubators] = useState([]);
   const incubatorsPerPage = 4;
-
-  useEffect(() => {
-    fetchIncubators();
-  }, []);
-
-  const fetchIncubators = async () => {
-    try {
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      const response = await axios.get(`${config.api_base_url}/startup/startupincubator/`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setIncubators(response.data);
-    } catch (error) {
-      console.error('Error fetching incubators:', error);
-    }
-  };
 
   const handleNextIncubatorPage = () => {
     if ((currentIncubatorPage + 1) * incubatorsPerPage < incubators.length) {
@@ -123,7 +103,6 @@ const Dashboard = () => {
         </div>
         
         <div className="stat-card">
-
           <div className="stat-icon external">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -227,49 +206,51 @@ const Dashboard = () => {
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">Industry:</div>
-                  <div className="info-value">{startupInfo.industry || 'Business service, other Service and Miscellaneous Service'}</div>
+                  <div className="info-value">{startupInfo?.industry || 'Not specified'}</div>
                 </div>
               </div>
 
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">Sector:</div>
-                  <div className="info-value">{startupInfo.sector || 'Professional Service'}</div>
+                  <div className="info-value">{startupInfo?.sector || 'Not specified'}</div>
                 </div>
               </div>
 
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">Registration Address:</div>
-                  <div className="info-value">{startupInfo.address || 'C/O POONAM PASWAN, SHAMAN VIHAAR APARTMENT, DWARKA, SECTOR-23 NA DELHI, South West, Delhi, DL, 110075, IN'}</div>
+                  <div className="info-value">{startupInfo?.registration_address || 'Not specified'}</div>
                 </div>
               </div>
 
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">CIN Number:</div>
-                  <div className="info-value">{startupInfo.cin_no || 'U74999DL2021PTC385097'}</div>
+                  <div className="info-value">{startupInfo?.cin_number || 'Not specified'}</div>
                 </div>
               </div>
 
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">CIN Date:</div>
-                  <div className="info-value">{startupInfo.cin_date ? new Date(startupInfo.cin_date).toLocaleDateString() : '08/12/2021'}</div>
+                  <div className="info-value">
+                    {startupInfo?.cin_date ? new Date(startupInfo.cin_date).toLocaleDateString() : 'Not specified'}
+                  </div>
                 </div>
               </div>
 
               <div className="info-row">
                 <div className="info-item">
                   <div className="info-label">Communication Address:</div>
-                  <div className="info-value">{startupInfo.address || 'Delhi India'}</div>
+                  <div className="info-value">{startupInfo?.communication_address || startupInfo?.address || 'Not specified'}</div>
                 </div>
               </div>
 
               <div className="info-row">
                 <div className="info-item">
-                  <div className="info-label">DIIT No.:</div>
-                  <div className="info-value">{startupInfo.dpiit_no || '1234534'}</div>
+                  <div className="info-label">DPIIT No.:</div>
+                  <div className="info-value">{startupInfo?.dpiit_number || 'Not specified'}</div>
                 </div>
               </div>
             </div>
@@ -294,7 +275,7 @@ const Dashboard = () => {
                       <span className="detail-label">Name:</span> 
                       <span className="detail-value">{member.first_name} {member.last_name}</span>
                     </div>
-                    <div className="member-role">({member.primary_role || 'CFO/Founder'})</div>
+                    <div className="member-role">({member.primary_role || 'Team Member'})</div>
                   </div>
                   <div className="member-social">
                     <a href={member.linkedin || '#'} className="social-link" target="_blank" rel="noopener noreferrer">
@@ -310,32 +291,7 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              // Fallback default team members if none are available from API
-              Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="team-member-card">
-                  <div className="member-photo">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Team Member" />
-                  </div>
-                  <div className="member-info">
-                    <div className="member-detail">
-                      <span className="detail-label">Name:</span> 
-                      <span className="detail-value">Kanishk Dadwal</span>
-                    </div>
-                    <div className="member-role">(CFO/Founder)</div>
-                  </div>
-                  <div className="member-social">
-                    <a href="#" className="social-link">
-                      <img src="https://img.icons8.com/color/48/000000/linkedin.png" alt="LinkedIn" />
-                    </a>
-                    <a href="#" className="social-link">
-                      <img src="https://img.icons8.com/color/48/000000/instagram-new.png" alt="Instagram" />
-                    </a>
-                    <a href="#" className="social-link">
-                      <img src="https://img.icons8.com/color/48/000000/twitter.png" alt="Twitter" />
-                    </a>
-                  </div>
-                </div>
-              ))
+              <div>No team members found</div>
             )}
           </div>
         </div>

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'utils/httpClient';
+import axios from 'axios';
 import config from '../config';
 import LoginImg from './Login.png';
 import VLogo from '../assets/VLogo.png';
 import './Login.css';
 
 const Login = ({ setUserRole }) => {
-  const [email, setEmail] = useState('email@example.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -52,19 +52,17 @@ const Login = ({ setUserRole }) => {
       );
 
       if (response.data) {
-        const { role, access_token, refresh_token, startup_id } = response.data;
+        const { role, access_token, refresh_token } = response.data;
         
         // Store tokens based on remember me
         if (rememberMe) {
           localStorage.setItem('access_token', access_token);
           localStorage.setItem('refresh_token', refresh_token);
-          localStorage.setItem('startup_id', startup_id);
           localStorage.setItem('remembered_email', email);
           localStorage.setItem('user_role', role);
         } else {
           sessionStorage.setItem('access_token', access_token);
           sessionStorage.setItem('refresh_token', refresh_token);     
-          sessionStorage.setItem('startup_id', startup_id);
           sessionStorage.setItem('user_role', role);
           localStorage.removeItem('remembered_email');
         }
@@ -74,24 +72,23 @@ const Login = ({ setUserRole }) => {
         
         // Show success message
         setShowSuccessPopup(true);
+        showToastMessage('Login successful!', 'success');
 
-        // Force a small delay to ensure tokens are set
-        setTimeout(() => {
-          if (role === 'startup') {
-            navigate('/startup/dashboard', { replace: true });
-          } else if (role === 'incubator') {
-            navigate('/incubator/dashboard', { replace: true });
-          }
-        }, 100);
+        // Navigate based on role
+        if (role === 'startup') {
+          navigate('/startup/dashboard');
+        } else if (role === 'incubator') {
+          navigate('/incubator/dashboard');
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
-      setErrorMessage(
-        error.response?.data?.message || 
-        error.response?.data?.detail || 
-        'Invalid credentials. Please try again.'
-      );
+      const errorMsg = error.response?.data?.message || 
+                      error.response?.data?.detail || 
+                      'Invalid credentials. Please try again.';
+      setErrorMessage(errorMsg);
       setShowErrorPopup(true);
+      showToastMessage(errorMsg, 'error');
     } finally {
       setIsLoading(false);
     }

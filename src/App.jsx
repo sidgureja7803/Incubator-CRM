@@ -4,11 +4,7 @@ import {
   Routes, 
   Route, 
   Navigate,
-  UNSAFE_DataRouterContext,
-  UNSAFE_DataRouterStateContext,
-  UNSAFE_NavigationContext,
-  UNSAFE_LocationContext,
-  UNSAFE_RouteContext
+  Outlet
 } from 'react-router-dom';
 
 // Public Pages
@@ -31,10 +27,8 @@ import StartupUpdates from './components/startups/pages/StartupProfile/Updates/U
 // Incubator Components
 import IncubatorSidebar from './components/incubators/pages/Sidebar/Sidebar';
 import IncubatorDashboard from './components/incubators/pages/Dashboard/Dashboard';
-
-import IncubatorProfile from 'components/incubators/components/IncubatorProfile/IncuabtorProfile';
-
-import IncubatorInfo from './components/incubators/pages/IncubatorProfile/IncubatorInfo/IncubatorInfo';
+import IncubatorProfile from './components/incubators/pages/IncubatorProfile/IncubatorProfile';
+import IncubatorInfo from './components/incubators/pages/IncubatorProfile/Info/IncuabtorInfo';
 import IncubatorTeam from './components/incubators/pages/IncubatorProfile/Team/Team';
 import IncubatorPartners from './components/incubators/pages/IncubatorProfile/Partners/Partners';
 import IncubatorInstitute from './components/incubators/pages/IncubatorProfile/InstituteAssociated/InstituteAssociated';
@@ -72,9 +66,7 @@ function App() {
   };
 
   return (
-    <Router
-      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-    >
+    <Router>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={
@@ -91,68 +83,58 @@ function App() {
         <Route path="/startup" element={
           <ProtectedRoute requiredRole="startup">
             <StartupProvider>
-              <div className="layout">
-                <StartupSidebar />
-                <div className="content">
-                  <Routes>
-                    <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<StartupDashboard />} />
-                    <Route path="profile" element={<StartupProfile />}>
-                      <Route index element={<Navigate to="startup-info" replace />} />
-                      <Route path="startup-info" element={<StartupInfo />} />
-                      <Route path="awards" element={<StartupAwards />} />
-                      <Route path="funding" element={<StartupFunding />} />
-                      <Route path="team" element={<StartupTeam />} />
-                      <Route path="intellectual-properties" element={<StartupIntellectualProperties />} />
-                      <Route path="updates" element={<StartupUpdates />} />
-                    </Route>
-                    <Route path="incubators" element={<div>Incubators</div>}>
-                      <Route path=":incubatorId">
-                        <Route path="programs/:programId">
-                          <Route path="cohorts/:cohortId">
-                            <Route path="tasks" element={<Tasks />} />
-                            <Route path="members" element={<Members />} />
-                            <Route path="mentors" element={<Mentors />} />
-                            <Route path="admins" element={<Admins />} />
-                            <Route path="documents" element={<Documents />} />
-                          </Route>
-                        </Route>
-                      </Route>
-                    </Route>
-                  </Routes>
-                </div>
-              </div>
+              <StartupSidebar />
             </StartupProvider>
           </ProtectedRoute>
-        } />
+        }>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<StartupDashboard />} />
+          <Route path="profile" element={<StartupProfile />}>
+            <Route index element={<Navigate to="startup-info" replace />} />
+            <Route path="startup-info" element={<StartupInfo />} />
+            <Route path="awards" element={<StartupAwards />} />
+            <Route path="funding" element={<StartupFunding />} />
+            <Route path="team" element={<StartupTeam />} />
+            <Route path="intellectual-properties" element={<StartupIntellectualProperties />} />
+            <Route path="updates" element={<StartupUpdates />} />
+          </Route>
+          <Route path="incubators" element={<div>Incubators</div>}>
+            <Route path=":incubatorId">
+              <Route path="programs/:programId">
+                <Route path="cohorts/:cohortId">
+                  <Route path="tasks" element={<Tasks />} />
+                  <Route path="members" element={<Members />} />
+                  <Route path="mentors" element={<Mentors />} />
+                  <Route path="admins" element={<Admins />} />
+                  <Route path="documents" element={<Documents />} />
+                </Route>
+              </Route>
+            </Route>
+          </Route>
+        </Route>
 
         {/* Incubator Routes */}
         <Route path="/incubator" element={
           <ProtectedRoute requiredRole="incubator">
             <IncubatorProvider>
-              <div className="layout">
-                <IncubatorSidebar />
-                <div className="content">
-                  <Routes>
-                    <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<IncubatorDashboard />} />
-                    <Route path="profile" element={<IncubatorProfile />}>
-                      <Route index element={<Navigate to="info" replace />} />
-                      <Route path="info" element={<IncubatorInfo />} />
-                      <Route path="team" element={<IncubatorTeam />} />
-                      <Route path="partners" element={<IncubatorPartners />} />
-                      <Route path="institute" element={<IncubatorInstitute />} />
-                      <Route path="infrastructure" element={<IncubatorInfrastructure />} />
-                      <Route path="awards" element={<IncubatorAwards />} />
-                    </Route>
-                    <Route path="programs" element={<div>Programs</div>} />
-                    <Route path="startups" element={<div>Startups</div>} />
-                  </Routes>
-                </div>
-              </div>
+              <IncubatorSidebar />
             </IncubatorProvider>
           </ProtectedRoute>
-        } />
+        }>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<IncubatorDashboard />} />
+          <Route path="profile" element={<IncubatorProfile />}>
+            <Route index element={<Navigate to="info" replace />} />
+            <Route path="info" element={<IncubatorInfo />} />
+            <Route path="team" element={<IncubatorTeam />} />
+            <Route path="partners" element={<IncubatorPartners />} />
+            <Route path="institute" element={<IncubatorInstitute />} />
+            <Route path="infrastructure" element={<IncubatorInfrastructure />} />
+            <Route path="awards" element={<IncubatorAwards />} />
+          </Route>
+          <Route path="programs" element={<div>Programs</div>} />
+          <Route path="startups" element={<div>Startups</div>} />
+        </Route>
 
         {/* Catch-all route */}
         <Route path="*" element={

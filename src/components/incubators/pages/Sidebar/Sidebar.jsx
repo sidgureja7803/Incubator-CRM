@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import './Sidebar.css';
+import React, { useState } from "react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import "./Sidebar.css";
 import VLogo from '../../../../assets/VLogo.png';
 
-const Sidebar = () => {
-  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+export default function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutPopup(true);
@@ -14,29 +15,34 @@ const Sidebar = () => {
   const confirmLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
-    <>
-      <aside className="sidebar">
+    <div className="mainContainer">
+      <div className="sidebar">
         <div className="sidebar-top">
-          <img src={VLogo} alt="Logo" className="sidebar-logo" />
+          <img className="sidebar-logo" src={VLogo} alt="Venture Lab" />
         </div>
+        
         <nav className="sidebar-links">
           <NavLink 
             to="/incubator/dashboard" 
             className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}
-          >
+          > 
             <i className="fas fa-home"></i>
             <span>Dashboard</span>
           </NavLink>
           <NavLink 
-            to="/incubator/profile" 
-            className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}
+            to="/incubator/profile/info" 
+            className={({ isActive }) => 
+              isActive || location.pathname.startsWith('/incubator/profile') 
+                ? "sidebar-link active" 
+                : "sidebar-link"
+            }
           >
             <i className="fas fa-user"></i>
-            <span>Profile</span>
+            <span>Incubator Profile</span>
           </NavLink>
           <NavLink 
             to="/incubator/programs" 
@@ -53,13 +59,17 @@ const Sidebar = () => {
             <span>Startups</span>
           </NavLink>
         </nav>
+        
         <div className="sidebar-bottom">
-          <button className="sidebar-link logout-button" onClick={handleLogout}>
+          <button className="logout-button" onClick={handleLogout}>
             <i className="fas fa-sign-out-alt"></i>
-            <span>Logout</span>
+            <span>Log Out</span>
           </button>
         </div>
-      </aside>
+      </div>
+      <div className="content-container">
+        <Outlet />
+      </div>
 
       {showLogoutPopup && (
         <div className="logout-popup">
@@ -73,8 +83,8 @@ const Sidebar = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
-};
+}
 
-export default Sidebar;
+

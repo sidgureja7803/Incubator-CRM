@@ -1,4 +1,4 @@
-import axios from 'utils/httpClient';
+import axios from 'axios';
 import config from '../config';
 
 let refreshPromise = null;
@@ -18,23 +18,23 @@ export const refreshTokens = async () => {
     // Create new promise for this refresh attempt
     refreshPromise = axios.post(
       `${config.api_base_url}/v1/auth/refresh/`,
-      { refresh_token: refreshToken }
+      { refresh: refreshToken }
     );
 
     const response = await refreshPromise;
     
-    if (response.status === 200 && response.data.access_token) {
-      const { access_token } = response.data;
+    if (response.status === 200 && response.data.access) {
+      const { access } = response.data;
       
       // Store the new access token in the same storage as the refresh token
       if (localStorage.getItem('refresh_token')) {
-        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('access_token', access);
       }
       if (sessionStorage.getItem('refresh_token')) {
-        sessionStorage.setItem('access_token', access_token);
+        sessionStorage.setItem('access_token', access);
       }
       
-      return access_token;
+      return access;
     }
     
     throw new Error('Invalid refresh response');
@@ -69,7 +69,7 @@ authAxios.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {

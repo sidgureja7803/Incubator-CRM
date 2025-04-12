@@ -53,11 +53,19 @@ html {
 
 .content {
   flex: 1;
-  margin-left: 250px; /* Add margin to account for fixed sidebar width */
+  margin-left: 250px; /* Match sidebar width */
   padding: 20px;
   background-color: #f8f9fa;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* Media query for responsive design */
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 /* Ensure the content is scrollable */
