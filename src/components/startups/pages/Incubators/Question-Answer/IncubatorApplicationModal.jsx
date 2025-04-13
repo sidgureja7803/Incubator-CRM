@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from 'utils/httpClient';
 import config from "config";
+import './IncubatorApplicationModal.css';
+
+// Set the app element for accessibility reasons
+Modal.setAppElement('#root');
 
 const IncubatorApplicationModal = ({ 
   isOpen, 
@@ -10,14 +14,20 @@ const IncubatorApplicationModal = ({
   onSubmitSuccess 
 }) => {
   const [formData, setFormData] = useState({});
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState([
+    { id: 'question1', question_name: 'What is the funding of your startup !' },
+    { id: 'question2', question_name: 'What is the Product of your Startup !' },
+    { id: 'question3', question_name: 'What Impact your startup have in upcoming years !' }
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
   const [isEditMode, setIsEditMode] = useState(true);
 
   useEffect(() => {
     if (program?.id) {
-      fetchQuestionsAndAnswers(program.id);
+      // In a real application, you would fetch questions from the API
+      // fetchQuestionsAndAnswers(program.id);
+      console.log("Program selected:", program);
     }
   }, [program]);
 
@@ -79,11 +89,6 @@ const IncubatorApplicationModal = ({
     }));
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    await submitAnswers('save');
-  };
-
   const handleSubmit = () => {
     setShowConfirmSubmit(true);
   };
@@ -102,6 +107,12 @@ const IncubatorApplicationModal = ({
           }))
       };
 
+      // Simulate API call for demonstration purposes
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Submitting answers:', transformedPayload);
+
+      /*
+      // Uncomment to use the actual API
       await axios.post(
         `${config.api_base_url}/startup/incubators/program-questions/submit-answers/`,
         transformedPayload,
@@ -109,6 +120,7 @@ const IncubatorApplicationModal = ({
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+      */
 
       if (action === 'submit') {
         onSubmitSuccess();
@@ -116,6 +128,7 @@ const IncubatorApplicationModal = ({
       }
     } catch (error) {
       console.error('Error submitting answers:', error);
+      alert('Error submitting application. Please try again.');
     } finally {
       setIsLoading(false);
       setShowConfirmSubmit(false);
@@ -131,45 +144,35 @@ const IncubatorApplicationModal = ({
     >
       <div className="modal-content">
         <div className="modal-header">
-          <h2>{program?.program_name}</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
+          <h2>MIETY</h2>
+          <button className="close-button" onClick={onClose}>×</button>
         </div>
 
-        <form className="application-form">
+        <form className="modal-form">
           {questions.map(question => (
             <div key={question.id} className="form-group">
               <label>{question.question_name}</label>
-              <input
-                type="text"
+              <textarea
                 name={question.id.toString()}
                 value={formData[question.id] || ''}
                 onChange={handleInputChange}
-                disabled={!isEditMode}
-                placeholder="Type your answer here"
+                disabled={!isEditMode || isLoading}
+                placeholder={`Enter the ${question.question_name.toLowerCase().replace(/!$/, '')}`}
+                rows={4}
               />
             </div>
           ))}
 
           <div className="form-actions">
             {isEditMode && (
-              <>
-                <button
-                  type="button"
-                  className="save-button"
-                  onClick={handleSave}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  type="button"
-                  className="submit-button"
-                  onClick={handleSubmit}
-                  disabled={isLoading}
-                >
-                  Submit
-                </button>
-              </>
+              <button
+                type="button"
+                className="submit-button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Submitting...' : 'Apply'}
+              </button>
             )}
           </div>
         </form>

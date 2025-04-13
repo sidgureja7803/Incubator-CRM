@@ -1,5 +1,6 @@
 .my-incubators-container {
-  padding: 1rem 0;
+  width: 100%;
+  padding: 24px;
 }
 
 .my-incubators-container h2 {
@@ -8,184 +9,247 @@
   font-size: 1.75rem;
 }
 
-.incubators-grid {
+.my-incubators-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 24px;
 }
 
 .incubator-card {
-  background-color: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 24px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  border: 1px solid #e0e0e0;
+  gap: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .incubator-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .incubator-card.active {
-  border: 2px solid #1976D2;
-  background-color: #f8f9fa;
+  border: 2px solid #2B3F6C;
 }
 
 .incubator-logo {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 1rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.incubator-logo img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
-.card-content {
-  text-align: center;
-  width: 100%;
+.incubator-info {
+  flex: 1;
 }
 
-.card-content h3 {
-  margin: 0 0 0.75rem;
-  font-size: 1.2rem;
-  color: #333;
+.incubator-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: #1A202C;
+  margin: 0 0 8px 0;
 }
 
 .joining-date {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
 }
 
-.programs-section {
-  background-color: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-top: 2rem;
+.joining-date span {
+  font-weight: 500;
 }
 
-.programs-section h2 {
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+.programs-container {
+  margin-top: 32px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 32px;
 }
 
-.programs-grid {
+.programs-container h2 {
+  font-size: 24px;
+  font-weight: 500;
+  color: #1A202C;
+  margin: 0 0 24px 0;
+}
+
+.programs-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
 }
 
-.program-card {
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid #eee;
-  display: flex;
-  flex-direction: column;
-}
-
-.program-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+.program-item {
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: #FFFFFF;
 }
 
 .program-header {
   display: flex;
-  align-items: center;
-  padding: 1.25rem;
-  background-color: #f8f9fa;
-  gap: 1rem;
-  border-bottom: 1px solid #eee;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  cursor: pointer;
+}
+
+.program-header:hover {
+  opacity: 0.9;
 }
 
 .program-logo {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .program-logo img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.program-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #333;
-  font-weight: 600;
+.program-info {
+  flex: 1;
+}
+
+.program-info h3 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #1A202C;
+  margin: 0 0 12px 0;
 }
 
 .program-description {
-  padding: 1.25rem;
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
+  font-size: 14px;
+  color: #718096;
   line-height: 1.5;
-  flex-grow: 1;
-  border-bottom: 1px solid #eee;
+  margin: 0;
 }
 
-.program-footer {
-  padding: 1.25rem;
+.program-meta {
+  margin-top: 24px;
 }
 
 .program-dates {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 16px;
 }
 
-.date-group {
+.date-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .date-label {
-  font-size: 0.85rem;
-  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A202C;
 }
 
 .date-value {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #333;
+  font-size: 14px;
+  color: #718096;
 }
 
-.program-link {
+.program-website {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .website-label {
-  font-size: 0.85rem;
-  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A202C;
 }
 
 .website-url {
-  font-size: 0.85rem;
-  color: #1976D2;
+  font-size: 14px;
+  color: #3182CE;
   text-decoration: none;
   word-break: break-all;
 }
 
 .website-url:hover {
   text-decoration: underline;
+}
+
+/* Cohorts styling */
+.cohorts-list {
+  margin-top: 24px;
+  border-top: 1px solid #E2E8F0;
+  padding-top: 24px;
+}
+
+.cohorts-list h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1A202C;
+  margin: 0 0 16px 0;
+}
+
+.cohort-item {
+  background: #F7FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cohort-item:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: #EDF2F7;
+}
+
+.cohort-item h5 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1A202C;
+  margin: 0 0 8px 0;
+}
+
+.cohort-item p {
+  font-size: 14px;
+  color: #718096;
+  margin: 0 0 12px 0;
+}
+
+.cohort-dates {
+  font-size: 12px;
+  color: #4A5568;
+}
+
+.loading, .error, .no-incubators {
+  text-align: center;
+  padding: 48px;
+  font-size: 16px;
+  color: #718096;
+}
+
+.error {
+  color: #E53E3E;
 }
 
 .status-badge {
@@ -209,8 +273,45 @@
   color: #ffa000;
 }
 
-@media (max-width: 768px) {
-  .incubators-grid, .programs-grid {
+@media (max-width: 1024px) {
+  .my-incubators-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .program-dates {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .my-incubators-container {
+    padding: 16px;
+  }
+
+  .incubator-card {
+    padding: 16px;
+  }
+
+  .incubator-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .incubator-name {
+    font-size: 16px;
+  }
+  
+  .programs-container {
+    padding: 24px 16px;
+  }
+  
+  .program-item {
+    padding: 16px;
+  }
+  
+  .cohort-item {
+    padding: 12px;
   }
 } 

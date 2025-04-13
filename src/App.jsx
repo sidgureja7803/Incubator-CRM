@@ -25,7 +25,8 @@ import StartupIntellectualProperties from './components/startups/pages/StartupPr
 import StartupUpdates from './components/startups/pages/StartupProfile/Updates/Updates';
 import MyIncubators from './components/startups/pages/Incubators/MyIncubators/MyIncubators';
 import ApplyIncubation from './components/startups/pages/Incubators/ApplyIncubation/ApplyIncubation';
-import Programs from './components/startups/pages/Incubators/Programs/Programs';
+import Incubators from './components/startups/pages/Incubators/Incubators';
+import Cohorts from './components/startups/pages/Incubators/Cohorts/Cohorts';
 
 // Incubator Components
 import IncubatorSidebar from './components/incubators/pages/Sidebar/Sidebar';
@@ -39,11 +40,11 @@ import IncubatorInfrastructure from './components/incubators/pages/IncubatorProf
 import IncubatorAwards from './components/incubators/pages/IncubatorProfile/Awards/Awards';
 
 // Cohort Components
-import Tasks from './components/startups/pages/Incubators/Tasks/Tasks';
-import Members from './components/startups/pages/Incubators/Members/Members';
-import Mentors from './components/startups/pages/Incubators/Mentors/Mentors';
-import Admins from './components/startups/pages/Incubators/Admins/Admins';
-import Documents from './components/startups/pages/Incubators/Documents/Documents';
+import Tasks from './components/startups/pages/Incubators/Cohorts/Tasks/Tasks';
+import Members from './components/startups/pages/Incubators/Cohorts/Members/Members';
+import Mentors from './components/startups/pages/Incubators/Cohorts/Mentors/Mentors';
+import Admins from './components/startups/pages/Incubators/Cohorts/Admins/Admins';
+import Documents from './components/startups/pages/Incubators/Cohorts/Documents/Documents';
 
 // Context Providers
 import { StartupProvider } from './context/StartupContext';
@@ -101,17 +102,18 @@ function App() {
             <Route path="intellectual-properties" element={<StartupIntellectualProperties />} />
             <Route path="updates" element={<StartupUpdates />} />
           </Route>
-          <Route path="incubators" element={<Navigate to="incubators/my-incubators" replace />} />
-          <Route path="incubators/my-incubators" element={<MyIncubators />} />
-          <Route path="incubators/apply" element={<ApplyIncubation />} />
-          <Route path="incubators/:incubatorId/programs/:programId" element={<Programs />} />
-          <Route path="incubators/:incubatorId/programs/:programId/cohorts/:cohortId" element={<Outlet />}>
-            <Route index element={<Navigate to="tasks" replace />} />
-            <Route path="tasks" element={<Tasks />} />
-            <Route path="members" element={<Members />} />
-            <Route path="mentors" element={<Mentors />} />
-            <Route path="admins" element={<Admins />} />
-            <Route path="documents" element={<Documents />} />
+          <Route path="incubators" element={<Incubators />}>
+            <Route index element={<Navigate to="my-incubators" replace />} />
+            <Route path="my-incubators" element={<MyIncubators />} />
+            <Route path="apply" element={<ApplyIncubation />} />
+            <Route path=":incubatorId/programs/:programId/cohorts/:cohortId" element={<Cohorts />}>
+              <Route index element={<Navigate to="tasks" replace />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="members" element={<Members />} />
+              <Route path="mentors" element={<Mentors />} />
+              <Route path="admins" element={<Admins />} />
+              <Route path="documents" element={<Documents />} />
+            </Route>
           </Route>
           <Route path="accelerators" element={<div>Accelerators</div>} />
         </Route>
