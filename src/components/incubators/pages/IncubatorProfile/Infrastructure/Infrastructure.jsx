@@ -1,240 +1,250 @@
-import React, { useState, useEffect } from 'react';
-import { authAxios } from '../../../../../utils/auth';
-import config from '../../../../../config';
-import Modal from 'react-modal';
-import './Infrastructure.css';
+import React, { useState } from "react";
+import { FiEdit2 } from 'react-icons/fi';
+import { RiDeleteBinLine } from 'react-icons/ri';
+import ReactDOM from 'react-dom';
+import "./Infrastructure.css";
+
+const Button = ({ onClick, children, className, variant }) => {
+  const baseClass = variant === 'contained' ? 'button-contained' : 'button-outlined';
+  return (
+    <button 
+      onClick={onClick} 
+      className={`custom-button ${baseClass} ${className || ''}`}
+    >
+      {children}
+    </button>
+  );
+};
+
+const Modal = ({ open, onClose, children }) => {
+  if (!open) return null;
+  
+  return ReactDOM.createPortal(
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>,
+    document.getElementById('root')
+  );
+};
 
 const Infrastructure = () => {
-  const [infrastructure, setInfrastructure] = useState([]);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null);
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    quantity: '',
-    location: ''
+    incubatorName: "",
+    infraId: "",
+    infraType: "",
+    infraCapacity: "",
+    incubatorId: ""
   });
+  const [data, setData] = useState([]);
+  const [editIndex, setEditIndex] = useState(null);
+  const [editInfoOpen, setEditInfoOpen] = useState(false);
+  const [selectedInfraId, setSelectedInfraId] = useState("");
 
-  useEffect(() => {
-    fetchInfrastructure();
-  }, []);
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
-  const fetchInfrastructure = async () => {
-    try {
-      const response = await authAxios.get(`${config.api_base_url}/incubator/infrastructure/`);
-      setInfrastructure(response.data);
-    } catch (error) {
-      console.error('Error fetching infrastructure:', error);
-    }
+  const handleClose = () => {
+    setOpen(false);
+    setEditIndex(null);
+    setFormData({
+      incubatorName: "",
+      infraId: "",
+      infraType: "",
+      infraCapacity: "",
+      incubatorId: ""
+    });
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await authAxios.post(`${config.api_base_url}/incubator/infrastructure/`, formData);
-      fetchInfrastructure();
-      setIsAddModalOpen(false);
-      setFormData({
-        name: '',
-        description: '',
-        quantity: '',
-        location: ''
-      });
-    } catch (error) {
-      console.error('Error adding infrastructure:', error);
+  const handleSave = () => {
+    if (editIndex !== null) {
+      const updatedData = data.map((item, index) =>
+        index === editIndex ? formData : item
+      );
+      setData(updatedData);
+    } else {
+      setData([...data, formData]);
+    }
+    handleClose();
+  };
+
+  const handleEdit = (index) => {
+    setFormData(data[index]);
+    setEditIndex(index);
+    handleOpen();
+  };
+
+  const handleDelete = (index) => {
+    const confirmDelete = window.confirm("Do you really want to delete that entry?");
+    if (confirmDelete) {
+      setData(data.filter((_, i) => i !== index));
     }
   };
 
-  const handleEdit = (item) => {
-    setCurrentItem(item);
-    setFormData({
-      name: item.name,
-      description: item.description,
-      quantity: item.quantity,
-      location: item.location
-    });
-    setIsEditModalOpen(true);
+  const handleEditInfoOpen = () => {
+    setEditInfoOpen(!editInfoOpen);
   };
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      await authAxios.patch(`${config.api_base_url}/incubator/infrastructure/${currentItem.id}/`, formData);
-      fetchInfrastructure();
-      setIsEditModalOpen(false);
-    } catch (error) {
-      console.error('Error updating infrastructure:', error);
+  const handleEditInfoChange = (e) => {
+    const infraId = e.target.value;
+    setSelectedInfraId(infraId);
+    const index = data.findIndex(item => item.infraId === infraId);
+    if (index !== -1) {
+      handleEdit(index);
     }
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      try {
-        await authAxios.delete(`${config.api_base_url}/incubator/infrastructure/${id}/`);
-        fetchInfrastructure();
-      } catch (error) {
-        console.error('Error deleting infrastructure:', error);
-      }
-    }
+    setEditInfoOpen(false);
   };
 
   return (
-    <div className="infrastructure-container">
-      <div className="infrastructure-header">
-        <h2>Infrastructure</h2>
-        <button onClick={() => setIsAddModalOpen(true)}>Add New</button>
-      </div>
+    <div className="page-container">
+      <div className="content-container">
+        <div className="title-container">
+          <h2>Infrastructure Management</h2>
+          <button 
+            className="add-info-button"
+            onClick={handleOpen}
+          >
+            + Add Infrastructure
+          </button>
+        </div>
 
-      <div className="infrastructure-list">
-        {infrastructure.length === 0 ? (
-          <p>No infrastructure items available</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Location</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {infrastructure.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.name}</td>
-                  <td>{item.description}</td>
-                  <td>{item.quantity}</td>
-                  <td>{item.location}</td>
-                  <td>
-                    <button onClick={() => handleEdit(item)}>Edit</button>
-                    <button onClick={() => handleDelete(item.id)}>Delete</button>
-                  </td>
+        <div className="table-container">
+          {data.length === 0 ? (
+            <div className="empty-state">
+              <p>No infrastructure data available. Click "Add Infrastructure" to get started.</p>
+            </div>
+          ) : (
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>Incubator Name</th>
+                  <th>Infrastructure ID</th>
+                  <th>Type</th>
+                  <th>Capacity</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {data.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.incubatorName}</td>
+                    <td>{row.infraId}</td>
+                    <td>{row.infraType}</td>
+                    <td>{row.infraCapacity}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="icon-button edit"
+                          onClick={() => handleEdit(index)}
+                          title="Edit"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button 
+                          className="icon-button delete"
+                          onClick={() => handleDelete(index)}
+                          title="Delete"
+                        >
+                          <RiDeleteBinLine />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
-      <Modal
-        isOpen={isAddModalOpen}
-        onRequestClose={() => setIsAddModalOpen(false)}
-        className="modal"
-        overlayClassName="overlay"
+      <Modal 
+        open={open} 
+        onClose={handleClose}
       >
-        <h2>Add Infrastructure</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Description:</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            ></textarea>
-          </div>
-          <div className="form-group">
-            <label>Quantity:</label>
-            <input
-              type="number"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Location:</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-actions">
-            <button type="submit">Save</button>
-            <button type="button" onClick={() => setIsAddModalOpen(false)}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      </Modal>
+        <div className="modalContainer">
+          <div className="modalContent">
+            <h3>{editIndex !== null ? 'Edit Infrastructure' : 'Add New Infrastructure'}</h3>
+            
+            <div className="form-group">
+              <input
+                type="text"
+                name="incubatorName"
+                value={formData.incubatorName}
+                onChange={handleChange}
+                placeholder="Incubator Name"
+                className="form-input"
+              />
+            </div>
 
-      <Modal
-        isOpen={isEditModalOpen}
-        onRequestClose={() => setIsEditModalOpen(false)}
-        className="modal"
-        overlayClassName="overlay"
-      >
-        <h2>Edit Infrastructure</h2>
-        <form onSubmit={handleUpdate}>
-          <div className="form-group">
-            <label>Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+            <div className="form-group">
+              <input
+                type="text"
+                name="infraId"
+                value={formData.infraId}
+                onChange={handleChange}
+                placeholder="Infrastructure ID"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                name="infraType"
+                value={formData.infraType}
+                onChange={handleChange}
+                placeholder="Infrastructure Type"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                name="infraCapacity"
+                value={formData.infraCapacity}
+                onChange={handleChange}
+                placeholder="Infrastructure Capacity"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                name="incubatorId"
+                value={formData.incubatorId}
+                onChange={handleChange}
+                placeholder="Incubator ID"
+                className="form-input"
+              />
+            </div>
+
+            <div className="modalButtons">
+              <Button 
+                onClick={handleSave} 
+                className="saveButton"
+                variant="contained"
+              >
+                {editIndex !== null ? 'Update' : 'Save'}
+              </Button>
+              <Button 
+                onClick={handleClose} 
+                className="cancelButton"
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
-          <div className="form-group">
-            <label>Description:</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            ></textarea>
-          </div>
-          <div className="form-group">
-            <label>Quantity:</label>
-            <input
-              type="number"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Location:</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-actions">
-            <button type="submit">Update</button>
-            <button type="button" onClick={() => setIsEditModalOpen(false)}>
-              Cancel
-            </button>
-          </div>
-        </form>
+        </div>
       </Modal>
     </div>
   );

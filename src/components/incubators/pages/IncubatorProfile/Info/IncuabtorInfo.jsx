@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
 import './IncubatorInfo.css';
 import image from './image.png';
+import { useIncubatorContext } from '../../../../../context/IncubatorContext';
 
 const IncubatorInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
+  const { incubatorInfo, setIncubatorInfo } = useIncubatorContext();
+  const [formData, setFormData] = useState(incubatorInfo || {
     incubator_name: "",
     address: "",
     country: "",
@@ -20,31 +22,6 @@ const IncubatorInfo = () => {
     youtube: "",
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(
-        `${config.api_base_url}/incubator/list/`,
-        {
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("access_token") ||
-              sessionStorage.getItem("access_token")
-            }`,
-          },
-        }
-      );
-      if (response.data && response.data[0]) {
-        setFormData(response.data[0]);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -56,7 +33,7 @@ const IncubatorInfo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.patch(
+      const response = await axios.patch(
         `${config.api_base_url}/incubator/update/`,
         formData,
         {
@@ -68,8 +45,8 @@ const IncubatorInfo = () => {
           },
         }
       );
+      setIncubatorInfo(response.data);
       setIsEditing(false);
-      fetchData();
     } catch (error) {
       console.error("Error updating data:", error);
     }
@@ -84,31 +61,34 @@ const IncubatorInfo = () => {
             <div className="info-display">
               <div className="info-item">
                 <label>Address</label>
-                <p>{formData.address}</p>
+                <p>{incubatorInfo?.address || formData.address}</p>
               </div>
               <div className="info-item">
                 <label>Website</label>
-                <p>{formData.website}</p>
+                <p>{incubatorInfo?.website || formData.website}</p>
               </div>
               <div className="info-item">
                 <label>LinkedIn</label>
-                <p>{formData.linkedin}</p>
+                <p>{incubatorInfo?.linkedin || formData.linkedin}</p>
               </div>
               <div className="info-item">
                 <label>Twitter</label>
-                <p>{formData.twitter}</p>
+                <p>{incubatorInfo?.twitter || formData.twitter}</p>
               </div>
               <div className="info-item">
                 <label>Instagram</label>
-                <p>{formData.instagram}</p>
+                <p>{incubatorInfo?.instagram || formData.instagram}</p>
               </div>
               <div className="info-item">
                 <label>YouTube</label>
-                <p>{formData.youtube}</p>
+                <p>{incubatorInfo?.youtube || formData.youtube}</p>
               </div>
               <button 
                 className="edit-button"
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                  setFormData(incubatorInfo || formData);
+                  setIsEditing(true);
+                }}
               >
                 Edit Details
               </button>

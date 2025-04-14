@@ -1,7 +1,7 @@
 const Awards = () => {
     return (
         <div>
-            <h1>Awards</h1>
+            <h1>No awards to show</h1>
         </div>
     )
 } 
