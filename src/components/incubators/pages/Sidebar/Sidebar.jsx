@@ -44,6 +44,8 @@ export default function Sidebar() {
             <i className="fas fa-user"></i>
             <span>Incubator Profile</span>
           </NavLink>
+
+          
           <NavLink 
             to="/incubator/programs" 
             className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}
@@ -51,6 +53,8 @@ export default function Sidebar() {
             <i className="fas fa-project-diagram"></i>
             <span>Programs</span>
           </NavLink>
+
+
           <NavLink 
             to="/incubator/startups" 
             className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}
