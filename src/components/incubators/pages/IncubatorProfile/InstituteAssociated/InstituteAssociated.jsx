@@ -4,6 +4,9 @@ import config from '../../../../../config';
 import './InstituteAssociated.css';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import { IoMdAdd, IoMdClose } from 'react-icons/io';
+import InstituteLogo from './Logo.png';
+import RightImage from './RightImage.png';
+
 
 const InstituteAssociated = () => {
   const [institutes, setInstitutes] = useState([]);
@@ -123,40 +126,43 @@ const InstituteAssociated = () => {
 
   return (
     <div className="institute-container">
-      <div className="institute-header">
-        <h2>Institute Associated</h2>
-        <button className="add-button" onClick={() => setShowModal(true)}>
-          <IoMdAdd /> Add Institute
-        </button>
-      </div>
+      <div className="institute-content">
+        <div className="institute-left">
+          <div className="institute-header">
+            <h2>Institute Associated</h2>
+            <button className="add-button" onClick={() => setShowModal(true)}>
+              <IoMdAdd /> Add Institute
+            </button>
+          </div>
 
-      <div className="institutes-grid">
-        {institutes.map((institute) => (
-          <div key={institute.id} className="institute-card">
-            <div className="institute-logo">
-              <img src={institute.logo || '/default-logo.png'} alt={institute.institute_name} />
-            </div>
-            <div className="institute-info">
-              <h3>{institute.institute_name}</h3>
-              <p className="address">{institute.address}</p>
-              <p className="city">{institute.city}</p>
-              <p className="state">{institute.state}</p>
-              <p className="country">{institute.country}</p>
-              <p className="pincode">{institute.pincode}</p>
-              <a href={institute.website} target="_blank" rel="noopener noreferrer" className="website">
-                {institute.website}
-              </a>
-            </div>
-            <div className="institute-actions">
+          {institutes.map((institute) => (
+            <div key={institute.id} className="institute-card">
+              <div className="institute-logo">
+                <img src={institute.logo || InstituteLogo} alt={institute.institute_name} />
+              </div>
+              <div className="institute-info">
+                <h3>{institute.institute_name}</h3>
+                <p className="address">{institute.address}</p>
+                <div className="location-info">
+                  <p className="city">{institute.city}</p>
+                  <p className="state">{institute.state}</p>
+                  <p className="country">{institute.country}</p>
+                  <p className="pincode">{institute.pincode}</p>
+                </div>
+                <a href={institute.website} target="_blank" rel="noopener noreferrer" className="website">
+                  {institute.website}
+                </a>
+              </div>
               <button onClick={() => handleEdit(institute)} className="edit-button">
                 <FaEdit />
               </button>
-              <button onClick={() => handleDelete(institute.id)} className="delete-button">
-                <FaTrash />
-              </button>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        
+        <div className="institute-right">
+          <img src={RightImage} alt="Institute illustration" className="right-image" />
+        </div>
       </div>
 
       {showModal && (
