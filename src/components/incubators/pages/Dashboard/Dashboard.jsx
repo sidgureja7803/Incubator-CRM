@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react';
-import { useIncubatorContext } from '../../../../context/IncubatorContext';
-import axios from 'axios';
-import config from '../../../../config';
+import React from 'react';
+import { useIncubator } from '../../../../hooks/useIncubator';
 import './Dashboard.css';
 import { 
   FaUsers, FaBuilding, FaMoneyBillWave, 
@@ -11,70 +9,46 @@ import {
 import { BsLinkedin, BsTwitter, BsInstagram, BsYoutube } from 'react-icons/bs';
 
 const Dashboard = () => {
-  const { 
-    incubatorInfo, 
-    setIncubatorInfo,
+  const {
+    incubatorInfo,
     incubatorTeam,
-    setIncubatorTeam,
+    incubatorPrograms,
     startups,
-    setStartups
-  } = useIncubatorContext();
+    isLoading,
+    error,
+    refetchIncubatorInfo,
+    refetchIncubatorTeam,
+    refetchPrograms,
+    refetchStartups
+  } = useIncubator();
 
-  useEffect(() => {
-    fetchIncubatorInfo();
-    fetchIncubatorTeam();
-    fetchStartups();
-  }, []);
+  // Handle loading state
+  if (isLoading.incubatorInfo || isLoading.programs || isLoading.incubatorTeam) {
+    return (
+      <div className="dashboard-loading">
+        <div className="spinner"></div>
+        <p>Loading dashboard data...</p>
+      </div>
+    );
+  }
 
-  const fetchIncubatorInfo = async () => {
-    try {
-      const response = await axios.get(
-        `${config.api_base_url}/incubator/list/`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
-          }
-        }
-      );
-      if (response.data && response.data[0]) {
-        setIncubatorInfo(response.data[0]);
-      }
-    } catch (error) {
-      console.error("Error fetching incubator info:", error);
-    }
-  };
-
-  const fetchIncubatorTeam = async () => {
-    try {
-      const response = await axios.get(
-        `${config.api_base_url}/incubator/people/`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
-          }
-        }
-      );
-      setIncubatorTeam(response.data);
-    } catch (error) {
-      console.error("Error fetching team:", error);
-    }
-  };
-
-  const fetchStartups = async () => {
-    try {
-      const response = await axios.get(
-        `${config.api_base_url}/incubator/startupincubator/`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
-          }
-        }
-      );
-      setStartups(response.data);
-    } catch (error) {
-      console.error("Error fetching startups:", error);
-    }
-  };
+  // Handle error state
+  if (error.incubatorInfo || error.programs || error.incubatorTeam) {
+    return (
+      <div className="dashboard-error">
+        <h2>Error loading dashboard</h2>
+        <p>{(error.incubatorInfo || error.programs || error.incubatorTeam)?.message}</p>
+        <button onClick={() => {
+          refetchIncubatorInfo();
+          refetchIncubatorTeam();
+          refetchPrograms();
+          refetchStartups();
+        }}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   const stats = [
     {

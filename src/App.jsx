@@ -6,6 +6,8 @@ import {
   Navigate,
   Outlet
 } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import queryClient from './utils/queryClient';
 
 // Public Pages
 import LandingPage from './pages/LandingPage';
@@ -38,6 +40,7 @@ import IncubatorPartners from './components/incubators/pages/IncubatorProfile/Pa
 import IncubatorInstitute from './components/incubators/pages/IncubatorProfile/InstituteAssociated/InstituteAssociated';
 import IncubatorInfrastructure from './components/incubators/pages/IncubatorProfile/Infrastructure/Infrastructure';
 import IncubatorAwards from './components/incubators/pages/IncubatorProfile/Awards/Awards';
+import IncubatorPrograms from './components/incubators/pages/Programs/Programs';
 
 // Cohort Components
 import Tasks from './components/startups/pages/Incubators/Cohorts/Tasks/Tasks';
@@ -70,85 +73,87 @@ function App() {
   };
 
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={
-          isAuthenticated() ? 
-            (userRole === 'startup' ? <Navigate to="/startup/dashboard" replace /> : <Navigate to="/incubator/dashboard" replace />) 
-            : <Navigate to="/landing" replace />
-        } />
-        <Route path="/landing" element={<LandingPage />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/verify-otp" element={<OtpVerification />} />
-        <Route path="/login" element={<Login setUserRole={setUserRole} />} />
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={
+            isAuthenticated() ? 
+              (userRole === 'startup' ? <Navigate to="/startup/dashboard" replace /> : <Navigate to="/incubator/dashboard" replace />) 
+              : <Navigate to="/landing" replace />
+          } />
+          <Route path="/landing" element={<LandingPage />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-otp" element={<OtpVerification />} />
+          <Route path="/login" element={<Login setUserRole={setUserRole} />} />
 
-        {/* Startup Routes */}
-        <Route path="/startup" element={
-          <ProtectedRoute requiredRole="startup">
-            <StartupProvider>
-              <StartupSidebar />
-            </StartupProvider>
-          </ProtectedRoute>
-        }>
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<StartupDashboard />} />
-          <Route path="profile" element={<StartupProfile />}>
-            <Route index element={<Navigate to="startup-info" replace />} />
-            <Route path="startup-info" element={<StartupInfo />} />
-            <Route path="awards" element={<StartupAwards />} />
-            <Route path="funding" element={<StartupFunding />} />
-            <Route path="team" element={<StartupTeam />} />
-            <Route path="intellectual-properties" element={<StartupIntellectualProperties />} />
-            <Route path="updates" element={<StartupUpdates />} />
-          </Route>
-          <Route path="incubators" element={<Incubators />}>
-            <Route index element={<Navigate to="my-incubators" replace />} />
-            <Route path="my-incubators" element={<MyIncubators />} />
-            <Route path="apply" element={<ApplyIncubation />} />
-            <Route path=":incubatorId/programs/:programId/cohorts/:cohortId" element={<Cohorts />}>
-              <Route index element={<Navigate to="tasks" replace />} />
-              <Route path="tasks" element={<Tasks />} />
-              <Route path="members" element={<Members />} />
-              <Route path="mentors" element={<Mentors />} />
-              <Route path="admins" element={<Admins />} />
-              <Route path="documents" element={<Documents />} />
+          {/* Startup Routes */}
+          <Route path="/startup" element={
+            <ProtectedRoute requiredRole="startup">
+              <StartupProvider>
+                <StartupSidebar />
+              </StartupProvider>
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<StartupDashboard />} />
+            <Route path="profile" element={<StartupProfile />}>
+              <Route index element={<Navigate to="startup-info" replace />} />
+              <Route path="startup-info" element={<StartupInfo />} />
+              <Route path="awards" element={<StartupAwards />} />
+              <Route path="funding" element={<StartupFunding />} />
+              <Route path="team" element={<StartupTeam />} />
+              <Route path="intellectual-properties" element={<StartupIntellectualProperties />} />
+              <Route path="updates" element={<StartupUpdates />} />
             </Route>
+            <Route path="incubators" element={<Incubators />}>
+              <Route index element={<Navigate to="my-incubators" replace />} />
+              <Route path="my-incubators" element={<MyIncubators />} />
+              <Route path="apply" element={<ApplyIncubation />} />
+              <Route path=":incubatorId/programs/:programId/cohorts/:cohortId" element={<Cohorts />}>
+                <Route index element={<Navigate to="tasks" replace />} />
+                <Route path="tasks" element={<Tasks />} />
+                <Route path="members" element={<Members />} />
+                <Route path="mentors" element={<Mentors />} />
+                <Route path="admins" element={<Admins />} />
+                <Route path="documents" element={<Documents />} />
+              </Route>
+            </Route>
+            <Route path="accelerators" element={<div>Accelerators</div>} />
           </Route>
-          <Route path="accelerators" element={<div>Accelerators</div>} />
-        </Route>
 
-        {/* Incubator Routes */}
-        <Route path="/incubator" element={
-          <ProtectedRoute requiredRole="incubator">
-            <IncubatorProvider>
-              <IncubatorSidebar />
-            </IncubatorProvider>
-          </ProtectedRoute>
-        }>
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<IncubatorDashboard />} />
-          <Route path="profile" element={<IncubatorProfile />}>
-            <Route index element={<Navigate to="info" replace />} />
-            <Route path="info" element={<IncubatorInfo />} />
-            <Route path="team" element={<IncubatorTeam />} />
-            <Route path="partners" element={<IncubatorPartners />} />
-            <Route path="institute" element={<IncubatorInstitute />} />
-            <Route path="infrastructure" element={<IncubatorInfrastructure />} />
-            <Route path="awards" element={<IncubatorAwards />} />
+          {/* Incubator Routes */}
+          <Route path="/incubator" element={
+            <ProtectedRoute requiredRole="incubator">
+              <IncubatorProvider>
+                <IncubatorSidebar />
+              </IncubatorProvider>
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<IncubatorDashboard />} />
+            <Route path="profile" element={<IncubatorProfile />}>
+              <Route index element={<Navigate to="info" replace />} />
+              <Route path="info" element={<IncubatorInfo />} />
+              <Route path="team" element={<IncubatorTeam />} />
+              <Route path="partners" element={<IncubatorPartners />} />
+              <Route path="institute" element={<IncubatorInstitute />} />
+              <Route path="infrastructure" element={<IncubatorInfrastructure />} />
+              <Route path="awards" element={<IncubatorAwards />} />
+            </Route>
+            <Route path="programs" element={<IncubatorPrograms/>} />
+            <Route path="startups" element={<div>Startups</div>} />
           </Route>
-          <Route path="programs" element={<div>Programs</div>} />
-          <Route path="startups" element={<div>Startups</div>} />
-        </Route>
 
-        {/* Catch-all route */}
-        <Route path="*" element={
-          isAuthenticated() ? 
-            (userRole === 'startup' ? <Navigate to="/startup/dashboard" replace /> : <Navigate to="/incubator/dashboard" replace />)
-            : <Navigate to="/login" replace />
-        } />
-      </Routes>
-    </Router>
+          {/* Catch-all route */}
+          <Route path="*" element={
+            isAuthenticated() ? 
+              (userRole === 'startup' ? <Navigate to="/startup/dashboard" replace /> : <Navigate to="/incubator/dashboard" replace />)
+              : <Navigate to="/login" replace />
+          } />
+        </Routes>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
