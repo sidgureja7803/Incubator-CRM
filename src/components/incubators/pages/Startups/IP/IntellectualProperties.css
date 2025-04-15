@@ -1,8 +1,7 @@
-.funding-container {
+.ip-container {
   padding: 24px;
   background-color: #fff;
   border-radius: 8px;
-  position: relative;
 }
 
 .loading-container {
@@ -35,23 +34,16 @@
   color: #E53E3E;
 }
 
-.funding-section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1A202C;
-  margin-bottom: 24px;
+.ip-table {
+  width: 100%;
 }
 
-.funding-table {
-  margin-bottom: 40px;
-}
-
-.funding-table table {
+.ip-table table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.funding-table th {
+.ip-table th {
   text-align: left;
   padding: 12px 16px;
   background-color: #F7FAFC;
@@ -61,14 +53,14 @@
   border-bottom: 1px solid #E2E8F0;
 }
 
-.funding-table td {
+.ip-table td {
   padding: 14px 16px;
   color: #1A202C;
   font-size: 14px;
   border-bottom: 1px solid #E2E8F0;
 }
 
-.funding-actions {
+.ip-actions {
   display: flex;
   gap: 8px;
 }
@@ -141,50 +133,12 @@
   color: #2B3F6C;
 }
 
-.tab-buttons {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  display: flex;
-  gap: 12px;
-}
-
-.tab-button {
-  background: none;
-  border: 1px solid #E2E8F0;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  color: #4A5568;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tab-button.active {
-  background-color: #2B3F6C;
-  color: white;
-  border-color: #2B3F6C;
-}
-
-.tab-button:hover:not(.active) {
-  background-color: #F7FAFC;
-}
-
 @media (max-width: 768px) {
-  .funding-container {
+  .ip-container {
     padding: 16px;
   }
   
-  .tab-buttons {
-    position: static;
-    margin-bottom: 24px;
-  }
-  
-  .funding-section-title {
-    margin-top: 16px;
-  }
-  
-  .funding-table {
+  .ip-table {
     overflow-x: auto;
   }
   
@@ -197,4 +151,4 @@
   .pagination-info, .rows-per-page {
     margin-right: 0;
   }
-}
+} 

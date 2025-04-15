@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { authAxios } from '../../../../../utils/auth';
-import config from '../../../../../config';
+import config from 'config';
 import './Updates.css';
 
 const Updates = () => {
@@ -10,37 +10,19 @@ const Updates = () => {
     handleRecentUpdates();
   }, []);
 
-  const handleRecentUpdates = async () => {
+  const handleNewUpdates = async (startup) => {
+    setSelectedStartup(startup);
     try {
-      const response = await authAxios.get(`${config.api_base_url}/incubator/view-regular-updates/`, {
+      const response = await axios.get(`${config.api_base_url}/incubator/regular-update-detail/${startup.startup_id}/`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
         }
       });
-      
-      // Filter updates from last 6 months
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      
-      const updates = response.data
-        .filter(update => {
-          const updateDate = new Date(update.year, parseInt(update.month) - 1);
-          return updateDate >= sixMonthsAgo;
-        })
-        .map(update => {
-          const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-          ];
-          return {
-            ...update,
-            monthName: monthNames[parseInt(update.month) - 1]
-          };
-        });
-
-      setUpdates(updates);
+      setStartupUpdates((prev) => ({ ...prev, [startup.startup_id]: response.data }));
+      setUpdatesModalIsOpen(true);
     } catch (error) {
-      console.error('Error fetching updates:', error);
+      console.error("Error fetching updates:", error.response ? error.response.data : error.message);
+      setStartupUpdates((prev) => ({ ...prev, [startup.startup_id]: [] }));
     }
   };
 

@@ -83,91 +83,173 @@
 }
 
 .team-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
-  gap: 1.5rem;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
 }
 
-.startup-team-section {
-  margin-bottom: 2rem;
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(43, 63, 108, 0.2);
+  border-radius: 50%;
+  border-top-color: #2B3F6C;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-container {
+  text-align: center;
+  padding: 40px;
+  color: #E53E3E;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 24px;
+}
+
+.no-team {
+  text-align: center;
+  padding: 48px 24px;
+  background-color: #F7FAFC;
+  border-radius: 8px;
+  border: 1px dashed #CBD5E0;
+  grid-column: 1 / -1;
+}
+
+.no-team p {
+  margin: 8px 0;
+  color: #4A5568;
+}
+
+.no-team p:first-child {
+  font-weight: 600;
+  font-size: 16px;
+  color: #2D3748;
 }
 
 .member-card {
-  background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
   display: flex;
-  gap: 1.5rem;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .member-image {
-  width: 80px;
-  height: 80px;
-  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  min-width: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 16px;
 }
 
 .member-image img {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #e5e7eb;
 }
 
-.member-info {
-  flex: 1;
-}
-
-.member-info h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 0.75rem;
-}
-
-.role-info, .contact-info {
-  margin-bottom: 0.75rem;
-}
-
-.role-info p, .contact-info p {
+.member-details {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
-  color: #4b5563;
-  margin-bottom: 0.25rem;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.role-info p span:first-child, .contact-info p span:first-child {
-  color: #6b7280;
+.member-header {
+  margin-bottom: 8px;
+}
+
+.member-header h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1A202C;
+  margin: 0 0 4px 0;
+}
+
+.designation {
+  font-size: 14px;
+  color: #4A5568;
+  margin: 0;
+}
+
+.member-contact {
+  margin-bottom: 12px;
+}
+
+.contact-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-row p {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: 14px;
+}
+
+.contact-row p span:first-child {
+  font-weight: 500;
+  color: #4A5568;
+  margin-bottom: 2px;
+}
+
+.contact-row p span:last-child {
+  color: #1A202C;
 }
 
 .social-links {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  gap: 12px;
+  margin-top: auto;
 }
 
-.social-links a {
-  display: inline-flex;
+.social-icon {
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 4px;
-  background-color: #f3f4f6;
-  transition: background-color 0.3s;
-  color: #4b5563;
+  color: #FFFFFF;
+  transition: opacity 0.2s;
 }
 
-.social-links a:hover {
-  background-color: #e5e7eb;
-  color: #1e40af;
+.social-icon:hover {
+  opacity: 0.8;
 }
 
-.social-links svg {
-  width: 16px;
-  height: 16px;
+.social-icon.linkedin {
+  background-color: #0077B5;
+}
+
+.social-icon.instagram {
+  background-color: #E1306C;
+}
+
+.social-icon.twitter {
+  background-color: #1DA1F2;
 }
 
 /* Responsive Design */
@@ -183,6 +265,10 @@
   }
   
   .team-container {
+    padding: 16px;
+  }
+  
+  .team-grid {
     grid-template-columns: 1fr;
   }
   
@@ -203,17 +289,17 @@
   }
   
   .member-image {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 1rem;
+    margin-right: 0;
+    margin-bottom: 12px;
   }
   
-  .role-info p, .contact-info p {
+  .contact-row {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 12px;
   }
   
   .social-links {
     justify-content: center;
+    margin-top: 16px;
   }
 }

@@ -1,0 +1,110 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'utils/httpClient';
+import config from 'config';
+import './Incubated.css';
+import ThaparInnovate from './TIETInnovate.png'
+
+const Incubated = () => {
+  const navigate = useNavigate();
+  const [startups, setLocalStartups] = useState([]);
+  const [startupPeople, setStartupPeople] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`${config.api_base_url}/incubator/startupincubator/`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+        }
+      });
+      setLocalStartups(response.data);
+      
+      // Fetch people for each startup
+      const peopleData = {};
+      await Promise.all(response.data.map(async (startup) => {
+        const peopleResponse = await axios.get(
+          `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+            }
+          }
+        );
+        peopleData[startup.startup_id] = peopleResponse.data;
+      }));
+      setStartupPeople(peopleData);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError(error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartupClick = (startup) => {
+    navigate(`/incubator/startups/incubated/${startup.startup_id}/info`);
+  };
+
+  if (isLoading) {
+    return <div className="loading-container">
+      <div className="spinner"></div>
+      <p>Loading incubated startups...</p>
+    </div>;
+  }
+
+  if (error) {
+    return <div className="error-container">
+      <h3>Error loading incubated startups</h3>
+      <p>{error.message}</p>
+      <button onClick={fetchData} className="retry-button">Retry</button>
+    </div>;
+  }
+
+  return (
+    <div className="incubated-container">
+      {startups.length === 0 ? (
+        <div className="no-startups">
+          <h3>No incubated startups found</h3>
+          <p>You don't have any startups in your incubator yet.</p>
+        </div>
+      ) : (
+        <div className="startups-grid">
+          {startups.map((startup) => (
+            <div 
+              key={startup.id || startup.startup_id} 
+              className="startup-card"
+              onClick={() => handleStartupClick(startup)}
+            >
+              <div className="startup-header">
+                <img 
+                  src={startup.logo || ThaparInnovate} 
+                  alt={startup.startup_name} 
+                  className="startup-logo"
+                />
+                <div className="startup-info">
+                  <h3 className="startup-name">Startup Name: {startup.startup_name}</h3>
+                  <div className="founder-info">
+                    <p>Founder: {
+                      startupPeople[startup.startup_id]?.length > 0 
+                        ? `${startupPeople[startup.startup_id][0].first_name} ${startupPeople[startup.startup_id][0].last_name}` 
+                        : 'Not specified'
+                    }</p>
+                  </div>
+                </div>
+              </div>
+              <div className="startup-arrow">→</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Incubated;
