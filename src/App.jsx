@@ -41,6 +41,17 @@ import IncubatorInstitute from './components/incubators/pages/IncubatorProfile/I
 import IncubatorInfrastructure from './components/incubators/pages/IncubatorProfile/Infrastructure/Infrastructure';
 import IncubatorAwards from './components/incubators/pages/IncubatorProfile/Awards/Awards';
 import IncubatorPrograms from './components/incubators/pages/Programs/Programs';
+import IncubatorStartups from './components/incubators/pages/Startups/Startup';
+
+// Startup Detail View components
+import StartupDetailView from './components/incubators/pages/Startups/Startups/StartupDetailView';
+import StartupBasicInfo from './components/incubators/pages/Startups/Info/Info';
+import IncubatedStartupAwards from './components/incubators/pages/Startups/Awards/Awards';
+import IncubatedStartupFunding from './components/incubators/pages/Startups/Funding/Funding';
+import IncubatedStartupTeam from './components/incubators/pages/Startups/Team/Team';
+import IncubatedStartupProperties from './components/incubators/pages/Startups/IP/IntellectualProperties';
+import IncubatedStartupUpdates from './components/incubators/pages/Startups/Updates/Updates';
+import IncubatedStartupFees from './components/incubators/pages/Startups/Fees/Fees';
 
 // Cohort Components
 import Tasks from './components/startups/pages/Incubators/Cohorts/Tasks/Tasks';
@@ -142,7 +153,19 @@ function App() {
               <Route path="awards" element={<IncubatorAwards />} />
             </Route>
             <Route path="programs" element={<IncubatorPrograms/>} />
-            <Route path="startups" element={<div>Startups</div>} />
+            <Route path="startups/*" element={<IncubatorStartups />} />
+            
+            {/* Add explicit routes for startup detail view with nested tabs */}
+            <Route path="startups/incubated/:startupId" element={<StartupDetailView />}>
+              <Route index element={<Navigate to="info" replace />} />
+              <Route path="info" element={<StartupBasicInfo />} />
+              <Route path="awards" element={<IncubatedStartupAwards />} />
+              <Route path="funding" element={<IncubatedStartupFunding />} />
+              <Route path="team" element={<IncubatedStartupTeam />} />
+              <Route path="properties" element={<IncubatedStartupProperties />} />
+              <Route path="updates" element={<IncubatedStartupUpdates />} />
+              <Route path="fee" element={<IncubatedStartupFees />} />
+            </Route>
           </Route>
 
           {/* Catch-all route */}

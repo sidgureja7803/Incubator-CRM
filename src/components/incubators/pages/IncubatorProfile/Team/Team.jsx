@@ -3,10 +3,10 @@ import axios from 'axios';
 import config from 'config';
 import './Team.css';
 import { FaLinkedin, FaInstagram, FaTwitter, FaPlus } from 'react-icons/fa';
-import { useIncubatorContext } from '../../../../../context/IncubatorContext';
+import { useIncubator } from '../../../../../hooks/useIncubator';
 
 const Team = () => {
-  const { incubatorTeam, setIncubatorTeam } = useIncubatorContext();
+  const { incubatorTeam, refetchIncubatorTeam } = useIncubator();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
@@ -49,7 +49,7 @@ const Team = () => {
 
     try {
       setIsLoading(true);
-      const response = await axios.post(
+      await axios.post(
         `${config.api_base_url}/incubator/people/`,
         formData,
         {
@@ -59,7 +59,10 @@ const Team = () => {
           },
         }
       );
-      setIncubatorTeam([...incubatorTeam, response.data]);
+      
+      // Refetch team members to update the UI
+      refetchIncubatorTeam();
+      
       resetForm();
       setShowSuccessPopup(true);
       setTimeout(() => setShowSuccessPopup(false), 3000);
@@ -72,13 +75,15 @@ const Team = () => {
   };
 
   const handleEdit = (index) => {
-    const person = incubatorTeam[index];
-    setfirst_name(person.first_name);
-    setlast_name(person.last_name);
-    setEmail(person.email);
-    setDesignation(person.designation);
-    setEditIndex(index);
-    setIsAddPersonOpen(true);
+    if (incubatorTeam && incubatorTeam[index]) {
+      const person = incubatorTeam[index];
+      setfirst_name(person.first_name || '');
+      setlast_name(person.last_name || '');
+      setEmail(person.email || '');
+      setDesignation(person.designation || '');
+      setEditIndex(index);
+      setIsAddPersonOpen(true);
+    }
   };
 
   const handleUpdate = async () => {
@@ -93,7 +98,11 @@ const Team = () => {
 
     try {
       setIsLoading(true);
-      const response = await axios.patch(
+      if (!incubatorTeam || !incubatorTeam[editIndex]) {
+        throw new Error('Team member not found');
+      }
+      
+      await axios.patch(
         `${config.api_base_url}/incubator/people/${incubatorTeam[editIndex].id}`,
         formData,
         {
@@ -103,10 +112,13 @@ const Team = () => {
           },
         }
       );
-      const updatedTeam = [...incubatorTeam];
-      updatedTeam[editIndex] = response.data;
-      setIncubatorTeam(updatedTeam);
+      
+      // Refetch team members to update the UI
+      refetchIncubatorTeam();
+      
       resetForm();
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
     } catch (error) {
       console.error("Error updating person:", error);
       alert("Failed to update team member");
@@ -122,6 +134,10 @@ const Team = () => {
     if (confirmation) {
       try {
         setIsLoading(true);
+        if (!incubatorTeam || !incubatorTeam[index]) {
+          throw new Error('Team member not found');
+        }
+        
         await axios.delete(
           `${config.api_base_url}/incubator/people/${incubatorTeam[index].id}`,
           {
@@ -130,8 +146,9 @@ const Team = () => {
             },
           }
         );
-        const updatedTeam = incubatorTeam.filter((_, i) => i !== index);
-        setIncubatorTeam(updatedTeam);
+        
+        // Refetch team members to update the UI
+        refetchIncubatorTeam();
       } catch (error) {
         console.error("Error deleting person:", error);
         alert("Failed to delete team member");
@@ -159,6 +176,8 @@ const Team = () => {
     return <div className="error">{error}</div>;
   }
 
+  const teamMembers = incubatorTeam || [];
+
   return (
     <div className="main-container">
       <button 
@@ -169,12 +188,12 @@ const Team = () => {
       </button>
       
       <div className="team-container">
-        {incubatorTeam.length === 0 ? (
+        {teamMembers.length === 0 ? (
           <div className="no-team-members">
             <p>No team members added yet. Click "Add Team" to get started.</p>
           </div>
         ) : (
-          incubatorTeam.map((person, index) => (
+          teamMembers.map((person, index) => (
             <div key={person.id || index} className="member-card">
               <div className="member-image">
                 <img 
@@ -301,7 +320,7 @@ const Team = () => {
 
       {showSuccessPopup && (
         <div className="success-popup">
-          Team member added successfully!
+          Team member {editIndex !== null ? 'updated' : 'added'} successfully!
         </div>
       )}
     </div>

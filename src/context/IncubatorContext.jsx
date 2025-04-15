@@ -17,18 +17,51 @@ export const useIncubatorContext = () => {
   return context;
 };
 
+const fetchStartupData = async () => {
+  try {
+    const response = await axios.get(`${config.api_base_url}/incubator/startupincubator/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+      }
+    });
+    setLocalStartups(response.data);
+    setContextStartups(response.data);
+    
+    // Fetch people for each startup
+    const peopleData = {};
+    await Promise.all(response.data.map(async (startup) => {
+      const peopleResponse = await axios.get(
+        `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+          }
+        }
+      );
+      peopleData[startup.startup_id] = peopleResponse.data;
+    }));
+    setStartupPeople(peopleData);
+    setIsLoading(false);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    setError(error);
+    setIsLoading(false);
+  }
+};
+
 // API Functions
 const fetchIncubatorInfo = async () => {
   try {
     const response = await axios.get(
-      `${config.api_base_url}/incubator/info`,
+      `${config.api_base_url}/incubator/list/`,
       {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
         }
       }
     );
-    return response.data;
+    // Return the first incubator in the list
+    return response.data && response.data.length > 0 ? response.data[0] : {};
   } catch (error) {
     console.error("Error fetching incubator info:", error);
     return {}; // Return empty object instead of null
@@ -38,7 +71,7 @@ const fetchIncubatorInfo = async () => {
 const fetchIncubatorTeam = async () => {
   try {
     const response = await axios.get(
-      `${config.api_base_url}/incubator/team`,
+      `${config.api_base_url}/incubator/people/`,
       {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
@@ -116,7 +149,7 @@ const fetchProgramsWithCohorts = async () => {
 const fetchStartups = async () => {
   try {
     const response = await axios.get(
-      `${config.api_base_url}/incubator/startups`,
+      `${config.api_base_url}/incubator/startupincubator/`,
       {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`

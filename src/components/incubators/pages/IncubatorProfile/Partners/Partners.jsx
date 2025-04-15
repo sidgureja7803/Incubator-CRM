@@ -225,20 +225,31 @@ const Partners = () => {
     <div className="partners-container">
       <div className="partners-header">
         <h2>Partners</h2>
-        <button onClick={() => setIsAddModalOpen(true)} disabled={loading}>
-          {loading ? 'Loading...' : 'Add Partner'}
+        <button 
+          className="add-btn" 
+          onClick={() => setIsAddModalOpen(true)}
+          disabled={loading}
+        >
+          {loading && <span className="button-loader"></span>}
+          Add Partner
         </button>
       </div>
 
-      {loading && partners.length === 0 && <div className="loading">Loading partners...</div>}
+      {loading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading partners...</p>
+        </div>
+      )}
 
       <div className="partners-grid">
-        {partners.length === 0 && !loading ? (
+        {!loading && partners.length === 0 && (
           <div className="no-partners">
-            <p>No partners available yet.</p>
-            <p>Add your first partner to showcase your ecosystem and attract startups!</p>
+            <p>No partners found</p>
+            <p>Click the button above to add your first partner</p>
           </div>
-        ) : (
+        )}
+        {partners.length > 0 && (
           partners.map((partner) => (
             <div key={partner.id} className="partner-card">
               <div className="partner-logo">
@@ -276,6 +287,10 @@ const Partners = () => {
         overlayClassName="overlay"
       >
         <h2>Add Partner</h2>
+        {submitting && <div className="modal-loading-overlay">
+          <div className="loading-spinner"></div>
+          <p>Saving partner...</p>
+        </div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Name:</label>
@@ -345,16 +360,22 @@ const Partners = () => {
               </div>
             )}
           </div>
-          <div className="form-actions">
-            <button type="submit" disabled={submitting}>
-              {submitting ? 'Saving...' : 'Save'}
-            </button>
+          <div className="modal-actions">
             <button 
               type="button" 
+              className="cancel-btn" 
               onClick={() => setIsAddModalOpen(false)}
               disabled={submitting}
             >
               Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={submitting}
+            >
+              {submitting && <span className="button-loader"></span>}
+              Save Partner
             </button>
           </div>
         </form>
@@ -367,6 +388,10 @@ const Partners = () => {
         overlayClassName="overlay"
       >
         <h2>Edit Partner</h2>
+        {submitting && <div className="modal-loading-overlay">
+          <div className="loading-spinner"></div>
+          <p>Updating partner...</p>
+        </div>}
         <form onSubmit={handleUpdate}>
           <div className="form-group">
             <label>Name:</label>
@@ -441,16 +466,22 @@ const Partners = () => {
               </div>
             )}
           </div>
-          <div className="form-actions">
-            <button type="submit" disabled={submitting}>
-              {submitting ? 'Updating...' : 'Update'}
-            </button>
+          <div className="modal-actions">
             <button 
               type="button" 
+              className="cancel-btn" 
               onClick={() => setIsEditModalOpen(false)}
               disabled={submitting}
             >
               Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={submitting}
+            >
+              {submitting && <span className="button-loader"></span>}
+              Update Partner
             </button>
           </div>
         </form>

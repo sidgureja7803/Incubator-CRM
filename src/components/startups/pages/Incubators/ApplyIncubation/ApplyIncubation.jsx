@@ -186,16 +186,52 @@ const ApplyIncubation = () => {
           </div>
         ) : (
           incubators.map((incubator) => (
-            <div key={incubator.id} className="incubator-card">
-              <div className="incubator-header" onClick={() => toggleIncubator(incubator.id)}>
-                <div className="incubator-logo">
-                  <img src={incubator.logo} alt={incubator.name} />
+            <div key={incubator.id} className="apply-incubator-card">
+              <div className="apply-incubator-header" onClick={() => toggleIncubator(incubator.id)}>
+                <div className="apply-incubator-logo">
+                  <img src={incubator.logo || 'https://via.placeholder.com/48'} alt={incubator.name} />
                 </div>
-                <h3>{incubator.name}</h3>
+                <div className="apply-incubator-info">
+                  <h3>{incubator.name}</h3>
+                  <p>{incubator.description || 'No description available'}</p>
+                </div>
                 <div className="expand-icon">
                   {expandedIncubator === incubator.id ? '−' : '+'}
                 </div>
               </div>
+              
+              {expandedIncubator === incubator.id && (
+                <div className="programs-container">
+                  <h4>Available Programs</h4>
+                  {incubator.programs && incubator.programs.length > 0 ? (
+                    <div className="programs-grid">
+                      {incubator.programs.map((program) => (
+                        <div key={program.id} className="program-item">
+                          <div className="program-info">
+                            <h5>{program.name}</h5>
+                            <p className="program-dates">
+                              <span>Start: {new Date(program.start_date).toLocaleDateString()}</span>
+                              <span>End: {new Date(program.end_date).toLocaleDateString()}</span>
+                            </p>
+                            <p className="program-description">{program.description || 'No description available'}</p>
+                          </div>
+                          <button 
+                            className="apply-btn" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleApply(program);
+                            }}
+                          >
+                            Apply
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="no-programs">No active programs available for this incubator.</p>
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}

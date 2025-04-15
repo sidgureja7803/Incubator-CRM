@@ -23,7 +23,7 @@ const Dashboard = () => {
   } = useIncubator();
 
   // Handle loading state
-  if (isLoading.incubatorInfo || isLoading.programs || isLoading.incubatorTeam) {
+  if (isLoading.incubatorInfo || isLoading.incubatorTeam || isLoading.programs) {
     return (
       <div className="dashboard-loading">
         <div className="spinner"></div>
@@ -33,11 +33,11 @@ const Dashboard = () => {
   }
 
   // Handle error state
-  if (error.incubatorInfo || error.programs || error.incubatorTeam) {
+  if (error.incubatorInfo || error.incubatorTeam || error.programs) {
     return (
       <div className="dashboard-error">
         <h2>Error loading dashboard</h2>
-        <p>{(error.incubatorInfo || error.programs || error.incubatorTeam)?.message}</p>
+        <p>{(error.incubatorInfo || error.incubatorTeam || error.programs)?.message || 'Something went wrong'}</p>
         <button onClick={() => {
           refetchIncubatorInfo();
           refetchIncubatorTeam();
@@ -50,11 +50,16 @@ const Dashboard = () => {
     );
   }
 
+  // Create safe references to data
+  const teamMembers = incubatorTeam || [];
+  const programs = incubatorPrograms || [];
+  const startupList = startups || [];
+
   const stats = [
     {
       icon: <FaBuilding />,
       title: "Number of Startups",
-      value: startups?.length || "100000",
+      value: startupList.length || "0",
       subtitle: "Total Partners"
     },
     {
@@ -129,7 +134,7 @@ const Dashboard = () => {
             <div className="info-row">
               <div className="info-field">
                 <span className="info-label">Name</span>
-                <span className="info-value">Venture Lab</span>
+                <span className="info-value">{incubatorInfo?.incubator_name || 'Venture Lab'}</span>
               </div>
               <div className="info-field">
                 <span className="info-label">LinkedIn</span>
@@ -169,29 +174,39 @@ const Dashboard = () => {
 
         <div className="info-section">
           <h2>Team Members</h2>
-          <div className="team-grid">
-            {incubatorTeam?.slice(0, 4).map((member, index) => (
-              <div key={index} className="team-member-card">
-                <img 
-                  src={member.profile_picture || 'https://randomuser.me/api/portraits/women/79.jpg'} 
-                  alt={member.name} 
-                  className="member-photo"
-                />
-                <div className="member-info">
-                  <div className="member-header">
-                    <span className="member-label">Name:</span>
-                    <span className="member-name">{member.first_name} {member.last_name || 'Kanishk Dadwal'}</span>
-                  </div>
-                  <div className="member-role">{member.designation || 'CEO/Founder'}</div>
-                  <div className="member-social">
-                    <a href={member.linkedin} target="_blank" rel="noopener noreferrer"><BsLinkedin /></a>
-                    <a href={member.instagram} target="_blank" rel="noopener noreferrer"><BsInstagram /></a>
-                    <a href={member.twitter} target="_blank" rel="noopener noreferrer"><BsTwitter /></a>
+          {teamMembers.length === 0 ? (
+            <div className="no-data-message">No team members found</div>
+          ) : (
+            <div className="team-grid">
+              {teamMembers.slice(0, 4).map((member, index) => (
+                <div key={index} className="team-member-card">
+                  <img 
+                    src={member.profile_picture || member.image || 'https://randomuser.me/api/portraits/women/79.jpg'} 
+                    alt={`${member.first_name} ${member.last_name}`} 
+                    className="member-photo"
+                  />
+                  <div className="member-info">
+                    <div className="member-header">
+                      <span className="member-label">Name:</span>
+                      <span className="member-name">{member.first_name} {member.last_name || ''}</span>
+                    </div>
+                    <div className="member-role">{member.designation || 'Team Member'}</div>
+                    <div className="member-social">
+                      {member.linkedin && (
+                        <a href={member.linkedin} target="_blank" rel="noopener noreferrer"><BsLinkedin /></a>
+                      )}
+                      {member.instagram && (
+                        <a href={member.instagram} target="_blank" rel="noopener noreferrer"><BsInstagram /></a>
+                      )}
+                      {member.twitter && (
+                        <a href={member.twitter} target="_blank" rel="noopener noreferrer"><BsTwitter /></a>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

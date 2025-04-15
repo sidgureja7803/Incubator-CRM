@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
 import './IncubatorInfo.css';
 import image from './image.png';
-import { useIncubatorContext } from '../../../../../context/IncubatorContext';
+import { useIncubator } from '../../../../../hooks/useIncubator';
 
 const IncubatorInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const { incubatorInfo, setIncubatorInfo } = useIncubatorContext();
-  const [formData, setFormData] = useState(incubatorInfo || {
+  const { incubatorInfo, refetchIncubatorInfo } = useIncubator();
+  const [formData, setFormData] = useState({
     incubator_name: "",
     address: "",
     country: "",
@@ -22,6 +22,25 @@ const IncubatorInfo = () => {
     youtube: "",
   });
 
+  // Update the form data when incubatorInfo changes
+  useEffect(() => {
+    if (incubatorInfo) {
+      setFormData({
+        incubator_name: incubatorInfo.incubator_name || "",
+        address: incubatorInfo.address || "",
+        country: incubatorInfo.country || "",
+        state: incubatorInfo.state || "",
+        city: incubatorInfo.city || "",
+        pincode: incubatorInfo.pincode || "",
+        website: incubatorInfo.website || "",
+        linkedin: incubatorInfo.linkedin || "",
+        twitter: incubatorInfo.twitter || "",
+        instagram: incubatorInfo.instagram || "",
+        youtube: incubatorInfo.youtube || "",
+      });
+    }
+  }, [incubatorInfo]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -33,7 +52,7 @@ const IncubatorInfo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `${config.api_base_url}/incubator/update/`,
         formData,
         {
@@ -45,7 +64,8 @@ const IncubatorInfo = () => {
           },
         }
       );
-      setIncubatorInfo(response.data);
+      // Refetch the incubator info to update the UI
+      refetchIncubatorInfo();
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating data:", error);
@@ -86,7 +106,6 @@ const IncubatorInfo = () => {
               <button 
                 className="edit-button"
                 onClick={() => {
-                  setFormData(incubatorInfo || formData);
                   setIsEditing(true);
                 }}
               >
