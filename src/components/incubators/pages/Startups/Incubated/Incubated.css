@@ -1,5 +1,6 @@
 .incubated-container {
-  padding: 24px;
+  padding: 24px 0;
+  width: 100%;
 }
 
 .loading-container {
@@ -7,31 +8,35 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px;
+  min-height: 200px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 24px 0;
+  text-align: center;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #E5E9F2;
-  border-top-color: #2B3F6C;
+  border: 3px solid rgba(43, 63, 108, 0.1);
   border-radius: 50%;
+  border-top: 3px solid #2B3F6C;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .error-container {
   padding: 24px;
-  text-align: center;
   background-color: #FEF2F2;
+  border: 1px solid #FCA5A5;
   border-radius: 8px;
-  margin: 16px 0;
+  margin: 24px 0;
 }
 
 .error-container h3 {
@@ -42,84 +47,96 @@
 .retry-button {
   background-color: #2B3F6C;
   color: white;
+  padding: 8px 16px;
   border: none;
   border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
   margin-top: 16px;
 }
 
+.retry-button:hover {
+  background-color: #1e2a4a;
+}
+
 .no-startups {
   text-align: center;
-  padding: 48px 24px;
-  background-color: #F8FAFC;
+  padding: 32px;
+  background-color: #f9fafb;
   border-radius: 8px;
-  border: 1px dashed #CBD5E1;
+  margin: 24px 0;
 }
 
 .no-startups h3 {
   margin-bottom: 8px;
-  color: #64748B;
-}
-
-.no-startups p {
-  color: #94A3B8;
+  color: #2B3F6C;
 }
 
 .startups-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .startup-card {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid #E5E9F2;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .startup-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .startup-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .startup-logo {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
-  background-color: #F8FAFC;
+  border-radius: 4px;
 }
 
 .startup-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.startup-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2C3E50;
-  margin: 0 0 8px 0;
+.startup-name-container, .founder-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.founder-info {
-  font-size: 14px;
-  color: #64748B;
+.startup-name-container span, .founder-container span {
+  color: #6B7280;
+  font-size: 0.875rem;
+  min-width: 110px;
+}
+
+.startup-name-container h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.founder-container p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #1F2937;
 }
 
 .startup-arrow {
@@ -128,7 +145,13 @@
 }
 
 @media (max-width: 768px) {
-  .startups-grid {
-    grid-template-columns: 1fr;
+  .startup-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .startup-card {
+    padding: 16px;
   }
 }
