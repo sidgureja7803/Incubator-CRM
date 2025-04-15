@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from 'config';
@@ -8,44 +8,68 @@ import ThaparInnovate from './TIETInnovate.png'
 const Incubated = () => {
   const navigate = useNavigate();
   const [startups, setLocalStartups] = useState([]);
-  const [startupPeople, setStartupPeople] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  // Use useCallback to memoize the fetch function
+  const fetchData = useCallback(async () => {
     try {
+      setIsLoading(true);
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+      
+      // Get all startups in a single request
       const response = await axios.get(`${config.api_base_url}/incubator/startupincubator/`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+          Authorization: `Bearer ${token}`
         }
       });
-      setLocalStartups(response.data);
       
-      // Fetch people for each startup
-      const peopleData = {};
-      await Promise.all(response.data.map(async (startup) => {
-        const peopleResponse = await axios.get(
-          `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
-            }
+      // Process the data to include founder information directly
+      const startupData = await Promise.all(
+        response.data.map(async (startup) => {
+          try {
+            const peopleResponse = await axios.get(
+              `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              }
+            );
+            
+            // Add founder info directly to the startup object
+            const people = peopleResponse.data || [];
+            const founderName = people.length > 0
+              ? `${people[0].first_name} ${people[0].last_name}`
+              : 'Not specified';
+              
+            return {
+              ...startup,
+              founderName
+            };
+          } catch (err) {
+            console.warn(`Could not fetch people for startup ${startup.startup_id}`, err);
+            return {
+              ...startup,
+              founderName: 'Not specified'
+            };
           }
-        );
-        peopleData[startup.startup_id] = peopleResponse.data;
-      }));
-      setStartupPeople(peopleData);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setError(error);
+        })
+      );
+      
+      setLocalStartups(startupData);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching startups:", err);
+      setError('Failed to load startups. Please try again.');
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleStartupClick = (startup) => {
     navigate(`/incubator/startups/incubated/${startup.startup_id}/info`);
@@ -61,7 +85,7 @@ const Incubated = () => {
   if (error) {
     return <div className="error-container">
       <h3>Error loading incubated startups</h3>
-      <p>{error.message}</p>
+      <p>{error}</p>
       <button onClick={fetchData} className="retry-button">Retry</button>
     </div>;
   }
@@ -86,15 +110,16 @@ const Incubated = () => {
                   src={startup.logo || ThaparInnovate} 
                   alt={startup.startup_name} 
                   className="startup-logo"
+                  loading="lazy"
                 />
                 <div className="startup-info">
-                  <h3 className="startup-name">Startup Name: {startup.startup_name}</h3>
-                  <div className="founder-info">
-                    <p>Founder: {
-                      startupPeople[startup.startup_id]?.length > 0 
-                        ? `${startupPeople[startup.startup_id][0].first_name} ${startupPeople[startup.startup_id][0].last_name}` 
-                        : 'Not specified'
-                    }</p>
+                  <div className="startup-name-container">
+                    <span>Startup Name:</span>
+                    <h3>{startup.startup_name}</h3>
+                  </div>
+                  <div className="founder-container">
+                    <span>Founder:</span>
+                    <p>{startup.founderName}</p>
                   </div>
                 </div>
               </div>
