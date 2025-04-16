@@ -105,21 +105,23 @@ const Incubated = () => {
               className="startup-card"
               onClick={() => handleStartupClick(startup)}
             >
-              <div className="startup-header">
-                <img 
-                  src={startup.logo || ThaparInnovate} 
-                  alt={startup.startup_name} 
-                  className="startup-logo"
-                  loading="lazy"
-                />
+              <div className="startup-content">
+                <div className="startup-logo-container">
+                  <img 
+                    src={startup.logo || ThaparInnovate} 
+                    alt={startup.startup_name} 
+                    className="startup-logo"
+                    loading="lazy"
+                  />
+                </div>
                 <div className="startup-info">
                   <div className="startup-name-container">
                     <span>Startup Name:</span>
-                    <h3>{startup.startup_name}</h3>
+                    <div className="startup-name">{startup.startup_name}</div>
                   </div>
                   <div className="founder-container">
                     <span>Founder:</span>
-                    <p>{startup.founderName}</p>
+                    <div className="founder-name">{startup.founderName}</div>
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@ import { useParams, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from 'config';
 import './StartupDetailView.css';
+import ThaparInnovate from '../Incubated/TIETInnovate.png';
 
 // Tab Components
 import StartupBasicInfo from '../Info/Info';
@@ -27,16 +28,17 @@ const StartupDetailView = () => {
   const fetchStartupDetails = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       const response = await axios.get(`${config.api_base_url}/startup/detail/${startupId}/`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       setStartup(response.data);
       setError(null);
     } catch (err) {
       console.error("Error fetching startup details:", err);
-      setError(err.message || 'Failed to load startup details. Please try again.');
+      setError('Failed to load startup details. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -72,16 +74,6 @@ const StartupDetailView = () => {
 
   return (
     <div className="startup-detail-container">
-      <div className="startup-detail-header">
-        <button className="back-button" onClick={goBack}>
-          <span>←</span> Back
-        </button>
-        <div className="startup-detail-title">
-          <h2>{startup?.name || 'Startup Details'}</h2>
-          <p className="startup-sector">{startup?.sector || 'Technology'}</p>
-        </div>
-      </div>
-
       <div className="startup-tabs">
         <NavLink to={`/incubator/startups/incubated/${startupId}/info`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
           Startup Info
@@ -107,7 +99,7 @@ const StartupDetailView = () => {
       </div>
 
       <div className="startup-tab-content">
-        <Outlet />
+        <Outlet context={{ startup }} />
       </div>
     </div>
   );

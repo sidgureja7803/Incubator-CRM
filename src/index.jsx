@@ -3,6 +3,24 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Workbox } from 'workbox-window';
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  const wb = new Workbox('/serviceWorker.js');
+
+  wb.addEventListener('installed', (event) => {
+    if (event.isUpdate) {
+      if (confirm('New app update is available! Click OK to refresh.')) {
+        window.location.reload();
+      }
+    }
+  });
+
+  wb.register().catch((err) => {
+    console.error('Service worker registration failed:', err);
+  });
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

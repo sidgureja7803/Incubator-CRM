@@ -20,27 +20,7 @@ const StartupInfo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchStartupDetails();
-  }, [startupId]);
 
-  const fetchStartupDetails = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${config.api_base_url}/startup/detail/${startupId}/`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
-        }
-      });
-      setStartup(response.data);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching startup details:", err);
-      setError(err.message || 'Failed to load startup details. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const goBack = () => {
     navigate('/incubator/startups/incubated');

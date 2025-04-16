@@ -7,6 +7,7 @@ import {
   Outlet
 } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import queryClient from './utils/queryClient';
 
 // Public Pages
@@ -176,6 +177,7 @@ function App() {
           } />
         </Routes>
       </Router>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

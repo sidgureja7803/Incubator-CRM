@@ -9,6 +9,8 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 1,
       refetchOnMount: true,
+      suspense: true,
+      networkMode: 'offlineFirst',
     },
   },
 });
