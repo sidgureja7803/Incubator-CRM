@@ -7,7 +7,7 @@ import ThaparInnovate from './TIETInnovate.png'
 
 const Incubated = () => {
   const navigate = useNavigate();
-  const [startups, setLocalStartups] = useState([]);
+  const [startups, setStartups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,47 +17,11 @@ const Incubated = () => {
       setIsLoading(true);
       const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       
-      // Get all startups in a single request
       const response = await axios.get(`${config.api_base_url}/incubator/startupincubator/`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Process the data to include founder information directly
-      const startupData = await Promise.all(
-        response.data.map(async (startup) => {
-          try {
-            const peopleResponse = await axios.get(
-              `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
-              }
-            );
-            
-            // Add founder info directly to the startup object
-            const people = peopleResponse.data || [];
-            const founderName = people.length > 0
-              ? `${people[0].first_name} ${people[0].last_name}`
-              : 'Not specified';
-              
-            return {
-              ...startup,
-              founderName
-            };
-          } catch (err) {
-            console.warn(`Could not fetch people for startup ${startup.startup_id}`, err);
-            return {
-              ...startup,
-              founderName: 'Not specified'
-            };
-          }
-        })
-      );
-      
-      setLocalStartups(startupData);
+      setStartups(response.data || []);
       setError(null);
     } catch (err) {
       console.error("Error fetching startups:", err);
@@ -73,6 +37,11 @@ const Incubated = () => {
 
   const handleStartupClick = (startup) => {
     navigate(`/incubator/startups/incubated/${startup.startup_id}/info`);
+  };
+
+  const handleViewDetailsClick = (e, startup) => {
+      e.stopPropagation(); // Prevent card click handler
+      navigate(`/incubator/startups/incubated/${startup.startup}/info`);
   };
 
   if (isLoading) {
@@ -92,44 +61,44 @@ const Incubated = () => {
 
   return (
     <div className="incubated-container">
-      {startups.length === 0 ? (
-        <div className="no-startups">
-          <h3>No incubated startups found</h3>
-          <p>You don't have any startups in your incubator yet.</p>
-        </div>
-      ) : (
-        <div className="startups-grid">
-          {startups.map((startup) => (
+      {/* Add Header like in Applications.jsx if needed */} 
+      {/* <div className="incubated-header">
+        <h1>Incubated Startups</h1>
+      </div> */} 
+
+      <div className="incubated-list">
+        {startups.length === 0 ? (
+          <div className="no-startups">
+            <h3>No incubated startups found</h3>
+            <p>You don't have any startups in your incubator yet.</p>
+          </div>
+        ) : (
+          startups.map((startup) => (
             <div 
-              key={startup.id || startup.startup_id} 
-              className="startup-card"
+              key={startup.id} 
+              className="incubated-card"
               onClick={() => handleStartupClick(startup)}
             >
-              <div className="startup-content">
-                <div className="startup-logo-container">
+              <div className="incubated-card-info">
+                <div className="incubated-logo">
                   <img 
-                    src={startup.logo || ThaparInnovate} 
-                    alt={startup.startup_name} 
-                    className="startup-logo"
+                    src={ThaparInnovate} 
+                    alt={startup.startup} 
                     loading="lazy"
                   />
                 </div>
-                <div className="startup-info">
-                  <div className="startup-name-container">
+                <div className="incubated-details">
+                  <div className="incubated-startup-name">
                     <span>Startup Name:</span>
-                    <div className="startup-name">{startup.startup_name}</div>
-                  </div>
-                  <div className="founder-container">
-                    <span>Founder:</span>
-                    <div className="founder-name">{startup.founderName}</div>
+                    <h3>{startup.startup}</h3>
                   </div>
                 </div>
               </div>
-              <div className="startup-arrow">→</div>
+              <div className="arrow-icon">→</div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };

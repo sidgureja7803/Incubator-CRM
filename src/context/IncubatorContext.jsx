@@ -148,6 +148,7 @@ const fetchProgramsWithCohorts = async () => {
 
 const fetchStartups = async () => {
   try {
+    // First fetch the list of startups
     const response = await axios.get(
       `${config.api_base_url}/incubator/startupincubator/`,
       {
@@ -156,7 +157,34 @@ const fetchStartups = async () => {
         }
       }
     );
-    return response.data;
+
+    // Then fetch detailed data for each startup
+    const startupsWithDetails = await Promise.all(
+      response.data.map(async (startup) => {
+        try {
+          const detailsResponse = await axios.get(
+            `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
+              }
+            }
+          );
+          return {
+            ...startup,
+            details: detailsResponse.data[0] // API returns an array, we take the first item
+          };
+        } catch (error) {
+          console.error(`Error fetching details for startup ${startup.startup_id}:`, error);
+          return {
+            ...startup,
+            details: null
+          };
+        }
+      })
+    );
+
+    return startupsWithDetails;
   } catch (error) {
     console.error("Error fetching startups:", error);
     return []; // Return empty array instead of null

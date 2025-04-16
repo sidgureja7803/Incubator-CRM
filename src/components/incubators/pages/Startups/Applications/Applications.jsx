@@ -3,6 +3,8 @@ import axios from 'utils/httpClient';
 import config from 'config';
 import './Applications.css';
 import Modal from 'react-modal';
+import ThaparInnovate from './IncuabtorImage.png';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 
 // Set the app element for the modal
 if (typeof window !== 'undefined') {
@@ -11,349 +13,299 @@ if (typeof window !== 'undefined') {
 
 const Applications = () => {
   const [programs, setPrograms] = useState([]);
+  const [expandedPrograms, setExpandedPrograms] = useState({});
   const [programApplications, setProgramApplications] = useState({});
+  const [applicationModalIsOpen, setApplicationModalIsOpen] = useState(false);
   const [questionsAndAnswers, setQuestionsAndAnswers] = useState([]);
-  const [selectedProgramId, setSelectedProgramId] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isQuestionsLoading, setIsQuestionsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-  const [applications, setApplications] = useState([]);
   const [selectedApplication, setSelectedApplication] = useState(null);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [error, setError] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [remarks, setRemarks] = useState('');
+  const [isLoadingPrograms, setIsLoadingPrograms] = useState(true);
+  const [isLoadingApplications, setIsLoadingApplications] = useState({});
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
 
-  // Memoize the fetchPrograms function to prevent unnecessary re-renders
   const fetchPrograms = useCallback(async () => {
+    setIsLoadingPrograms(true);
     const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-    
     try {
-      setIsLoading(true);
       const response = await axios.get(`${config.api_base_url}/incubator/programs/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
+      const fetchedPrograms = response.data || [];
+      setPrograms(fetchedPrograms);
       
-      setPrograms(response.data);
+      const initialExpandedState = {};
+      fetchedPrograms.forEach(program => {
+        initialExpandedState[program.id] = false;
+        fetchApplications(program.id);
+      });
+      setExpandedPrograms(initialExpandedState);
       setError(null);
-
-      // If there are programs, fetch applications for the first one
-      if (response.data.length > 0) {
-        const firstProgramId = response.data[0].id;
-        setSelectedProgramId(firstProgramId);
-        fetchApplications(firstProgramId);
-      } else {
-        setIsLoading(false);
-      }
-    } catch (err) {
-      console.error("Error fetching programs:", err);
-      setError('Failed to load programs. Please try again.');
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching programs:', error);
+      setError("Failed to fetch programs.");
+    } finally {
+      setIsLoadingPrograms(false);
     }
   }, []);
-
-  // Memoize the fetchApplications function
-  const fetchApplications = useCallback(async (programId) => {
-    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-    
-    // If we already have this program's applications cached, use them
-    if (programApplications[programId]) {
-      setApplications(programApplications[programId]);
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      const response = await axios.get(`${config.api_base_url}/incubator/applications/${programId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      // Cache the applications for this program
-      const appData = response.data || [];
-      setProgramApplications(prev => ({
-        ...prev,
-        [programId]: appData
-      }));
-      
-      setApplications(appData);
-      setError(null);
-    } catch (err) {
-      console.error(`Error fetching applications for program ${programId}:`, err);
-      setError(`Failed to load applications for program ${programId}. Please try again.`);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [programApplications]);
-
-  // Fetch Q&A separately with its own loading state
-  const fetchQuestionsAndAnswers = async (programId, startupId) => {
-    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-    
-    try {
-      setIsQuestionsLoading(true);
-      const response = await axios.get(`${config.api_base_url}/incubator/program/${programId}/questions/?startup_id=${startupId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      setQuestionsAndAnswers(response.data || []);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching questions and answers:', err);
-      setQuestionsAndAnswers([]);
-      // Don't set global error, just handle locally
-      console.warn('Could not load Q&A. Modal will show empty Q&A section.');
-    } finally {
-      setIsQuestionsLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchPrograms();
   }, [fetchPrograms]);
 
-  const handleProgramChange = (e) => {
-    const programId = e.target.value;
-    setSelectedProgramId(programId);
-    fetchApplications(programId);
+  const toggleProgram = (programId) => {
+    setExpandedPrograms(prev => ({
+      ...prev,
+      [programId]: !prev[programId]
+    }));
+    if (!expandedPrograms[programId] && !programApplications[programId] && !isLoadingApplications[programId]) {
+      fetchApplications(programId);
+    }
   };
 
-  const handleViewApplication = (application) => {
+  const fetchApplications = useCallback(async (programId) => {
+    setIsLoadingApplications(prev => ({ ...prev, [programId]: true }));
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    try {
+      const response = await axios.get(`${config.api_base_url}/incubator/applications/${programId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setProgramApplications(prev => ({
+        ...prev,
+        [programId]: response.data || []
+      }));
+      setError(null);
+    } catch (error) {
+      console.error(`Error fetching applications for program ${programId}:`, error);
+      setError(`Failed to fetch applications for program ${programId}.`);
+      setProgramApplications(prev => ({
+        ...prev,
+        [programId]: []
+      }));
+    } finally {
+      setIsLoadingApplications(prev => ({ ...prev, [programId]: false }));
+    }
+  }, []);
+
+  const fetchQuestionsAndAnswers = useCallback(async (programId, startupId) => {
+    setIsLoadingQuestions(true);
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    try {
+      const response = await axios.get(`${config.api_base_url}/incubator/program/${programId}/questions/?startup_id=${startupId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setQuestionsAndAnswers(response.data || []);
+    } catch (error) {
+      console.error('Error fetching questions and answers:', error);
+      setQuestionsAndAnswers([]);
+    } finally {
+      setIsLoadingQuestions(false);
+    }
+  }, []);
+
+  const handleViewApplicationClick = (application) => {
     setSelectedApplication(application);
     setNewStatus(application.status || '');
     setRemarks(application.remarks || '');
-    setModalIsOpen(true);
-    
-    // Fetch Q&A only after opening modal
-    fetchQuestionsAndAnswers(selectedProgramId, application.startup_id);
+    fetchQuestionsAndAnswers(application.program_id, application.startup_id);
+    setApplicationModalIsOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setApplicationModalIsOpen(false);
+    setSelectedApplication(null);
+    setQuestionsAndAnswers([]);
+    setNewStatus('');
+    setRemarks('');
   };
 
   const handleSaveStatus = async () => {
+    if (!selectedApplication) return;
+    setIsSubmittingStatus(true);
     const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-    
     try {
-      setIsSubmitting(true);
       await axios.patch(`${config.api_base_url}/incubator/editapplicationstatus/${selectedApplication.id}/`, {
         status: newStatus,
         remarks: remarks
       }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      
-      // Update the application in our state
-      const updatedApplications = applications.map(app =>
-        app.id === selectedApplication.id ? { ...app, status: newStatus, remarks: remarks } : app
-      );
-      
-      // Update both states
-      setApplications(updatedApplications);
+
+      const programId = selectedApplication.program_id;
       setProgramApplications(prev => ({
         ...prev,
-        [selectedProgramId]: updatedApplications
+        [programId]: (prev[programId] || []).map(app =>
+          app.id === selectedApplication.id ? { ...app, status: newStatus, remarks: remarks } : app
+        )
       }));
-      
-      // Clear the form
-      setNewStatus('');
-      setRemarks('');
-      setModalIsOpen(false);
-    } catch (err) {
-      console.error('Error updating application status:', err);
-      alert('Failed to update application status. Please try again.');
+
+      handleModalClose();
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      alert("Failed to update status. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingStatus(false);
     }
   };
 
+  if (isLoadingPrograms) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading programs...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="applications-container">
-      <div className="program-selector">
-        <span>Select Program:</span>
-        <select 
-          value={selectedProgramId || ''}
-          onChange={handleProgramChange}
-          disabled={isLoading || programs.length === 0}
-          className="program-dropdown"
-        >
-          {programs.length === 0 && <option value="">No programs available</option>}
-          {programs.map(program => (
-            <option key={program.id} value={program.id}>
-              {program.program_name}
-            </option>
-          ))}
-        </select>
+    <div className="broad-container">
+      <div className="header-container">
+        <h1 className="top-left-heading">Programs</h1>
       </div>
 
-      {isLoading ? (
-        <div className="loading-container">
-          <div className="spinner"></div>
-          <p>Loading applications...</p>
-        </div>
-      ) : error ? (
-        <div className="error-container">
-          <h3>Error</h3>
-          <p>{error}</p>
-          <button 
-            onClick={() => selectedProgramId && fetchApplications(selectedProgramId)}
-            className="retry-button"
-          >
-            Retry
-          </button>
-        </div>
-      ) : applications.length === 0 ? (
-        <div className="no-applications">
-          <h3>No applications found</h3>
-          <p>There are no startups that have applied to this program yet.</p>
-        </div>
+      {error && <div className="error-container"><p>{error}</p></div>}
+
+      {programs.length === 0 && !isLoadingPrograms ? (
+          <div className="no-applications"><p>No programs found.</p></div>
       ) : (
-        <div className="applications-table-container">
-          <table className="applications-table">
-            <thead>
-              <tr>
-                <th>Startup Name</th>
-                <th>Application Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map(application => (
-                <tr key={application.id}>
-                  <td>{application.startup_name}</td>
-                  <td>{application.created_at ? new Date(application.created_at).toLocaleDateString() : 'Invalid Date'}</td>
-                  <td>
-                    <span className={`status-badge ${application.status?.toLowerCase() || 'applied'}`}>
-                      {application.status || 'Applied'}
-                    </span>
-                  </td>
-                  <td>
-                    <button 
-                      className="view-application-btn"
-                      onClick={() => handleViewApplication(application)}
-                    >
-                      View Application
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        programs.map(program => (
+          <div key={program.id} className="program-section">
+            <div className="program-header" onClick={() => toggleProgram(program.id)}>
+              {expandedPrograms[program.id] ? 
+                <KeyboardArrowUp className="arrow-icon" /> : 
+                <KeyboardArrowDown className="arrow-icon" />
+              }
+              <span>{program.program_name}</span>
+            </div>
+
+            {expandedPrograms[program.id] && (
+              <div className="applications-list-section">
+                {isLoadingApplications[program.id] ? (
+                  <div className="loading-container small-spinner">
+                    <div className="spinner"></div>
+                    <p>Loading applications...</p>
+                  </div>
+                ) : (programApplications[program.id] || []).length === 0 ? (
+                  <div className="no-applications small-text"><p>No applications for this program.</p></div>
+                ) : (
+                  <div className="applications-list">
+                    {(programApplications[program.id] || []).map(application => (
+                      <div key={application.id} className="application-card">
+                        <div className="application-info">
+                          <div className="logo">
+                            <img src={ThaparInnovate} alt="Startup Logo" /> 
+                          </div>
+                          <div className="details">
+                            <div className="startup-name">
+                              <span>Startup Name:</span>
+                              <h3>{application.startup_name}</h3>
+                            </div>
+                            <div className="founder">
+                              <span>Founder:</span>
+                              <p>{application.founder_name || 'N/A'}</p> 
+                            </div>
+                          </div>
+                        </div>
+                        <button 
+                          className="view-button"
+                          onClick={() => handleViewApplicationClick(application)}
+                        >
+                          View Application
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))
       )}
 
       <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => !isSubmitting && setModalIsOpen(false)}
+        isOpen={applicationModalIsOpen}
+        onRequestClose={handleModalClose}
         className="application-modal"
-        overlayClassName="application-modal-overlay"
+        overlayClassName="modal-overlay"
+        contentLabel="Application Details"
       >
-        <div className="modal-header">
-          <h2>View Application</h2>
-          <button 
-            className="close-btn" 
-            onClick={() => setModalIsOpen(false)}
-            disabled={isSubmitting}
-          >×</button>
-        </div>
-        
-        <div className="modal-content">
-          {isQuestionsLoading ? (
-            <div className="modal-loading">
-              <div className="spinner"></div>
-              <p>Loading application details...</p>
+        {selectedApplication && (
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>View Application: {selectedApplication.startup_name}</h2>
+              <button className="close-button" onClick={handleModalClose} disabled={isSubmittingStatus}>×</button>
             </div>
-          ) : questionsAndAnswers.length > 0 ? (
-            <div className="qa-container">
-              {questionsAndAnswers.map(qa => (
-                <div key={qa.id} className="qa-item">
-                  <h3 className="question">{qa.question}</h3>
-                  <div className="answer">
-                    <p>Answer:</p>
-                    <p>{qa.answer || 'No answer provided.'}</p>
-                  </div>
+
+            <div className="modal-body">
+              <div className="questions-section">
+                <h3>Application Questions</h3>
+                {isLoadingQuestions ? (
+                   <div className="loading-container small-spinner">
+                    <div className="spinner"></div>
+                   </div>
+                ) : questionsAndAnswers.length > 0 ? (
+                  questionsAndAnswers.map((qa, index) => (
+                    <div key={index} className="question-answer">
+                      <h4>{qa.question}</h4>
+                      <div className="answer">
+                        <p>Answer:</p>
+                        <p>{qa.answer || 'No answer provided.'}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No questions found for this application.</p>
+                )}
+              </div>
+
+              <div className="status-section">
+                <h3>Update Status</h3>
+                <div className="status-buttons">
+                  {['Applied', 'In Progress', 'Accepted', 'Rejected'].map(status => (
+                    <button
+                      key={status}
+                      className={`status-btn ${newStatus === status ? 'active' : ''}`}
+                      onClick={() => setNewStatus(status)}
+                      disabled={isSubmittingStatus}
+                    >
+                      {status}
+                    </button>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="no-questions">No questions or answers found for this application.</p>
-          )}
+                <div className="remarks-section">
+                  <label htmlFor="remarks">Remarks (Optional)</label>
+                  <textarea 
+                    id="remarks"
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
+                    placeholder="Add remarks here..."
+                    rows={3}
+                    disabled={isSubmittingStatus}
+                  />
+                </div>
+              </div>
 
-          <div className="status-container">
-            <h3>Status</h3>
-            <div className="status-options">
-              <button 
-                className={`status-btn ${newStatus === 'Applied' ? 'active' : ''}`}
-                onClick={() => setNewStatus('Applied')}
-                disabled={isSubmitting}
-              >
-                Applied
-              </button>
-              <button 
-                className={`status-btn ${newStatus === 'In Progress' ? 'active' : ''}`}
-                onClick={() => setNewStatus('In Progress')}
-                disabled={isSubmitting}
-              >
-                In Progress
-              </button>
-              <button 
-                className={`status-btn ${newStatus === 'Accepted' ? 'active' : ''}`}
-                onClick={() => setNewStatus('Accepted')}
-                disabled={isSubmitting}
-              >
-                Accepted
-              </button>
-              <button 
-                className={`status-btn ${newStatus === 'Rejected' ? 'active' : ''}`}
-                onClick={() => setNewStatus('Rejected')}
-                disabled={isSubmitting}
-              >
-                Rejected
-              </button>
-            </div>
-            
-            <div className="remarks-container">
-              <label htmlFor="remarks">Remarks</label>
-              <textarea 
-                id="remarks"
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Add remarks about this application..."
-                disabled={isSubmitting}
-              />
+              <div className="action-buttons">
+                 <button 
+                    className="cancel-button" 
+                    onClick={handleModalClose} 
+                    disabled={isSubmittingStatus}
+                >
+                    Cancel
+                </button>
+                <button 
+                    className="save-button" 
+                    onClick={handleSaveStatus} 
+                    disabled={!newStatus || isSubmittingStatus}
+                >
+                  {isSubmittingStatus ? 'Saving...' : 'Save'}
+                </button>
+              </div>
             </div>
           </div>
-
-          <div className="modal-actions">
-            <button 
-              className="cancel-btn"
-              onClick={() => setModalIsOpen(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button 
-              className="save-btn"
-              onClick={handleSaveStatus}
-              disabled={!newStatus || isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="button-spinner"></span>
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </button>
-          </div>
-        </div>
+        )}
       </Modal>
     </div>
   );
