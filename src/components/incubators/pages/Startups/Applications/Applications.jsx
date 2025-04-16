@@ -175,12 +175,12 @@ const Applications = () => {
   return (
     <div className="applications-container">
       <div className="program-selector">
-        <label htmlFor="program-select">Select Program:</label>
+        <span>Select Program:</span>
         <select 
-          id="program-select" 
           value={selectedProgramId || ''}
           onChange={handleProgramChange}
           disabled={isLoading || programs.length === 0}
+          className="program-dropdown"
         >
           {programs.length === 0 && <option value="">No programs available</option>}
           {programs.map(program => (
@@ -213,8 +213,8 @@ const Applications = () => {
           <p>There are no startups that have applied to this program yet.</p>
         </div>
       ) : (
-        <div className="applications-table">
-          <table>
+        <div className="applications-table-container">
+          <table className="applications-table">
             <thead>
               <tr>
                 <th>Startup Name</th>
@@ -227,7 +227,7 @@ const Applications = () => {
               {applications.map(application => (
                 <tr key={application.id}>
                   <td>{application.startup_name}</td>
-                  <td>{new Date(application.created_at).toLocaleDateString()}</td>
+                  <td>{application.created_at ? new Date(application.created_at).toLocaleDateString() : 'Invalid Date'}</td>
                   <td>
                     <span className={`status-badge ${application.status?.toLowerCase() || 'applied'}`}>
                       {application.status || 'Applied'}
@@ -235,7 +235,7 @@ const Applications = () => {
                   </td>
                   <td>
                     <button 
-                      className="view-btn"
+                      className="view-application-btn"
                       onClick={() => handleViewApplication(application)}
                     >
                       View Application

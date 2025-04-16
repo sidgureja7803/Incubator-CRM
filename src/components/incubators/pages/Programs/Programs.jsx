@@ -1,10 +1,257 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import axios from 'utils/httpClient';
 import config from 'config';
 import './Programs.css';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
 import { useIncubator } from '../../../../hooks/useIncubator';
 import ThaparInnovate from './IncuabtorImage.png';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { FixedSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
+import InfiniteLoader from 'react-virtualized/dist/commonjs/InfiniteLoader';
+import ErrorBoundary from '../../../common/ErrorBoundary';
+
+// Separate components for better code splitting and error boundaries
+const LoadingSpinner = () => (
+  <div className="loading-container">
+    <div className="spinner"></div>
+    <p>Loading data...</p>
+  </div>
+);
+
+const ErrorDisplay = ({ error, refetch }) => (
+  <div className="error-container">
+    <h2>Error</h2>
+    <p>{error?.message || 'Something went wrong'}</p>
+    <button onClick={refetch}>Try Again</button>
+  </div>
+);
+
+const ProgramCard = ({ program, onToggle, isExpanded, onEdit, onAddCohort, onAssignAdmin }) => (
+  <div className="program-card">
+    <div className="program-header">
+      <div className="program-info-wrapper">
+        <div className="program-logo">
+          <img src={ThaparInnovate} alt={program.program_name} />
+        </div>
+        <div className="program-title">
+          <h2>{program.program_name}</h2>
+          <p>{program.description}</p>
+        </div>
+      </div>
+      <div className="program-actions">
+        <button 
+          className="edit-program-btn"
+          onClick={() => onEdit(program)}
+        >
+          Edit Program
+        </button>
+        <button 
+          className="expand-btn"
+          onClick={() => onToggle(program.id)}
+        >
+          {isExpanded ? (
+            <span>Collapse <KeyboardArrowUp /></span>
+          ) : (
+            <span>Expand <KeyboardArrowDown /></span>
+          )}
+        </button>
+      </div>
+    </div>
+
+    {isExpanded && (
+      <div className="program-content">
+        <div className="action-buttons">
+          <button 
+            className="add-cohort-btn"
+            onClick={() => onAddCohort(program)}
+          >
+            Add Cohort
+          </button>
+          <button 
+            className="assign-admin-btn"
+            onClick={() => onAssignAdmin(program)}
+          >
+            Assign Admin
+          </button>
+        </div>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          <CohortsList program={program} />
+        </Suspense>
+      </div>
+    )}
+  </div>
+);
+
+const CohortsList = ({ program }) => {
+  const { data: cohorts = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['cohorts', program.id],
+    queryFn: () => fetchProgramCohorts(program.id),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorDisplay error={error} refetch={refetch} />;
+
+  return (
+    <div className="cohorts-grid">
+      {cohorts.length > 0 ? (
+        cohorts.map(cohort => (
+          <CohortCard key={cohort.id} cohort={cohort} />
+        ))
+      ) : (
+        <div className="no-cohorts">
+          <p>No cohorts found for this program</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CohortCard = ({ cohort }) => {
+  const [showAddPeopleModal, setShowAddPeopleModal] = useState(false);
+  const [showViewPeopleModal, setShowViewPeopleModal] = useState(false);
+  const [showAssignTaskModal, setShowAssignTaskModal] = useState(false);
+  const [showDocumentsModal, setShowDocumentsModal] = useState(false);
+
+  return (
+    <div className="cohort-card">
+      <h3>{cohort.cohort_name}</h3>
+      
+      <div className="cohort-details">
+        <div className="detail-row">
+          <span className="detail-label">Start Date:</span>
+          <span className="detail-value">{new Date(cohort.start_date).toLocaleDateString()}</span>
+        </div>
+        
+        <div className="detail-row">
+          <span className="detail-label">End Date:</span>
+          <span className="detail-value">{new Date(cohort.end_date).toLocaleDateString()}</span>
+        </div>
+        
+        <div className="detail-row">
+          <span className="detail-label">Status:</span>
+          <span className={`status-badge ${cohort.status}`}>{cohort.status}</span>
+        </div>
+      </div>
+      
+      <div className="action-row">
+        <button 
+          className="edit-btn"
+          onClick={() => {
+            // Handle edit
+          }}
+        >
+          Edit
+        </button>
+        <button 
+          className="delete-btn"
+          onClick={() => {
+            // Handle delete
+          }}
+        >
+          Delete
+        </button>
+      </div>
+      
+      <div className="action-row">
+        <button 
+          className="add-people-btn"
+          onClick={() => setShowAddPeopleModal(true)}
+        >
+          Add People
+        </button>
+        <button 
+          className="view-people-btn"
+          onClick={() => setShowViewPeopleModal(true)}
+        >
+          View People
+        </button>
+      </div>
+      
+      <div className="action-row">
+        <button 
+          className="assign-task-btn"
+          onClick={() => setShowAssignTaskModal(true)}
+        >
+          Assign Task
+        </button>
+        <button 
+          className="documents-btn"
+          onClick={() => setShowDocumentsModal(true)}
+        >
+          Documents
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const VirtualizedProgramList = ({ programs, onToggle, isExpanded, onEdit, onAddCohort, onAssignAdmin }) => {
+  const ROW_HEIGHT = 200; // Adjust based on your card height
+
+  const Row = ({ index, style }) => {
+    const program = programs[index];
+    return (
+      <div style={style}>
+        <ProgramCard
+          program={program}
+          onToggle={onToggle}
+          isExpanded={isExpanded[program.id]}
+          onEdit={onEdit}
+          onAddCohort={onAddCohort}
+          onAssignAdmin={onAssignAdmin}
+        />
+      </div>
+    );
+  };
+
+  return (
+    <AutoSizer>
+      {({ height, width }) => (
+        <List
+          height={height}
+          itemCount={programs.length}
+          itemSize={ROW_HEIGHT}
+          width={width}
+        >
+          {Row}
+        </List>
+      )}
+    </AutoSizer>
+  );
+};
+
+const VirtualizedCohortsList = ({ cohorts }) => {
+  const ROW_HEIGHT = 150; // Adjust based on your card height
+
+  const Row = ({ index, style }) => {
+    const cohort = cohorts[index];
+    return (
+      <div style={style}>
+        <CohortCard cohort={cohort} />
+      </div>
+    );
+  };
+
+  return (
+    <AutoSizer>
+      {({ height, width }) => (
+        <List
+          height={Math.min(height, cohorts.length * ROW_HEIGHT)}
+          itemCount={cohorts.length}
+          itemSize={ROW_HEIGHT}
+          width={width}
+        >
+          {Row}
+        </List>
+      )}
+    </AutoSizer>
+  );
+};
+
 const Programs = () => {
   const { incubatorPrograms, addProgram, updateProgram, addCohort, updateCohort, refetchPrograms } = useIncubator();
   const [programs, setPrograms] = useState([]);
@@ -168,9 +415,30 @@ const Programs = () => {
     );
   };
 
-  const handleAddCohort = async (e) => {
-    e.preventDefault();
-    
+  const toggleProgram = (programId) => {
+    setExpandedProgram(prev => ({
+      ...prev,
+      [programId]: !prev[programId]
+    }));
+  };
+
+  const handleAddCohort = (programOrEvent) => {
+    if (programOrEvent?.preventDefault) {
+      // Form submission handler
+      programOrEvent.preventDefault();
+      handleAddCohortSubmit();
+    } else {
+      // Program selection handler
+      const program = programOrEvent;
+      if (!program.is_active) {
+        return;
+      }
+      setSelectedProgram(program.id);
+      setShowAddCohortModal(true);
+    }
+  };
+
+  const handleAddCohortSubmit = async () => {
     // Check if program exists and is active
     const program = programs.find(p => p.id === selectedProgram);
     if (!program) {
@@ -198,7 +466,6 @@ const Programs = () => {
         program_id: selectedProgram
       };
 
-      // Use the mutation from context instead of direct axios call
       await addCohort(payload);
       
       setShowSuccessPopup(true);
@@ -206,7 +473,6 @@ const Programs = () => {
       setTimeout(() => setShowSuccessPopup(false), 3000);
       setShowAddCohortModal(false);
       
-      // Instead of fetching all programs, just fetch cohorts for the updated program
       const updatedCohorts = await fetchProgramCohorts(selectedProgram);
       setPrograms(prevPrograms => prevPrograms.map(program => 
         program.id === selectedProgram 
@@ -222,9 +488,22 @@ const Programs = () => {
     }
   };
 
-  const handleAssignAdmin = async () => {
+  const handleAssignAdmin = (programOrEvent) => {
+    if (programOrEvent?.preventDefault) {
+      // Form submission handler
+      programOrEvent.preventDefault();
+      handleAssignAdminSubmit();
+    } else {
+      // Program selection handler
+      const program = programOrEvent;
+      setSelectedProgram(program.id);
+      setShowAssignAdminModal(true);
+    }
+  };
+
+  const handleAssignAdminSubmit = async () => {
     if (!selectedProgram || !selectedAdmin) {
-      alert('Please select both program and admin');
+      setErrorMessage('Please select both program and admin');
       return;
     }
 
@@ -243,21 +522,14 @@ const Programs = () => {
       if (response.status === 200 || response.status === 201) {
         setSuccessMessage('Admin assigned successfully!');
         setShowAssignAdminModal(false);
-        refetchPrograms(); // Refresh the programs list
+        refetchPrograms();
         setSelectedProgram(null);
         setSelectedAdmin('');
       }
     } catch (error) {
       console.error("Error assigning admin:", error);
-      alert(error.response?.data?.message || 'Error assigning admin');
+      setErrorMessage(error.response?.data?.message || 'Error assigning admin');
     }
-  };
-
-  const toggleProgram = (programId) => {
-    setExpandedProgram(prev => ({
-      ...prev,
-      [programId]: !prev[programId]
-    }));
   };
 
   const handleEditCohort = (cohort) => {
@@ -575,862 +847,220 @@ const Programs = () => {
     }
   };
 
-  return (
-    <div className="programs-container">
-      <div className="programs-header">
-        <h1>Programs</h1>
-        <button 
-          className="add-program-btn"
-          onClick={() => setShowAddProgramModal(true)}
-        >
-          Add Program
-        </button>
-      </div>
+  const queryClient = useQueryClient();
 
-      {programs.map(program => (
-        <div key={program.id} className="program-card">
-          <div className="program-header">
-            <div className="program-info-wrapper">
-              <div className="program-logo">
-                <img src={ThaparInnovate} alt={program.program_name} />
-              </div>
-              <div className="program-title">
-                <h2>{program.program_name}</h2>
-                <p>{program.description}</p>
-              </div>
-            </div>
-            <div className="program-actions">
-              <button 
-                className="edit-program-btn"
-                onClick={() => {
-                  setProgramToUpdate(program);
-                  setShowUpdateProgramModal(true);
-                }}
-              >
-                Edit Program
-              </button>
-              <button 
-                className="expand-btn"
-                onClick={() => toggleProgram(program.id)}
-              >
-                {expandedProgram[program.id] ? (
-                  <span>Collapse <KeyboardArrowUp /></span>
-                ) : (
-                  <span>Expand <KeyboardArrowDown /></span>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {expandedProgram[program.id] && (
-            <div className="program-content">
-              <div className="action-buttons">
-                <button 
-                  className="add-cohort-btn"
-                  onClick={() => {
-                    if (!program.is_active) {
-                      setErrorMessage('Cannot add cohort to an inactive program');
-                      return;
-                    }
-                    setSelectedProgram(program.id);
-                    setShowAddCohortModal(true);
-                  }}
-                >
-                  Add Cohort
-                </button>
-                <button 
-                  className="assign-admin-btn"
-                  onClick={() => {
-                    setSelectedProgram(program.id);
-                    setShowAssignAdminModal(true);
-                  }}
-                >
-                  Assign Admin
-                </button>
-              </div>
-
-              <div className="cohorts-grid">
-                {program.cohorts && program.cohorts.length > 0 ? (
-                  program.cohorts.map(cohort => (
-                    <div key={cohort.id} className="cohort-card">
-                      <h3>{cohort.cohort_name}</h3>
-                      
-                      <div className="cohort-details">
-                        <div className="detail-row">
-                          <span className="detail-label">Start Date:</span>
-                          <span className="detail-value">{new Date(cohort.start_date).toLocaleDateString()}</span>
-                        </div>
-                        
-                        <div className="detail-row">
-                          <span className="detail-label">End Date:</span>
-                          <span className="detail-value">{new Date(cohort.end_date).toLocaleDateString()}</span>
-                        </div>
-                        
-                        <div className="detail-row">
-                          <span className="detail-label">Status:</span>
-                          <span className={`status-badge ${cohort.status}`}>{cohort.status}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="action-row">
-                        <button 
-                          className="edit-btn"
-                          onClick={() => {
-                            setCohortToUpdate(cohort);
-                            setShowUpdateCohortModal(true);
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button 
-                          className="delete-btn"
-                          onClick={() => handleDeleteCohort(cohort.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                      
-                      <div className="action-row">
-                        <button 
-                          className="add-people-btn"
-                          onClick={() => {
-                            setSelectedCohortId(cohort.id);
-                            setShowAddPeopleModal(true);
-                            fetchStartups();
-                            fetchStartupPeople();
-                          }}
-                        >
-                          Add People
-                        </button>
-                        <button 
-                          className="view-people-btn"
-                          onClick={() => {
-                            setSelectedCohortId(cohort.id);
-                            setShowViewPeopleModal(true);
-                            fetchCohortPeople(cohort.id);
-                          }}
-                        >
-                          View People
-                        </button>
-                      </div>
-                      
-                      <div className="action-row">
-                        <button 
-                          className="assign-task-btn"
-                          onClick={() => {
-                            setSelectedCohort(cohort);
-                            setShowAssignTaskModal(true);
-                          }}
-                        >
-                          Assign Task
-                        </button>
-                        <button 
-                          className="documents-btn"
-                          onClick={() => {
-                            setSelectedCohort(cohort);
-                            fetchDocuments(cohort.id);
-                            setShowDocumentsModal(true);
-                          }}
-                        >
-                          Documents
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="no-cohorts">
-                    <p>No cohorts found for this program</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {/* Add Program Modal */}
-      {showAddProgramModal && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-header">
-              <h2>Add Program details !</h2>
-              <button 
-                className="close-btn"
-                onClick={() => setShowAddProgramModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={handleAddProgram}>
-                <div className="form-group">
-                  <label>Program Name</label>
-                  <input
-                    type="text"
-                    value={newProgramData.program_name}
-                    onChange={(e) => setNewProgramData({
-                      ...newProgramData,
-                      program_name: e.target.value
-                    })}
-                    placeholder="Enter the IP Type"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Description</label>
-                  <textarea
-                    value={newProgramData.description}
-                    onChange={(e) => setNewProgramData({
-                      ...newProgramData,
-                      description: e.target.value
-                    })}
-                    placeholder="Enter the Description for Program Here !!"
-                    required
-                  />
-                </div>
-                
-                <div className="form-actions">
-                  <button type="submit" className="submit-btn">Add</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Cohort Modal */}
-      {showAddCohortModal && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-header">
-              <h2>Add Cohort !</h2>
-              <button 
-                className="close-btn"
-                onClick={() => {
-                  setShowAddCohortModal(false);
-                  setErrorMessage('');
-                }}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="modal-body">
-              {errorMessage && (
-                <div className="error-message">
-                  {errorMessage}
-                </div>
-              )}
-              
-              <form onSubmit={handleAddCohort}>
-                <div className="form-group">
-                  <label>Cohorts</label>
-                  <input
-                    type="text"
-                    value={formData.cohort_name}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      cohort_name: e.target.value
-                    })}
-                    placeholder="Enter the IP Type"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Start Date</label>
-                  <input
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      start_date: e.target.value
-                    })}
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>End Date</label>
-                  <input
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      end_date: e.target.value
-                    })}
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Status</label>
-                  <div className="status-toggle">
-                    <button
-                      type="button"
-                      className={`status-btn ${formData.status === 'active' ? 'active' : ''}`}
-                      onClick={() => setFormData({
-                        ...formData,
-                        status: 'active'
-                      })}
-                    >
-                      Active
-                    </button>
-                    <button
-                      type="button"
-                      className={`status-btn ${formData.status === 'closed' ? 'active' : ''}`}
-                      onClick={() => setFormData({
-                        ...formData,
-                        status: 'closed'
-                      })}
-                    >
-                      Closed
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="form-actions">
-                  <button type="submit" className="submit-btn">Save</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Assign Admin Modal */}
-      {showAssignAdminModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Assign Program Admin</h2>
-            </div>
-            <div className="form-row">
-              <label>Select Admin</label>
-              <select
-                value={selectedAdmin}
-                onChange={(e) => setSelectedAdmin(e.target.value)}
-                required
-              >
-                <option value="">Select an admin</option>
-                {people.map(person => (
-                  <option key={person.id} value={person.id}>
-                    {person.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-actions">
-              <button 
-                type="button" 
-                onClick={() => {
-                  setShowAssignAdminModal(false);
-                  setSelectedAdmin('');
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAssignAdmin}
-                disabled={!selectedAdmin}
-              >
-                Assign Admin
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Update Program Modal */}
-      {showUpdateProgramModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Update Program</h2>
-              <button 
-                className="close-button"
-                onClick={() => {
-                  setShowUpdateProgramModal(false);
-                  setProgramToUpdate(null);
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleUpdateProgram}>
-              <div className="form-row">
-                <label>Program Name</label>
-                <input
-                  type="text"
-                  value={programToUpdate.program_name}
-                  onChange={(e) => setProgramToUpdate({
-                    ...programToUpdate,
-                    program_name: e.target.value
-                  })}
-                  placeholder="Enter program name"
-                  required
-                />
-              </div>
-              <div className="form-row">
-                <label>Description</label>
-                <textarea
-                  value={programToUpdate.description}
-                  onChange={(e) => setProgramToUpdate({
-                    ...programToUpdate,
-                    description: e.target.value
-                  })}
-                  placeholder="Enter program description"
-                  rows="4"
-                  required
-                />
-              </div>
-              <div className="form-row">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={programToUpdate.is_active}
-                    onChange={(e) => setProgramToUpdate({
-                      ...programToUpdate,
-                      is_active: e.target.checked
-                    })}
-                  />
-                  Active Program
-                </label>
-              </div>
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  onClick={() => setShowUpdateProgramModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit">
-                  Update Program
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Update Cohort Modal */}
-      {showUpdateCohortModal && cohortToUpdate && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Update Cohort</h2>
-              <button 
-                className="close-button"
-                onClick={() => {
-                  setShowUpdateCohortModal(false);
-                  setCohortToUpdate(null);
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleUpdateCohort}>
-              <div className="form-row">
-                <label>Cohort Name</label>
-                <input
-                  type="text"
-                  value={cohortToUpdate.cohort_name}
-                  onChange={(e) => setCohortToUpdate({
-                    ...cohortToUpdate,
-                    cohort_name: e.target.value
-                  })}
-                  placeholder="Enter cohort name"
-                  required
-                />
-              </div>
-              <div className="form-row">
-                <label>Start Date</label>
-                <input
-                  type="date"
-                  value={cohortToUpdate.start_date}
-                  onChange={(e) => setCohortToUpdate({
-                    ...cohortToUpdate,
-                    start_date: e.target.value
-                  })}
-                  required
-                />
-              </div>
-              <div className="form-row">
-                <label>End Date</label>
-                <input
-                  type="date"
-                  value={cohortToUpdate.end_date}
-                  onChange={(e) => setCohortToUpdate({
-                    ...cohortToUpdate,
-                    end_date: e.target.value
-                  })}
-                  required
-                />
-              </div>
-              <div className="form-row">
-                <label>Status</label>
-                <select
-                  value={cohortToUpdate.status}
-                  onChange={(e) => setCohortToUpdate({
-                    ...cohortToUpdate,
-                    status: e.target.value
-                  })}
-                  required
-                >
-                  <option value="">Select Status</option>
-                  <option value="active">Active</option>
-                  <option value="closed">Closed</option>
-                </select>
-              </div>
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  onClick={() => setShowUpdateCohortModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit">
-                  Update Cohort
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+  const fetchProgramsPage = async (page) => {
+    try {
+      const response = await axios.get(
+        `${config.api_base_url}/incubator/programs/?page=${page}&limit=10`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
+          }
+        }
+      );
       
-     
-{showAssignTaskModal && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h2>Assign Task</h2>
-        <button onClick={() => setShowAssignTaskModal(false)}>×</button>
-      </div>
-      <form onSubmit={handleAssignTask}>
-        <div className="form-row">
-          <label>Task Name</label>
-          <input
-            type="text"
-            value={taskData.task_name}
-            onChange={(e) => setTaskData({ ...taskData, task_name: e.target.value })}
-            required
-          />
-        </div>
-        <div className="form-row">
-          <label>Description</label>
-          <textarea
-            value={taskData.description}
-            onChange={(e) => setTaskData({ ...taskData, description: e.target.value })}
-            required
-          />
-        </div>
-        <div className="form-row">
-          <label>Due Date</label>
-          <input
-            type="date"
-            value={taskData.due_date}
-            onChange={(e) => setTaskData({ ...taskData, due_date: e.target.value })}
-            required
-          />
-        </div>
-        <div className="form-row">
-          <label>Select People from Cohort</label>
-          <select
-            multiple
-            value={taskData.startup_person_ids}
-            onChange={(e) => {
-              const options = e.target.options;
-              const selectedIds = [];
-              for (let i = 0; i < options.length; i++) {
-                if (options[i].selected) {
-                  selectedIds.push(options[i].value);
-                }
-              }
-              setTaskData({ ...taskData, startup_person_ids: selectedIds });
-            }}
-          >
-            {cohortPeople.map(person => (
-              <option key={person.id} value={person.id}>{person.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="form-actions">
-          <button type="button" onClick={() => setShowAssignTaskModal(false)}>Cancel</button>
-          <button type="submit">Assign Task</button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+      // Ensure we have the expected data structure
+      const programs = response.data.results || response.data || [];
+      const totalPages = response.data.total_pages || 1;
+      
+      return {
+        programs: programs,
+        nextPage: page < totalPages ? page + 1 : undefined,
+        hasMore: page < totalPages
+      };
+    } catch (error) {
+      console.error("Error fetching programs page:", error);
+      throw error;
+    }
+  };
 
-{showDocumentsModal && (
-  <div className="modal-overlay">
-    <div className="modal-content documents-modal">
-      <div className="modal-header">
-        <h2>Documents Management</h2>
-        <button onClick={() => setShowDocumentsModal(false)}>×</button>
-      </div>
+  // Update the infinite query implementation
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['programs'],
+    queryFn: ({ pageParam = 1 }) => fetchProgramsPage(pageParam),
+    getNextPageParam: (lastPage) => lastPage?.nextPage,
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
+    onError: (error) => {
+      console.error("Query error:", error);
+      setErrorMessage(error.message || 'Error fetching programs');
+    },
+    // Add suspense option to work with Suspense boundary
+    suspense: true,
+    // Add error boundary handling
+    useErrorBoundary: true
+  });
 
-      {/* Documents List */}
-      <div className="documents-list">
-        <div className="documents-header">
-          <h3>Existing Documents</h3>
+  // Safe data flattening
+  const allPrograms = React.useMemo(() => {
+    return data?.pages?.flatMap(page => page?.programs || []) || [];
+  }, [data]);
+
+  const handleEditProgram = (program) => {
+    setProgramToUpdate(program);
+    setShowUpdateProgramModal(true);
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorDisplay error={error} />;
+  }
+
+  return (
+    <ErrorBoundary fallback={<ErrorDisplay error={error} />}>
+      <div className="programs-container">
+        <div className="programs-header">
+          <h1>Programs</h1>
           <button 
-            className="add-new-doc-btn"
-            onClick={() => setShowAddNewDocModal(true)}
+            className="add-program-btn"
+            onClick={() => setShowAddProgramModal(true)}
           >
-            Add New Document
+            Add Program
           </button>
         </div>
-        {documents.length > 0 ? (
-          <table className="documents-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Document</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map((doc) => (
-                <tr key={doc.id}>
-                  <td>{doc.name}</td>
-                  <td>{doc.description}</td>
-                  <td>
-                    <a href={doc.document_url} target="_blank" rel="noopener noreferrer">
-                      View
-                    </a>
-                  </td>
-                  <td className="action-buttons">
-                    <button 
-                      className="edit-btn small"
-                      onClick={() => {
-                        setDocumentData({
-                          id: doc.id,
-                          name: doc.name,
-                          description: doc.description,
-                          file: null
-                        });
-                        setIsEditingDoc(true);
-                        setShowAddNewDocModal(true);
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      className="delete-btn small"
-                      onClick={async () => {
-                        if (window.confirm('Are you sure you want to delete this document?')) {
-                          try {
-                            await axios.delete(
-                              `${config.api_base_url}/programadmin/docs/${doc.id}`,
-                              {
-                                headers: {
-                                  'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
-                                }
-                              }
-                            );
-                            fetchDocuments(selectedCohort.id);
-                            setShowSuccessPopup(true);
-                            setSuccessMessage('Document deleted successfully!');
-                            setTimeout(() => setShowSuccessPopup(false), 3000);
-                          } catch (error) {
-                            console.error('Error deleting document:', error);
-                            setErrorMessage('Error deleting document');
-                          }
-                        }
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No documents found</p>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          <VirtualizedProgramList
+            programs={allPrograms}
+            onToggle={toggleProgram}
+            isExpanded={expandedProgram}
+            onEdit={handleEditProgram}
+            onAddCohort={handleAddCohort}
+            onAssignAdmin={handleAssignAdmin}
+          />
+        </Suspense>
+
+        {hasNextPage && (
+          <div className="load-more">
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+            </button>
+          </div>
+        )}
+
+        {/* Success/Error Messages */}
+        {showSuccessPopup && (
+          <div className="success-popup">
+            {successMessage}
+          </div>
+        )}
+        {errorMessage && (
+          <div className="error-message">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* Modals */}
+        {showAddProgramModal && (
+          <div className="modal-overlay">
+            <AddProgramModal
+              onSubmit={handleAddProgram}
+              onClose={() => setShowAddProgramModal(false)}
+            />
+          </div>
+        )}
+        {showUpdateProgramModal && programToUpdate && (
+          <div className="modal-overlay">
+            <UpdateProgramModal
+              program={programToUpdate}
+              onSubmit={handleUpdateProgram}
+              onClose={() => setShowUpdateProgramModal(false)}
+            />
+          </div>
+        )}
+        {showAssignAdminModal && (
+          <div className="modal-overlay">
+            <AssignAdminModal
+              onSubmit={handleAssignAdminSubmit}
+              onClose={() => setShowAssignAdminModal(false)}
+              selectedAdmin={selectedAdmin}
+              setSelectedAdmin={setSelectedAdmin}
+            />
+          </div>
+        )}
+        {showAddCohortModal && (
+          <div className="modal-overlay">
+            <AddCohortModal
+              onSubmit={handleAddCohort}
+              onClose={() => setShowAddCohortModal(false)}
+              formData={formData}
+              setFormData={setFormData}
+            />
+          </div>
+        )}
+        {showUpdateCohortModal && cohortToUpdate && (
+          <div className="modal-overlay">
+            <UpdateCohortModal
+              cohort={cohortToUpdate}
+              onSubmit={handleUpdateCohort}
+              onClose={() => setShowUpdateCohortModal(false)}
+            />
+          </div>
+        )}
+        {showAssignTaskModal && (
+          <div className="modal-overlay">
+            <AssignTaskModal
+              onSubmit={handleAssignTask}
+              onClose={() => setShowAssignTaskModal(false)}
+              taskData={taskData}
+              setTaskData={setTaskData}
+            />
+          </div>
+        )}
+        {showDocumentsModal && (
+          <div className="modal-overlay">
+            <DocumentsModal
+              documents={documents}
+              onClose={() => setShowDocumentsModal(false)}
+            />
+          </div>
+        )}
+        {showAddNewDocModal && (
+          <div className="modal-overlay">
+            <AddNewDocModal
+              onSubmit={handleAddDocument}
+              onClose={() => setShowAddNewDocModal(false)}
+              documentData={documentData}
+              setDocumentData={setDocumentData}
+            />
+          </div>
+        )}
+        {showAddPeopleModal && (
+          <div className="modal-overlay">
+            <AddPeopleModal
+              onSubmit={handleAddPersonToCohort}
+              onClose={() => setShowAddPeopleModal(false)}
+              people={people}
+              selectedPeople={selectedPeople}
+              setSelectedPeople={setSelectedPeople}
+            />
+          </div>
+        )}
+        {showViewPeopleModal && (
+          
+          <div className="modal-overlay">
+            <ViewPeopleModal
+              onClose={() => setShowViewPeopleModal(false)}
+              people={cohortPeople}
+            />
+          </div>
         )}
       </div>
-    </div>
-  </div>
-)}
-
-{/* Add/Edit Document Modal */}
-{showAddNewDocModal && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h2>{isEditingDoc ? 'Edit Document' : 'Add New Document'}</h2>
-        <button onClick={() => {
-          setShowAddNewDocModal(false);
-          setIsEditingDoc(false);
-          setDocumentData({ name: '', description: '', file: null });
-        }}>×</button>
-      </div>
-      <form onSubmit={isEditingDoc ? handleUpdateDocument : handleAddDocument}>
-        <div className="form-row">
-          <label>Document Name</label>
-          <input
-            type="text"
-            value={documentData.name}
-            onChange={(e) => setDocumentData({ ...documentData, name: e.target.value })}
-            required
-          />
-        </div>
-        <div className="form-row">
-          <label>Description</label>
-          <textarea
-            value={documentData.description}
-            onChange={(e) => setDocumentData({ ...documentData, description: e.target.value })}
-            required
-          />
-        </div>
-        <div className="form-row">
-          <label>{isEditingDoc ? 'Update Document (optional)' : 'Document File'}</label>
-          <input
-            type="file"
-            onChange={(e) => setDocumentData({ ...documentData, file: e.target.files[0] })}
-            required={!isEditingDoc}
-          />
-        </div>
-        <div className="form-actions">
-          <button type="button" onClick={() => {
-            setShowAddNewDocModal(false);
-            setIsEditingDoc(false);
-            setDocumentData({ name: '', description: '', file: null });
-          }}>Cancel</button>
-          <button type="submit">
-            {isEditingDoc ? 'Update Document' : 'Add Document'}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
-
-      {/* Add People Modal */}
-      {showAddPeopleModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Add People to Cohort</h2>
-              <button 
-                className="close-button"
-                onClick={() => {
-                  setShowAddPeopleModal(false);
-                  setSelectedPeople([]);
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleAddPersonToCohort}>
-              <div className="form-row">
-                <label>Select Startup</label>
-                <select
-                  value={selectedStartup}
-                  onChange={(e) => {
-                    setSelectedStartup(e.target.value);
-                    setSelectedPeople([]);
-                  }}
-                  required
-                >
-                  <option value="">Choose a startup</option>
-                  {startupPeople.map(startup => (
-                    <option key={startup.startup_name} value={startup.startup_name}>
-                      {startup.startup_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              {selectedStartup && (
-      <div className="form-row">
-    <label>Select People</label>
-    <div className="people-select-list">
-      {startupPeople
-        .find(s => s.startup_name === selectedStartup)
-        ?.people.map(person => (
-          <label key={person.person_id} className="checkbox-label">
-            <input
-              type="checkbox"
-              value={person.person_id}
-              checked={selectedPeople.includes(person.person_id)}
-              onChange={(e) => {
-                const personId = person.person_id;
-                setSelectedPeople(prev =>
-                  e.target.checked
-                    ? [...prev, personId] // Add person if checked
-                    : prev.filter(id => id !== personId) // Remove person if unchecked
-                );
-              }}
-            />
-            {person.person_name}
-          </label>
-        ))}
-    </div>
-  </div>
-)}
-
-
-              
-              <div className="form-actions">
-                <button 
-                  type="submit"
-                  disabled={selectedPeople.length === 0}
-                >
-                  Add Selected People
-                </button>
-                <button type="button" onClick={() => setShowAddPeopleModal(false)}>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-              )}
-
-      {/* View People Modal */}
-      {showViewPeopleModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Cohort People</h2>
-              <button 
-                className="close-button"
-                onClick={() => setShowViewPeopleModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="cohort-people-list">
-              {cohortPeople.length > 0 ? (
-                cohortPeople.map(person => (
-                  <div key={person.id} className="person-card">
-                    <h4>{person.first_name} {person.last_name}</h4>
-                    <p>{person.startup_name}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="no-people">No people found in this cohort</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Popup */}
-      {showSuccessPopup && (
-        <div className="success-popup">
-          {successMessage}
-        </div>
-      )}
-    </div>
+    </ErrorBoundary>
   );
 };
 
