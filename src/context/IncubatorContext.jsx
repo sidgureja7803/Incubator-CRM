@@ -17,46 +17,43 @@ export const useIncubatorContext = () => {
   return context;
 };
 
-const fetchStartupData = async () => {
+// API Functions - Define all API functions here
+const fetchProgramCohorts = async (programId) => {
   try {
-    const response = await axios.get(`${config.api_base_url}/incubator/startupincubator/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
-      }
-    });
-    setLocalStartups(response.data);
-    setContextStartups(response.data);
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return [];
+    }
     
-    // Fetch people for each startup
-    const peopleData = {};
-    await Promise.all(response.data.map(async (startup) => {
-      const peopleResponse = await axios.get(
-        `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
-          }
+    const response = await axios.get(
+      `${config.api_base_url}/incubator/program/${programId}/cohort/`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      );
-      peopleData[startup.startup_id] = peopleResponse.data;
-    }));
-    setStartupPeople(peopleData);
-    setIsLoading(false);
+      }
+    );
+    return response.data || [];
   } catch (error) {
-    console.error("Error fetching data:", error);
-    setError(error);
-    setIsLoading(false);
+    console.error(`Error fetching cohorts for program ${programId}:`, error);
+    return [];
   }
 };
 
-// API Functions
 const fetchIncubatorInfo = async () => {
   try {
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return {};
+    }
+    
     const response = await axios.get(
       `${config.api_base_url}/incubator/list/`,
       {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
+          'Authorization': `Bearer ${token}`
         }
       }
     );
@@ -70,45 +67,40 @@ const fetchIncubatorInfo = async () => {
 
 const fetchIncubatorTeam = async () => {
   try {
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return [];
+    }
+    
     const response = await axios.get(
       `${config.api_base_url}/incubator/people/`,
       {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
+          'Authorization': `Bearer ${token}`
         }
       }
     );
-    return response.data;
+    return response.data || [];
   } catch (error) {
     console.error("Error fetching incubator team:", error);
     return []; // Return empty array instead of null
   }
 };
 
-const fetchPrograms = async () => {
-  try {
-    const response = await axios.get(
-      `${config.api_base_url}/incubator/programs/`,
-      {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
-        }
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching programs:", error);
-    return []; // Return empty array instead of null
-  }
-};
-
 const fetchProgramsWithCohorts = async () => {
   try {
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return [];
+    }
+    
     const response = await axios.get(
       `${config.api_base_url}/incubator/programs/`,
       {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
+          'Authorization': `Bearer ${token}`
         }
       }
     );
@@ -117,17 +109,10 @@ const fetchProgramsWithCohorts = async () => {
     const programsWithCohorts = await Promise.all(
       response.data.map(async (program) => {
         try {
-          const cohortsResponse = await axios.get(
-            `${config.api_base_url}/incubator/program/${program.id}/cohort/`,
-            {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
-              }
-            }
-          );
+          const cohorts = await fetchProgramCohorts(program.id);
           return {
             ...program,
-            cohorts: cohortsResponse.data
+            cohorts
           };
         } catch (error) {
           console.error(`Error fetching cohorts for program ${program.id}:`, error);
@@ -148,12 +133,18 @@ const fetchProgramsWithCohorts = async () => {
 
 const fetchStartups = async () => {
   try {
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return [];
+    }
+    
     // First fetch the list of startups
     const response = await axios.get(
       `${config.api_base_url}/incubator/startupincubator/`,
       {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
+          'Authorization': `Bearer ${token}`
         }
       }
     );
@@ -166,7 +157,7 @@ const fetchStartups = async () => {
             `${config.api_base_url}/startup/list/?startup_id=${startup.startup_id}`,
             {
               headers: {
-                'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`
+                'Authorization': `Bearer ${token}`
               }
             }
           );
@@ -199,6 +190,7 @@ export const IncubatorProvider = ({ children }) => {
     queryKey: ['incubatorInfo'],
     queryFn: fetchIncubatorInfo,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
     retry: 1,
     refetchOnWindowFocus: false
   });
@@ -207,6 +199,7 @@ export const IncubatorProvider = ({ children }) => {
     queryKey: ['incubatorTeam'],
     queryFn: fetchIncubatorTeam,
     staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false
   });
@@ -215,6 +208,7 @@ export const IncubatorProvider = ({ children }) => {
     queryKey: ['programs'],
     queryFn: fetchProgramsWithCohorts,
     staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false
   });
@@ -223,6 +217,7 @@ export const IncubatorProvider = ({ children }) => {
     queryKey: ['startups'],
     queryFn: fetchStartups,
     staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false
   });
@@ -230,12 +225,17 @@ export const IncubatorProvider = ({ children }) => {
   // Mutations
   const addProgramMutation = useMutation({
     mutationFn: async (programData) => {
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       const response = await axios.post(
         `${config.api_base_url}/incubator/programs/`,
         programData,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }
@@ -249,6 +249,11 @@ export const IncubatorProvider = ({ children }) => {
 
   const updateProgramMutation = useMutation({
     mutationFn: async (programData) => {
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       const response = await axios.patch(
         `${config.api_base_url}/incubator/programs/${programData.id}`,
         {
@@ -258,7 +263,7 @@ export const IncubatorProvider = ({ children }) => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }
@@ -272,6 +277,11 @@ export const IncubatorProvider = ({ children }) => {
 
   const addCohortMutation = useMutation({
     mutationFn: async (cohortData) => {
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       const response = await axios.post(
         `${config.api_base_url}/incubator/program/${cohortData.program_id}/cohort/`,
         {
@@ -283,20 +293,26 @@ export const IncubatorProvider = ({ children }) => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }
       );
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['cohorts', variables.program_id] });
     }
   });
 
   const updateCohortMutation = useMutation({
     mutationFn: async (cohortData) => {
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       const response = await axios.patch(
         `${config.api_base_url}/incubator/program/cohort/${cohortData.id}`,
         {
@@ -307,15 +323,16 @@ export const IncubatorProvider = ({ children }) => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem("access_token") || sessionStorage.getItem("access_token")}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }
       );
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['cohorts'] });
     }
   });
 
@@ -360,7 +377,10 @@ export const IncubatorProvider = ({ children }) => {
     addProgram: addProgramMutation.mutate,
     updateProgram: updateProgramMutation.mutate,
     addCohort: addCohortMutation.mutate,
-    updateCohort: updateCohortMutation.mutate
+    updateCohort: updateCohortMutation.mutate,
+    
+    // Helper functions
+    fetchProgramCohorts
   };
 
   return (

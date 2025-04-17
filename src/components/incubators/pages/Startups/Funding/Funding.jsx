@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import './Funding.css';
 
 const Funding = () => {
   const { startup } = useOutletContext();
-  const [activeTab, setActiveTab] = useState('incubator');
-  
-  const incubatorFunding = startup?.Startup_IncubatorFunding || [];
-  const externalFunding = startup?.Startup_ExternalFunding || [];
+  const fundingRounds = startup?.funding_rounds || [];
 
   if (!startup) {
     return (
@@ -20,85 +17,44 @@ const Funding = () => {
 
   return (
     <div className="funding-container">
-      <div className="tab-buttons">
-        <button 
-          className={`tab-button ${activeTab === 'incubator' ? 'active' : ''}`} 
-          onClick={() => setActiveTab('incubator')}
-        >
-          Incubator Funding
-        </button>
-        <button 
-          className={`tab-button ${activeTab === 'external' ? 'active' : ''}`} 
-          onClick={() => setActiveTab('external')}
-        >
-          External Funding
-        </button>
-      </div>
-
-      {activeTab === 'incubator' && (
-        <>
-          <h2 className="funding-section-title">Incubator Funding</h2>
-          {incubatorFunding.length === 0 ? (
-            <div className="no-funding">
-              <p>No incubator funding records found.</p>
+      <h2>Funding History</h2>
+      
+      {fundingRounds.length === 0 ? (
+        <div className="no-funding">
+          <p>No funding rounds have been added yet.</p>
+        </div>
+      ) : (
+        <div className="funding-timeline">
+          {fundingRounds.map((round, index) => (
+            <div key={round.id || index} className="funding-round">
+              <div className="round-marker">
+                <div className="round-dot"></div>
+                <div className="round-line"></div>
+              </div>
+              <div className="round-content">
+                <div className="round-header">
+                  <h3>{round.round_type || 'Funding Round'}</h3>
+                  <span className="round-date">{round.date || 'Unknown date'}</span>
+                </div>
+                <div className="round-details">
+                  <div className="round-amount">
+                    <span className="label">Amount Raised:</span>
+                    <span className="value">{round.amount ? `$${round.amount.toLocaleString()}` : 'Undisclosed'}</span>
+                  </div>
+                  {round.lead_investor && (
+                    <div className="round-investor">
+                      <span className="label">Lead Investor:</span>
+                      <span className="value">{round.lead_investor}</span>
+                    </div>
+                  )}
+                  {round.description && (
+                    <p className="round-description">{round.description}</p>
+                  )}
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="funding-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Funding Program</th>
-                    <th>Funding Agency</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {incubatorFunding.map((funding) => (
-                    <tr key={funding.id}>
-                      <td>{new Date(funding.created_datetime).toLocaleDateString()}</td>
-                      <td>₹{funding.amount.toLocaleString()}</td>
-                      <td>{funding.funding_program}</td>
-                      <td>{funding.funding_agency}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
-      )}
-
-      {activeTab === 'external' && (
-        <>
-          <h2 className="funding-section-title">External Funding</h2>
-          {externalFunding.length === 0 ? (
-            <div className="no-funding">
-              <p>No external funding records found.</p>
-            </div>
-          ) : (
-            <div className="funding-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Investor Name</th>
-                    <th>Amount</th>
-                    <th>Funding Program</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {externalFunding.map((funding) => (
-                    <tr key={funding.id}>
-                      <td>{funding.investor_name}</td>
-                      <td>₹{funding.amount.toLocaleString()}</td>
-                      <td>{funding.funding_program}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
     </div>
   );

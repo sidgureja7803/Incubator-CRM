@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from '../config';
 import './LandingPage.css';
-import VLogo from '../assets/VLogo.png';
+import VLogo from './VentureLab.png';
 
 const IncubatorLanding = () => {
   const navigate = useNavigate();
@@ -51,9 +51,9 @@ const IncubatorLanding = () => {
 
   return (
     <div className="landing-page">
-      <div className="logo">
+      {/* <div className="logo">
         <img src={VLogo} alt="Venture Lab" />
-      </div>
+      </div> */}
       
       <div className="landing-content">
         <div className="left-content">
