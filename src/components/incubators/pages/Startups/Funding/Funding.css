@@ -1,200 +1,160 @@
 .funding-container {
-  padding: 24px;
-  background-color: #fff;
-  border-radius: 8px;
-  position: relative;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.loading-container {
+.funding-container h2 {
+  font-size: 1.5rem;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.funding-timeline {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0.5rem;
+}
+
+.funding-round {
+  display: flex;
+  padding: 0.5rem 0;
+}
+
+.round-marker {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  min-height: 200px;
+  padding: 0 1.5rem;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(43, 63, 108, 0.2);
+.round-dot {
+  width: 20px;
+  height: 20px;
+  background-color: #4F46E5;
   border-radius: 50%;
-  border-top-color: #2B3F6C;
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 16px;
+  margin-bottom: 0.5rem;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.round-line {
+  flex-grow: 1;
+  width: 2px;
+  background-color: #E5E7EB;
+}
+
+.funding-round:last-child .round-line {
+  display: none;
+}
+
+.round-content {
+  flex: 1;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.round-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  border-bottom: 1px solid #E5E7EB;
+  background: #F9FAFB;
+}
+
+.round-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.round-date {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.round-details {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.round-amount, .round-investor {
+  display: flex;
+  justify-content: space-between;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.value {
+  font-size: 0.875rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+.round-description {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+  color: #4B5563;
+  line-height: 1.5;
+  padding-top: 0.5rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.no-funding {
+  text-align: center;
+  padding: 3rem;
+  background: #F9FAFB;
+  border-radius: 0.5rem;
+  border: 1px dashed #D1D5DB;
+}
+
+.no-funding p {
+  color: #6B7280;
+  font-size: 0.875rem;
+  margin: 0;
 }
 
 .error-container {
+  padding: 1.5rem;
   text-align: center;
-  padding: 40px;
-  color: #E53E3E;
+  background: #FEF2F2;
+  border-radius: 0.5rem;
+  color: #B91C1C;
 }
 
-.funding-section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1A202C;
-  margin-bottom: 24px;
+.error-container h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
 }
 
-.funding-table {
-  margin-bottom: 40px;
+.error-container p {
+  margin: 0;
+  color: #B91C1C;
 }
 
-.funding-table table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.funding-table th {
-  text-align: left;
-  padding: 12px 16px;
-  background-color: #F7FAFC;
-  color: #4A5568;
-  font-weight: 500;
-  font-size: 14px;
-  border-bottom: 1px solid #E2E8F0;
-}
-
-.funding-table td {
-  padding: 14px 16px;
-  color: #1A202C;
-  font-size: 14px;
-  border-bottom: 1px solid #E2E8F0;
-}
-
-.funding-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.edit-btn, .delete-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  color: #718096;
-  transition: color 0.2s;
-}
-
-.edit-btn:hover {
-  color: #2B3F6C;
-}
-
-.delete-btn:hover {
-  color: #E53E3E;
-}
-
-.table-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 12px 16px;
-  font-size: 14px;
-  color: #4A5568;
-}
-
-.pagination-info {
-  margin-right: 24px;
-}
-
-.rows-per-page {
-  display: flex;
-  align-items: center;
-  margin-right: 24px;
-}
-
-.rows-per-page span {
-  margin-right: 8px;
-}
-
-.rows-per-page select {
-  background-color: #F7FAFC;
-  border: 1px solid #E2E8F0;
-  border-radius: 4px;
-  padding: 4px 8px;
-  color: #4A5568;
-}
-
-.pagination-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.prev-btn, .next-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #718096;
-  transition: color 0.2s;
-}
-
-.prev-btn:hover, .next-btn:hover {
-  color: #2B3F6C;
-}
-
-.tab-buttons {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  display: flex;
-  gap: 12px;
-}
-
-.tab-button {
-  background: none;
-  border: 1px solid #E2E8F0;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  color: #4A5568;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tab-button.active {
-  background-color: #2B3F6C;
-  color: white;
-  border-color: #2B3F6C;
-}
-
-.tab-button:hover:not(.active) {
-  background-color: #F7FAFC;
-}
-
+/* Responsive styles */
 @media (max-width: 768px) {
   .funding-container {
-    padding: 16px;
+    padding: 1rem;
   }
   
-  .tab-buttons {
-    position: static;
-    margin-bottom: 24px;
+  .round-marker {
+    padding: 0 0.75rem;
   }
   
-  .funding-section-title {
-    margin-top: 16px;
-  }
-  
-  .funding-table {
-    overflow-x: auto;
-  }
-  
-  .table-footer {
+  .round-amount, .round-investor {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .pagination-info, .rows-per-page {
-    margin-right: 0;
+    gap: 0.25rem;
   }
 }

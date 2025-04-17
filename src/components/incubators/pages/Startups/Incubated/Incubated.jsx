@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from 'config';
 import './Incubated.css';
-import ThaparInnovate from './TIETInnovate.png'
+import ThaparInnovate from './TIETInnovate.png';
+import { ArrowForward } from '@mui/icons-material';
 
 const Incubated = () => {
   const navigate = useNavigate();
@@ -39,11 +40,6 @@ const Incubated = () => {
     navigate(`/incubator/startups/incubated/${startup.startup_id}/info`);
   };
 
-  const handleViewDetailsClick = (e, startup) => {
-      e.stopPropagation(); // Prevent card click handler
-      navigate(`/incubator/startups/incubated/${startup.startup}/info`);
-  };
-
   if (isLoading) {
     return <div className="loading-container">
       <div className="spinner"></div>
@@ -61,11 +57,6 @@ const Incubated = () => {
 
   return (
     <div className="incubated-container">
-      {/* Add Header like in Applications.jsx if needed */} 
-      {/* <div className="incubated-header">
-        <h1>Incubated Startups</h1>
-      </div> */} 
-
       <div className="incubated-list">
         {startups.length === 0 ? (
           <div className="no-startups">
@@ -79,22 +70,30 @@ const Incubated = () => {
               className="incubated-card"
               onClick={() => handleStartupClick(startup)}
             >
-              <div className="incubated-card-info">
-                <div className="incubated-logo">
-                  <img 
-                    src={ThaparInnovate} 
-                    alt={startup.startup} 
-                    loading="lazy"
-                  />
+              <div className="startup-logo-container">
+                <img 
+                  src={ThaparInnovate} 
+                  alt={startup.startup} 
+                  className="startup-logo"
+                  loading="lazy"
+                />
+              </div>
+              
+              <div className="startup-info">
+                <div className="startup-name-section">
+                  <span className="label">Startup Name:</span>
+                  <h3 className="startup-name">{startup.startup}</h3>
                 </div>
-                <div className="incubated-details">
-                  <div className="incubated-startup-name">
-                    <span>Startup Name:</span>
-                    <h3>{startup.startup}</h3>
-                  </div>
+                
+                <div className="founder-section">
+                  <span className="label">Founder:</span>
+                  <p className="founder-name">Kanishk Dadwal</p>
                 </div>
               </div>
-              <div className="arrow-icon">→</div>
+              
+              <button className="view-application-btn">
+                <ArrowForward />
+              </button>
             </div>
           ))
         )}

@@ -1,12 +1,15 @@
-import React, { useState, useEffect, Suspense, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useCallback, useMemo, useTransition } from 'react';
 import axios from 'utils/httpClient';
 import config from 'config';
 import './Programs.css';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
 import { useIncubator } from '../../../../hooks/useIncubator';
+import { useIncubatorContext } from '../../../../context/IncubatorContext';
 import ThaparInnovate from './IncuabtorImage.png';
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ErrorBoundary from '../../../common/ErrorBoundary';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../hooks/useAuth';
 
 // Separate components for better code splitting and error boundaries
 const LoadingSpinner = () => (
@@ -82,6 +85,7 @@ const ProgramCard = ({ program, onToggle, isExpanded, onEdit, onAddCohort, onAss
 );
 
 const CohortsList = ({ program }) => {
+  const [isPending, startTransition] = useTransition();
   const { data: cohorts = [], isLoading, error, refetch } = useQuery({
     queryKey: ['cohorts', program.id],
     queryFn: () => fetchProgramCohorts(program.id),
@@ -94,7 +98,9 @@ const CohortsList = ({ program }) => {
 
   return (
     <div className="cohorts-grid">
-      {cohorts.length > 0 ? (
+      {isPending ? (
+        <LoadingSpinner />
+      ) : cohorts.length > 0 ? (
         cohorts.map(cohort => (
           <CohortCard key={cohort.id} cohort={cohort} />
         ))
@@ -108,10 +114,32 @@ const CohortsList = ({ program }) => {
 };
 
 const CohortCard = ({ cohort }) => {
+  const [isPending, startTransition] = useTransition();
   const [showAddPeopleModal, setShowAddPeopleModal] = useState(false);
   const [showViewPeopleModal, setShowViewPeopleModal] = useState(false);
   const [showAssignTaskModal, setShowAssignTaskModal] = useState(false);
   const [showDocumentsModal, setShowDocumentsModal] = useState(false);
+
+  const handleActionClick = (action) => {
+    startTransition(() => {
+      switch(action) {
+        case 'addPeople':
+          setShowAddPeopleModal(true);
+          break;
+        case 'viewPeople':
+          setShowViewPeopleModal(true);
+          break;
+        case 'assignTask':
+          setShowAssignTaskModal(true);
+          break;
+        case 'documents':
+          setShowDocumentsModal(true);
+          break;
+        default:
+          break;
+      }
+    });
+  };
 
   return (
     <div className="cohort-card">
@@ -156,13 +184,13 @@ const CohortCard = ({ cohort }) => {
       <div className="action-row">
         <button 
           className="add-people-btn"
-          onClick={() => setShowAddPeopleModal(true)}
+          onClick={() => handleActionClick('addPeople')}
         >
           Add People
         </button>
         <button 
           className="view-people-btn"
-          onClick={() => setShowViewPeopleModal(true)}
+          onClick={() => handleActionClick('viewPeople')}
         >
           View People
         </button>
@@ -171,13 +199,13 @@ const CohortCard = ({ cohort }) => {
       <div className="action-row">
         <button 
           className="assign-task-btn"
-          onClick={() => setShowAssignTaskModal(true)}
+          onClick={() => handleActionClick('assignTask')}
         >
           Assign Task
         </button>
         <button 
           className="documents-btn"
-          onClick={() => setShowDocumentsModal(true)}
+          onClick={() => handleActionClick('documents')}
         >
           Documents
         </button>
@@ -186,9 +214,48 @@ const CohortCard = ({ cohort }) => {
   );
 };
 
+// Fetch program cohorts using API from the context
+const fetchProgramCohorts = async (programId) => {
+  console.log(`Fetching cohorts for program ID: ${programId}`);
+  const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+  if (!programId) {
+    console.error("fetchProgramCohorts called with invalid programId");
+    return []; // Return empty array if programId is invalid
+  }
+  try {
+    const response = await axios.get(
+      `${config.api_base_url}/incubator/program/${programId}/cohort/`,
+      {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }
+    );
+    console.log(`Cohorts for program ${programId}:`, response.data);
+    return response.data || []; // Ensure returning an array
+  } catch (error) {
+    console.error(`Error fetching cohorts for program ${programId}:`, error);
+    return []; // Return empty array on error for graceful handling in CohortsList
+  }
+};
+
 const Programs = () => {
-  const { incubatorPrograms, addProgram, updateProgram, addCohort, updateCohort, refetchPrograms } = useIncubator();
-  const [programs, setPrograms] = useState([]);
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [isPending, startTransition] = useTransition();
+  
+  // Access the context to use the pre-fetched data
+  const { 
+    incubatorPrograms, 
+    isLoading: { programs: programsLoading },
+    error: { programs: programsError },
+    refetchPrograms,
+    addProgram,
+    updateProgram,
+    addCohort,
+    updateCohort 
+  } = useIncubatorContext();
+
+  const queryClient = useQueryClient();
+  
   const [people, setPeople] = useState([]);
   const [expandedPrograms, setExpandedPrograms] = useState(new Set());
   const [showAddCohortModal, setShowAddCohortModal] = useState(false);
@@ -220,42 +287,24 @@ const Programs = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showDocumentsModal, setShowDocumentsModal] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const fetchProgramsData = async () => {
-    console.log("Fetching programs data via fetchProgramsData...");
-    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-    try {
-      const response = await axios.get(`${config.api_base_url}/incubator/programs/`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      console.log("Raw programs data:", response.data);
-      return response.data || [];
-    } catch (error) {
-      console.error("Error fetching programs via query:", error);
-      setErrorMessage('Error fetching programs');
-      throw error;
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/login');
     }
-  };
+  }, [isAuthenticated, authLoading, navigate]);
 
-  const { data: fetchedProgramsData, isLoading: isLoadingProgramsQuery, error: programsError } = useQuery({
-    queryKey: ['programsList'],
-    queryFn: fetchProgramsData,
-    enabled: !incubatorPrograms,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const allPrograms = useMemo(() => {
-    const programsSource = incubatorPrograms || fetchedProgramsData || [];
-    console.log("Determined program source:", programsSource);
-    return Array.isArray(programsSource) ? programsSource : [];
-  }, [incubatorPrograms, fetchedProgramsData]);
-
+  // Pre-fetch and cache people data
   const fetchPeople = useCallback(async () => {
     console.log("Fetching people...");
     const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    
+    if (!token) {
+      console.error("No token available");
+      return;
+    }
+    
     try {
       const response = await axios.get(`${config.api_base_url}/incubator/people/`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -271,420 +320,460 @@ const Programs = () => {
   }, []);
 
   useEffect(() => {
-    fetchPeople();
-  }, [fetchPeople]);
+    // Only fetch people when authenticated and component mounts
+    if (isAuthenticated && !authLoading) {
+      fetchPeople();
+    }
+  }, [isAuthenticated, authLoading, fetchPeople]);
 
+  // Toggle program expansion
   const toggleProgram = useCallback((programId) => {
-    setExpandedPrograms(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(programId)) {
-        newSet.delete(programId);
-      } else {
-        newSet.add(programId);
-      }
-      return newSet;
+    startTransition(() => {
+      setExpandedPrograms(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(programId)) {
+          newSet.delete(programId);
+        } else {
+          newSet.add(programId);
+          // Pre-fetch cohorts data for this program
+          queryClient.prefetchQuery({
+            queryKey: ['cohorts', programId],
+            queryFn: () => fetchProgramCohorts(programId),
+            staleTime: 5 * 60 * 1000 // 5 minutes
+          });
+        }
+        return newSet;
+      });
     });
-  }, []);
+  }, [queryClient]);
 
+  // Handle add cohort click
   const handleAddCohortClick = useCallback((program) => {
     if (!program || !program.id) {
-        console.error("Invalid program selected for adding cohort");
-        setErrorMessage("Cannot add cohort: Invalid program data.");
-        return;
+      console.error("Invalid program selected for adding cohort");
+      setErrorMessage("Cannot add cohort: Invalid program data.");
+      return;
     }
+    
     if (!program.is_active) {
-        setErrorMessage("Cannot add cohort to an inactive program.");
-        return;
+      setErrorMessage("Cannot add cohort to an inactive program.");
+      return;
     }
-    setSelectedProgram(program);
-    setFormData({
+    
+    startTransition(() => {
+      setSelectedProgram(program);
+      setFormData({
         cohort_name: '',
         start_date: '',
         end_date: '',
         status: 'active' 
+      });
+      setErrorMessage('');
+      setShowAddCohortModal(true);
     });
-    setErrorMessage('');
-    setShowAddCohortModal(true);
-}, []);
+  }, []);
 
-const handleAddCohortSubmit = useCallback(async (e) => {
+  // Handle add cohort submission
+  const handleAddCohortSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!selectedProgram || !selectedProgram.id) {
-        setErrorMessage("No program selected or invalid program ID.");
-        return;
+      setErrorMessage("No program selected or invalid program ID.");
+      return;
     }
 
     if (!formData.cohort_name || !formData.start_date || !formData.end_date || !formData.status) {
-        setErrorMessage("Please fill in all required cohort fields.");
-        return;
+      setErrorMessage("Please fill in all required cohort fields.");
+      return;
     }
-
-    console.log("Submitting cohort data:", { ...formData, program: selectedProgram.id });
 
     try {
-        await addCohort({ ...formData, program_id: selectedProgram.id }); 
-        
-        setSuccessMessage('Cohort added successfully!');
-        setShowAddCohortModal(false);
-
-        setTimeout(() => setSuccessMessage(''), 3000);
-
+      await addCohort({ 
+        program_id: selectedProgram.id, 
+        cohort_name: formData.cohort_name,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        status: formData.status
+      });
+      
+      setSuccessMessage('Cohort added successfully!');
+      setShowAddCohortModal(false);
+      
+      // Invalidate and refetch programs and cohorts data
+      queryClient.invalidateQueries(['cohorts', selectedProgram.id]);
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-        console.error("Error adding cohort:", error);
-        const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to add cohort. Please try again.';
-        if (apiErrorMessage.includes("cohort with this cohort name already exists")) {
-             setErrorMessage('A cohort with this name already exists in this program.');
-        } else {
-             setErrorMessage(apiErrorMessage);
-        }
+      console.error("Error adding cohort:", error);
+      const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to add cohort. Please try again.';
+      if (apiErrorMessage.includes("cohort with this cohort name already exists")) {
+        setErrorMessage('A cohort with this name already exists in this program.');
+      } else {
+        setErrorMessage(apiErrorMessage);
+      }
     }
-}, [selectedProgram, formData, addCohort, queryClient, refetchPrograms]);
+  }, [selectedProgram, formData, addCohort, queryClient]);
 
-const handleAssignAdminClick = useCallback((program) => {
+  // Handle assign admin click
+  const handleAssignAdminClick = useCallback((program) => {
     if (!program || !program.id) {
-        console.error("Invalid program selected for assigning admin");
-        setErrorMessage("Cannot assign admin: Invalid program data.");
-        return;
+      console.error("Invalid program selected for assigning admin");
+      setErrorMessage("Cannot assign admin: Invalid program data.");
+      return;
     }
-    setSelectedProgram(program);
-    setSelectedAdmin('');
-    setErrorMessage('');
-    setShowAssignAdminModal(true);
-}, []);
+    
+    startTransition(() => {
+      setSelectedProgram(program);
+      setSelectedAdmin('');
+      setErrorMessage('');
+      setShowAssignAdminModal(true);
+    });
+  }, []);
 
-const handleAssignAdminSubmit = useCallback(async (e) => {
+  // Handle assign admin submission
+  const handleAssignAdminSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!selectedProgram || !selectedProgram.id || !selectedAdmin) {
-        setErrorMessage("Please select a program and an admin.");
-        return;
+      setErrorMessage("Please select a program and an admin.");
+      return;
     }
 
-    console.log(`Assigning admin ${selectedAdmin} to program ${selectedProgram.id}`);
-    
     const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
     try {
-        await axios.post(
-            `${config.api_base_url}/programadmin/${selectedProgram.id}`,
-            { admin_id: selectedAdmin },
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+      await axios.post(
+        `${config.api_base_url}/programadmin/${selectedProgram.id}`,
+        { admin_id: selectedAdmin },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-        setSuccessMessage('Admin assigned successfully!');
-        setShowAssignAdminModal(false);
-        setSelectedAdmin('');
-
-        setTimeout(() => setSuccessMessage(''), 3000);
-
+      setSuccessMessage('Admin assigned successfully!');
+      setShowAssignAdminModal(false);
+      setSelectedAdmin('');
+      refetchPrograms(); // Refresh programs data
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-        console.error("Error assigning admin:", error);
-        const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to assign admin. Please try again.';
-        setErrorMessage(apiErrorMessage);
+      console.error("Error assigning admin:", error);
+      const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to assign admin. Please try again.';
+      setErrorMessage(apiErrorMessage);
     }
-}, [selectedProgram, selectedAdmin, queryClient, refetchPrograms]);
+  }, [selectedProgram, selectedAdmin, refetchPrograms]);
 
-const handleEditProgram = useCallback((program) => {
-    setProgramToUpdate({ ...program });
-    setShowUpdateProgramModal(true);
-}, []);
+  // Handle edit program
+  const handleEditProgram = useCallback((program) => {
+    startTransition(() => {
+      setProgramToUpdate({ ...program });
+      setShowUpdateProgramModal(true);
+    });
+  }, []);
 
-const handleUpdateProgramSubmit = useCallback(async (e) => {
+  // Handle update program submission
+  const handleUpdateProgramSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!programToUpdate || !programToUpdate.id) return;
 
     try {
-        await updateProgram({ 
-            id: programToUpdate.id, 
-            program_name: programToUpdate.program_name, 
-            description: programToUpdate.description,
-            is_active: programToUpdate.is_active
-        });
+      await updateProgram({
+        id: programToUpdate.id,
+        program_name: programToUpdate.program_name,
+        description: programToUpdate.description,
+        is_active: programToUpdate.is_active
+      });
 
-        setSuccessMessage('Program updated successfully!');
-        setShowUpdateProgramModal(false);
-
-        setTimeout(() => setSuccessMessage(''), 3000);
-
+      setSuccessMessage('Program updated successfully!');
+      setShowUpdateProgramModal(false);
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-        console.error("Error updating program:", error);
-        const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to update program.';
-        alert(apiErrorMessage);
+      console.error("Error updating program:", error);
+      const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to update program.';
+      setErrorMessage(apiErrorMessage);
     }
-}, [programToUpdate, updateProgram, queryClient, refetchPrograms]);
+  }, [programToUpdate, updateProgram]);
 
-const fetchProgramCohorts = async (programId) => {
-  console.log(`Fetching cohorts for program ID: ${programId}`);
-  const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-  if (!programId) {
-    console.error("fetchProgramCohorts called with invalid programId");
-    return []; // Return empty array if programId is invalid
-  }
-  try {
-    const response = await axios.get(
-      `${config.api_base_url}/incubator/program/${programId}/cohort/`,
-      {
-        headers: { 'Authorization': `Bearer ${token}` }
-      }
-    );
-    console.log(`Cohorts for program ${programId}:`, response.data);
-    return response.data || []; // Ensure returning an array
-  } catch (error) {
-    console.error(`Error fetching cohorts for program ${programId}:`, error);
-    // Don't throw here, let useQuery handle the error state
-    return []; // Return empty array on error for graceful handling in CohortsList
-  }
-};
+  // Handle add program
+  const handleAddProgram = useCallback(async (e) => {
+    e.preventDefault();
+    
+    if (!newProgramData.program_name || !newProgramData.description) {
+      setErrorMessage("Please fill in all required program fields.");
+      return;
+    }
+    
+    try {
+      await addProgram(newProgramData);
+      setSuccessMessage('Program added successfully!');
+      setShowAddProgramModal(false);
+      setNewProgramData({
+        program_name: '',
+        description: '',
+        is_active: true
+      });
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error("Error adding program:", error);
+      const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to add program.';
+      setErrorMessage(apiErrorMessage);
+    }
+  }, [newProgramData, addProgram]);
 
-if (isLoadingProgramsQuery && !incubatorPrograms) {
+  // Loading, error and data access logic
+  if (authLoading) {
     return <LoadingSpinner />;
-}
+  }
 
-if (programsError && !incubatorPrograms) {
-    return <ErrorDisplay error={programsError} refetch={() => queryClient.refetchQueries(['programsList'])} />;
-}
+  if (!isAuthenticated) {
+    return null; // Will redirect due to useEffect
+  }
 
-console.log("Rendering Programs component with programs:", allPrograms);
+  if (programsLoading && !incubatorPrograms) {
+    return <LoadingSpinner />;
+  }
 
-return (
+  if (programsError && !incubatorPrograms) {
+    return <ErrorDisplay error={programsError} refetch={refetchPrograms} />;
+  }
+
+  return (
     <ErrorBoundary>
-        <div className="programs-container">
-            <div className="programs-header">
-                <h1>Programs</h1>
-                <button 
-                    className="add-program-btn"
-                    onClick={() => setShowAddProgramModal(true)}
-                >
-                    Add Program
-                </button>
-            </div>
-
-            {successMessage && (
-                <div className="success-popup">
-                    {successMessage}
-                </div>
-            )}
-            {errorMessage && !showAddCohortModal && !showAssignAdminModal && (
-                <div className="error-message">
-                    {errorMessage}
-                </div>
-            )}
-
-            <div className="programs-list-container"> 
-                {allPrograms.length > 0 ? (
-                    allPrograms.map(program => (
-                        <ProgramCard
-                            key={program.id}
-                            program={program}
-                            onToggle={toggleProgram}
-                            isExpanded={expandedPrograms.has(program.id)}
-                            onEdit={handleEditProgram} 
-                            onAddCohort={handleAddCohortClick}
-                            onAssignAdmin={handleAssignAdminClick}
-                        />
-                    ))
-                ) : (
-                    <div className="no-programs-message">
-                        <p>No programs available.</p> 
-                    </div>
-                )}
-            </div>
-
-            {showAddProgramModal && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
-                        <div className="modal-header">
-                            <h2>Add New Program</h2>
-                            <button className="close-btn" onClick={() => setShowAddProgramModal(false)}>×</button>
-                        </div>
-                        <div className="modal-body">
-                            <form onSubmit={handleAddProgram}>
-                                <div className="form-group">
-                                    <label htmlFor="program_name">Program Name</label>
-                                    <input
-                                        id="program_name"
-                                        type="text"
-                                        value={newProgramData.program_name}
-                                        onChange={(e) => setNewProgramData({ ...newProgramData, program_name: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="description">Description</label>
-                                    <textarea
-                                        id="description"
-                                        value={newProgramData.description}
-                                        onChange={(e) => setNewProgramData({ ...newProgramData, description: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-actions">
-                                    <button type="submit" className="submit-btn">Add Program</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showAddCohortModal && selectedProgram && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
-                        <div className="modal-header">
-                            <h2>Add Cohort to {selectedProgram.program_name}</h2>
-                            <button className="close-btn" onClick={() => { setShowAddCohortModal(false); setErrorMessage(''); }}>×</button>
-                        </div>
-                        <div className="modal-body">
-                            {errorMessage && (
-                                <div className="error-message modal-error">{errorMessage}</div>
-                            )}
-                            <form onSubmit={handleAddCohortSubmit}> 
-                                <div className="form-group">
-                                    <label htmlFor="cohort_name">Cohort Name</label>
-                                    <input
-                                        id="cohort_name"
-                                        type="text"
-                                        value={formData.cohort_name}
-                                        onChange={(e) => setFormData({ ...formData, cohort_name: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="start_date">Start Date</label>
-                                    <input
-                                        id="start_date"
-                                        type="date"
-                                        value={formData.start_date}
-                                        onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="end_date">End Date</label>
-                                    <input
-                                        id="end_date"
-                                        type="date"
-                                        value={formData.end_date}
-                                        onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Status</label>
-                                    <div className="status-toggle">
-                                        <button
-                                            type="button"
-                                            className={`status-btn ${formData.status === 'active' ? 'active' : ''}`}
-                                            onClick={() => setFormData({ ...formData, status: 'active' })}
-                                        >Active</button>
-                                        <button
-                                            type="button"
-                                            className={`status-btn ${formData.status === 'closed' ? 'active' : ''}`}
-                                            onClick={() => setFormData({ ...formData, status: 'closed' })}
-                                        >Closed</button>
-                                    </div>
-                                </div>
-                                <div className="form-actions">
-                                    <button type="submit" className="submit-btn">Save Cohort</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showAssignAdminModal && selectedProgram && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
-                        <div className="modal-header">
-                            <h2>Assign Admin to {selectedProgram.program_name}</h2>
-                            <button className="close-btn" onClick={() => { setShowAssignAdminModal(false); setErrorMessage(''); }}>×</button>
-                        </div>
-                        <div className="modal-body">
-                            {errorMessage && (
-                                <div className="error-message modal-error">{errorMessage}</div>
-                            )}
-                            <form onSubmit={handleAssignAdminSubmit}> 
-                                <div className="form-group">
-                                    <label htmlFor="admin-select">Select Admin</label>
-                                    <select
-                                        id="admin-select"
-                                        value={selectedAdmin}
-                                        onChange={(e) => setSelectedAdmin(e.target.value)}
-                                        required
-                                    >
-                                        <option value="" disabled>-- Select an Admin --</option>
-                                        {people.length > 0 ? (
-                                            people.map(person => (
-                                                <option key={person.id} value={person.id}>
-                                                    {person.name}
-                                                </option>
-                                            ))
-                                        ) : (
-                                            <option value="" disabled>Loading admins...</option>
-                                        )}
-                                    </select>
-                                </div>
-                                <div className="form-actions">
-                                    <button type="submit" className="submit-btn" disabled={!selectedAdmin}>Assign Admin</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showUpdateProgramModal && programToUpdate && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
-                        <div className="modal-header">
-                            <h2>Update Program</h2>
-                            <button className="close-btn" onClick={() => setShowUpdateProgramModal(false)}>×</button>
-                        </div>
-                        <div className="modal-body">
-                            <form onSubmit={handleUpdateProgramSubmit}> 
-                                <div className="form-group">
-                                    <label htmlFor="update_program_name">Program Name</label>
-                                    <input
-                                        id="update_program_name"
-                                        type="text"
-                                        value={programToUpdate.program_name}
-                                        onChange={(e) => setProgramToUpdate({ ...programToUpdate, program_name: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="update_description">Description</label>
-                                    <textarea
-                                        id="update_description"
-                                        value={programToUpdate.description}
-                                        onChange={(e) => setProgramToUpdate({ ...programToUpdate, description: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group checkbox-group"> 
-                                    <input
-                                        id="update_is_active"
-                                        type="checkbox"
-                                        checked={programToUpdate.is_active}
-                                        onChange={(e) => setProgramToUpdate({ ...programToUpdate, is_active: e.target.checked })}
-                                    />
-                                    <label htmlFor="update_is_active">Active Program</label>
-                                </div>
-                                <div className="form-actions">
-                                    <button type="submit" className="submit-btn">Update Program</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )}
+      <div className="programs-container">
+        <div className="programs-header">
+          <h1>Programs</h1>
+          <button 
+            className="add-program-btn"
+            onClick={() => setShowAddProgramModal(true)}
+          >
+            Add Program
+          </button>
         </div>
+
+        {successMessage && (
+          <div className="success-popup">
+            {successMessage}
+          </div>
+        )}
+        
+        {errorMessage && !showAddCohortModal && !showAssignAdminModal && (
+          <div className="error-message">
+            {errorMessage}
+          </div>
+        )}
+
+        <div className="programs-list-container">
+          {isPending ? (
+            <LoadingSpinner />
+          ) : incubatorPrograms?.length > 0 ? (
+            incubatorPrograms.map(program => (
+              <ProgramCard
+                key={program.id}
+                program={program}
+                onToggle={toggleProgram}
+                isExpanded={expandedPrograms.has(program.id)}
+                onEdit={handleEditProgram}
+                onAddCohort={handleAddCohortClick}
+                onAssignAdmin={handleAssignAdminClick}
+              />
+            ))
+          ) : (
+            <div className="no-programs-message">
+              <p>No programs available.</p>
+            </div>
+          )}
+        </div>
+
+        {showAddProgramModal && (
+          <div className="modal-overlay">
+            <div className="modal-container">
+              <div className="modal-header">
+                <h2>Add New Program</h2>
+                <button className="close-btn" onClick={() => setShowAddProgramModal(false)}>×</button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleAddProgram}>
+                  <div className="form-group">
+                    <label htmlFor="program_name">Program Name</label>
+                    <input
+                      id="program_name"
+                      type="text"
+                      value={newProgramData.program_name}
+                      onChange={(e) => setNewProgramData({ ...newProgramData, program_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="description">Description</label>
+                    <textarea
+                      id="description"
+                      value={newProgramData.description}
+                      onChange={(e) => setNewProgramData({ ...newProgramData, description: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="submit-btn">Add Program</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showAddCohortModal && selectedProgram && (
+          <div className="modal-overlay">
+            <div className="modal-container">
+              <div className="modal-header">
+                <h2>Add Cohort to {selectedProgram.program_name}</h2>
+                <button className="close-btn" onClick={() => { setShowAddCohortModal(false); setErrorMessage(''); }}>×</button>
+              </div>
+              <div className="modal-body">
+                {errorMessage && (
+                  <div className="error-message modal-error">{errorMessage}</div>
+                )}
+                <form onSubmit={handleAddCohortSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="cohort_name">Cohort Name</label>
+                    <input
+                      id="cohort_name"
+                      type="text"
+                      value={formData.cohort_name}
+                      onChange={(e) => setFormData({ ...formData, cohort_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="start_date">Start Date</label>
+                    <input
+                      id="start_date"
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="end_date">End Date</label>
+                    <input
+                      id="end_date"
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Status</label>
+                    <div className="status-toggle">
+                      <button
+                        type="button"
+                        className={`status-btn ${formData.status === 'active' ? 'active' : ''}`}
+                        onClick={() => setFormData({ ...formData, status: 'active' })}
+                      >Active</button>
+                      <button
+                        type="button"
+                        className={`status-btn ${formData.status === 'closed' ? 'active' : ''}`}
+                        onClick={() => setFormData({ ...formData, status: 'closed' })}
+                      >Closed</button>
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="submit-btn">Save Cohort</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showAssignAdminModal && selectedProgram && (
+          <div className="modal-overlay">
+            <div className="modal-container">
+              <div className="modal-header">
+                <h2>Assign Admin to {selectedProgram.program_name}</h2>
+                <button className="close-btn" onClick={() => { setShowAssignAdminModal(false); setErrorMessage(''); }}>×</button>
+              </div>
+              <div className="modal-body">
+                {errorMessage && (
+                  <div className="error-message modal-error">{errorMessage}</div>
+                )}
+                <form onSubmit={handleAssignAdminSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="admin-select">Select Admin</label>
+                    <select
+                      id="admin-select"
+                      value={selectedAdmin}
+                      onChange={(e) => setSelectedAdmin(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>-- Select an Admin --</option>
+                      {people.length > 0 ? (
+                        people.map(person => (
+                          <option key={person.id} value={person.id}>
+                            {person.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>Loading admins...</option>
+                      )}
+                    </select>
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="submit-btn" disabled={!selectedAdmin}>Assign Admin</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showUpdateProgramModal && programToUpdate && (
+          <div className="modal-overlay">
+            <div className="modal-container">
+              <div className="modal-header">
+                <h2>Update Program</h2>
+                <button className="close-btn" onClick={() => setShowUpdateProgramModal(false)}>×</button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleUpdateProgramSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="update_program_name">Program Name</label>
+                    <input
+                      id="update_program_name"
+                      type="text"
+                      value={programToUpdate.program_name}
+                      onChange={(e) => setProgramToUpdate({ ...programToUpdate, program_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="update_description">Description</label>
+                    <textarea
+                      id="update_description"
+                      value={programToUpdate.description}
+                      onChange={(e) => setProgramToUpdate({ ...programToUpdate, description: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group checkbox-group">
+                    <input
+                      id="update_is_active"
+                      type="checkbox"
+                      checked={programToUpdate.is_active}
+                      onChange={(e) => setProgramToUpdate({ ...programToUpdate, is_active: e.target.checked })}
+                    />
+                    <label htmlFor="update_is_active">Active Program</label>
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="submit-btn">Update Program</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </ErrorBoundary>
-);
+  );
 };
 
 export default Programs;

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
+import { useOutletContext } from 'react-router-dom';
 import './Fees.css';
 
-const Fees = ({ startupId }) => {
-  const [charges, setCharges] = useState([]);
+const Fees = () => {
+  const { startup } = useOutletContext();
+  const fees = startup?.fees || [];
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [editCharge, setEditCharge] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,33 +18,9 @@ const Fees = ({ startupId }) => {
     status: ''
   });
 
-  useEffect(() => {
-    if (startupId) {
-      fetchSchedule();
-    }
-  }, [startupId]);
-
-  const fetchSchedule = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${config.api_base_url}/incubator/charges/${startupId}/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
-        }
-      });
-      setCharges(response.data);
-      setLoading(false);
-      return response.data.length > 0;
-    } catch (error) {
-      console.error("Error fetching charges:", error.response ? error.response.data : error.message);
-      setLoading(false);
-      return false;
-    }
-  };
-
   const handleCreateSchedule = async (totalAmount, frequency) => {
     const payload = {
-      startup: startupId,
+      startup: startup.id,
       amount: totalAmount,
       frequency: frequency
     };
@@ -80,7 +58,7 @@ const Fees = ({ startupId }) => {
         }
       );
       setEditCharge(null);
-      setCharges((prevCharges) => prevCharges.map((charge) => (charge.id === updatedCharge.id ? updatedCharge : charge)));
+      await fetchSchedule();
       setLoading(false);
     } catch (error) {
       console.error("Error updating charge:", error.response ? error.response.data : error.message);
@@ -100,7 +78,7 @@ const Fees = ({ startupId }) => {
             }
           }
         );
-        setCharges(charges.filter(charge => charge.id !== chargeId));
+        await fetchSchedule();
         setLoading(false);
       } catch (error) {
         console.error("Error deleting charge:", error.response ? error.response.data : error.message);
@@ -109,8 +87,71 @@ const Fees = ({ startupId }) => {
     }
   };
 
+  const fetchSchedule = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${config.api_base_url}/incubator/charges/${startup.id}/`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+        }
+      });
+      setLoading(false);
+      return response.data.length > 0;
+    } catch (error) {
+      console.error("Error fetching charges:", error.response ? error.response.data : error.message);
+      setLoading(false);
+      return false;
+    }
+  };
+
+  if (!startup) {
+    return (
+      <div className="error-container">
+        <h3>Error</h3>
+        <p>Startup information not found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="fees-container">
+      <h2>Fee Records</h2>
+      
+      {fees.length === 0 ? (
+        <div className="no-fees">
+          <p>No fee records have been added yet.</p>
+        </div>
+      ) : (
+        <div className="fees-table-container">
+          <table className="fees-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Fee Type</th>
+                <th>Payment Status</th>
+                <th>Due Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fees.map((fee, index) => (
+                <tr key={fee.id || index} className={fee.status === 'Paid' ? 'paid' : 'unpaid'}>
+                  <td>{fee.payment_date || 'N/A'}</td>
+                  <td className="amount">₹{fee.amount?.toLocaleString() || 'N/A'}</td>
+                  <td>{fee.type || 'Regular Fee'}</td>
+                  <td>
+                    <span className={`status-badge ${fee.status?.toLowerCase() || 'pending'}`}>
+                      {fee.status || 'Pending'}
+                    </span>
+                  </td>
+                  <td>{fee.due_date || 'N/A'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       <div className="fees-content">
         <div className="fees-header">
           <button className="add-fee-btn" onClick={() => setShowSchedulePopup(true)} disabled={loading}>
@@ -118,57 +159,10 @@ const Fees = ({ startupId }) => {
           </button>
         </div>
 
-        {loading && charges.length === 0 && (
+        {loading && fees.length === 0 && (
           <div className="loading-container">
             <div className="spinner"></div>
             <p>Loading fees...</p>
-          </div>
-        )}
-
-        {!loading && charges.length === 0 ? (
-          <div className="no-fees">
-            <p>No fees have been set up for this startup.</p>
-            <p>Click the "Add Fee" button to create a fee schedule.</p>
-          </div>
-        ) : (
-          <div className="fees-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Amount</th>
-                  <th>Due Date</th>
-                  <th>Frequency</th>
-                  <th>Fee Type</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {charges.map((charge) => (
-                  <tr key={charge.id}>
-                    <td>{charge.amount} Rs</td>
-                    <td>{charge.due_date}</td>
-                    <td>{charge.frequency}</td>
-                    <td>{charge.fee_type}</td>
-                    <td>
-                      <span className={`status-badge ${charge.status.toLowerCase()}`}>
-                        {charge.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button className="edit-btn" onClick={() => setEditCharge(charge)} disabled={loading}>
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        <button className="delete-btn" onClick={() => handleDeleteCharge(charge.id)} disabled={loading}>
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         )}
 
