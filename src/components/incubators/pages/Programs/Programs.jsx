@@ -2,7 +2,7 @@ import React, { useState, useEffect, Suspense, useCallback, useMemo, useTransiti
 import axios from 'utils/httpClient';
 import config from 'config';
 import './Programs.css';
-import { KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
+import { KeyboardArrowUp, KeyboardArrowDown, Add, Edit, AdminPanelSettings, Group, Description } from '@mui/icons-material';
 import { useIncubator } from '../../../../hooks/useIncubator';
 import { useIncubatorContext } from '../../../../context/IncubatorContext';
 import ThaparInnovate from './IncuabtorImage.png';
@@ -28,11 +28,11 @@ const ErrorDisplay = ({ error, refetch }) => (
 );
 
 const ProgramCard = ({ program, onToggle, isExpanded, onEdit, onAddCohort, onAssignAdmin }) => (
-  <div className="program-card">
+  <div className={`program-card ${isExpanded ? 'expanded' : ''}`}>
     <div className="program-header">
       <div className="program-info-wrapper">
         <div className="program-logo">
-          <img src={ThaparInnovate} alt={program.program_name} />
+          <img src={program.image_url || ThaparInnovate} alt={program.program_name} />
         </div>
         <div className="program-title">
           <h2>{program.program_name}</h2>
@@ -44,16 +44,16 @@ const ProgramCard = ({ program, onToggle, isExpanded, onEdit, onAddCohort, onAss
           className="edit-program-btn"
           onClick={() => onEdit(program)}
         >
-          Edit Program
+          <Edit /> <span>Edit</span>
         </button>
         <button 
           className="expand-btn"
           onClick={() => onToggle(program.id)}
         >
           {isExpanded ? (
-            <span>Collapse <KeyboardArrowUp /></span>
+            <><KeyboardArrowUp /> <span>Collapse</span></>
           ) : (
-            <span>Expand <KeyboardArrowDown /></span>
+            <><KeyboardArrowDown /> <span>Expand</span></>
           )}
         </button>
       </div>
@@ -66,13 +66,13 @@ const ProgramCard = ({ program, onToggle, isExpanded, onEdit, onAddCohort, onAss
             className="add-cohort-btn"
             onClick={() => onAddCohort(program)}
           >
-            Add Cohort
+            <Add /> Add Cohort
           </button>
           <button 
             className="assign-admin-btn"
             onClick={() => onAssignAdmin(program)}
           >
-            Assign Admin
+            <AdminPanelSettings /> Assign Admin
           </button>
         </div>
 
@@ -141,74 +141,64 @@ const CohortCard = ({ cohort }) => {
     });
   };
 
+  // Format date strings
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   return (
     <div className="cohort-card">
-      <h3>{cohort.cohort_name}</h3>
+      <div className="cohort-header">
+        <h3>{cohort.cohort_name}</h3>
+        <span className={`status-badge ${cohort.status?.toLowerCase()}`}>{cohort.status}</span>
+      </div>
       
       <div className="cohort-details">
         <div className="detail-row">
           <span className="detail-label">Start Date:</span>
-          <span className="detail-value">{new Date(cohort.start_date).toLocaleDateString()}</span>
+          <span className="detail-value">{formatDate(cohort.start_date)}</span>
         </div>
         
         <div className="detail-row">
           <span className="detail-label">End Date:</span>
-          <span className="detail-value">{new Date(cohort.end_date).toLocaleDateString()}</span>
+          <span className="detail-value">{formatDate(cohort.end_date)}</span>
+        </div>
+      </div>
+      
+      <div className="action-buttons-grid">
+        <div className="action-buttons-row">
+          <button className="action-btn edit-btn">
+            <Edit fontSize="small" />
+            <span>Edit</span>
+          </button>
+          
+          <button 
+            className="action-btn people-btn"
+            onClick={() => handleActionClick('addPeople')}
+          >
+            <Group fontSize="small" />
+            <span>Add People</span>
+          </button>
         </div>
         
-        <div className="detail-row">
-          <span className="detail-label">Status:</span>
-          <span className={`status-badge ${cohort.status}`}>{cohort.status}</span>
+        <div className="action-buttons-row">
+          <button 
+            className="action-btn view-btn"
+            onClick={() => handleActionClick('viewPeople')}
+          >
+            <Group fontSize="small" />
+            <span>View People</span>
+          </button>
+          
+          <button 
+            className="action-btn doc-btn"
+            onClick={() => handleActionClick('documents')}
+          >
+            <Description fontSize="small" />
+            <span>Documents</span>
+          </button>
         </div>
-      </div>
-      
-      <div className="action-row">
-        <button 
-          className="edit-btn"
-          onClick={() => {
-            // Handle edit
-          }}
-        >
-          Edit
-        </button>
-        <button 
-          className="delete-btn"
-          onClick={() => {
-            // Handle delete
-          }}
-        >
-          Delete
-        </button>
-      </div>
-      
-      <div className="action-row">
-        <button 
-          className="add-people-btn"
-          onClick={() => handleActionClick('addPeople')}
-        >
-          Add People
-        </button>
-        <button 
-          className="view-people-btn"
-          onClick={() => handleActionClick('viewPeople')}
-        >
-          View People
-        </button>
-      </div>
-      
-      <div className="action-row">
-        <button 
-          className="assign-task-btn"
-          onClick={() => handleActionClick('assignTask')}
-        >
-          Assign Task
-        </button>
-        <button 
-          className="documents-btn"
-          onClick={() => handleActionClick('documents')}
-        >
-          Documents
-        </button>
       </div>
     </div>
   );
@@ -544,7 +534,7 @@ const Programs = () => {
             className="add-program-btn"
             onClick={() => setShowAddProgramModal(true)}
           >
-            Add Program
+            <Add /> Add Program
           </button>
         </div>
 

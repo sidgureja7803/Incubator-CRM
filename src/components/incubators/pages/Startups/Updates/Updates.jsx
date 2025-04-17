@@ -1,16 +1,75 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import axios from 'utils/httpClient';
+import config from 'config';
 import './Updates.css';
 
 const Updates = () => {
   const { startup } = useOutletContext();
-  const updates = startup?.updates || [];
+  const [updates, setUpdates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    const fetchStartupUpdates = async () => {
+      if (!startup || !startup.startup_id) return;
+      
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+        
+        const response =  await axios.get(`${config.api_base_url}/incubator/view-regular-updates/`, 
+          {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }
+        );
+        
+        // Process response data - format dates and sort by date (newest first)
+        const formattedUpdates = response.data.map(update => ({
+          ...update,
+          date: new Date(update.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+        setUpdates(formattedUpdates);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching startup updates:", err);
+        setError("Failed to load startup updates. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStartupUpdates();
+  }, [startup]);
 
   if (!startup) {
     return (
       <div className="error-container">
         <h3>Error</h3>
         <p>Startup information not found</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading updates...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <h3>Error</h3>
+        <p>{error}</p>
       </div>
     );
   }
@@ -33,11 +92,11 @@ const Updates = () => {
               </div>
               <div className="update-content">
                 <div className="update-header">
-                  <h3>{update.title || 'Update'}</h3>
-                  <span className="update-date">{update.date || 'Unknown date'}</span>
+                  <h3>{update.title || update.month + ' ' + update.year || 'Update'}</h3>
+                  <span className="update-date">{update.date}</span>
                 </div>
                 <div className="update-body">
-                  <p>{update.content || 'No details available.'}</p>
+                  <p>{update.description || update.content || 'No details available.'}</p>
                 </div>
                 {update.attachment_url && (
                   <div className="update-attachment">
