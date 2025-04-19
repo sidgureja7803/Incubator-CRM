@@ -10,7 +10,7 @@ const StartupDetailView = React.lazy(() => import('./Startups/StartupDetailView'
 const StartupBasicInfo = React.lazy(() => import('./Info/Info'));
 const StartupAwards = React.lazy(() => import('./Awards/Awards'));
 const StartupFunding = React.lazy(() => import('./Funding/Funding'));
-const StartupTeam = React.lazy(() => import('./Team/Team'));
+const StartupTeam = React.lazy(() => import('./Team/StartupTeam'));
 const StartupProperties = React.lazy(() => import('./IP/IntellectualProperties'));
 const StartupUpdates = React.lazy(() => import('./Updates/Updates'));
 const StartupFees = React.lazy(() => import('./Fees/Fees'));

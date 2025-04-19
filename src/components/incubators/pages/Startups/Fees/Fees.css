@@ -124,3 +124,290 @@
     padding: 0.5rem 0.75rem;
   }
 }
+
+.fee-container {
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.fee-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.add-fee-button {
+  background-color: #2b3a67;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-fee-button:hover {
+  background-color: #1e2a4a;
+}
+
+.fee-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.fee-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fee-table th {
+  background-color: #f9f9f9;
+  color: #333;
+  font-weight: 600;
+  text-align: left;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.fee-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+}
+
+.fee-table tr:last-child td {
+  border-bottom: none;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.paid {
+  background-color: #e6f7ee;
+  color: #0d9f4f;
+}
+
+.status-badge.pending {
+  background-color: #fff8e6;
+  color: #e6a700;
+}
+
+.status-badge.unpaid {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button.edit {
+  color: #2b3a67;
+}
+
+.action-button.delete {
+  color: #d32f2f;
+}
+
+/* Pagination styles */
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.page-info {
+  margin-right: 20px;
+}
+
+.rows-per-page {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.rows-per-page span {
+  margin-right: 10px;
+}
+
+.rows-per-page select {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.page-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.page-button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.page-button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Modal styles */
+.fee-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.fee-modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 550px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.fee-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.fee-modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.fee-modal form {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.form-group input::placeholder,
+.form-group select::placeholder {
+  color: #999;
+}
+
+.date-input-container {
+  position: relative;
+}
+
+.date-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 18px;
+}
+
+.select-container {
+  position: relative;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #666;
+  font-size: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.save-button {
+  background-color: #2b3a67;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover {
+  background-color: #1e2a4a;
+}

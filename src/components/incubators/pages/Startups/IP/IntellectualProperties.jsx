@@ -1,20 +1,67 @@
-import React from 'react';
-import { useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import axios from 'utils/httpClient';
+import config from '../../../../../config';
 import './IntellectualProperties.css';
 
 const IntellectualProperties = () => {
-  const { startup } = useOutletContext();
+  const [intellectualProperties, setIntellectualProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [startupId, setStartupId] = useState(null);
 
-  if (!startup) {
+  // Get startup ID from URL
+  useEffect(() => {
+    const path = window.location.pathname;
+    const matches = path.match(/\/startups\/(\d+)/);
+    if (matches && matches[1]) {
+      setStartupId(matches[1]);
+    }
+  }, []);
+
+  // Fetch IP data directly
+  useEffect(() => {
+    if (!startupId) return;
+    
+    const fetchIP = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+        const response = await axios.get(
+          `${config.api_base_url}/incubator/startup/${startupId}/intellectual-properties/`,
+          {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }
+        );
+        setIntellectualProperties(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching intellectual properties:", err);
+        setError("Failed to load intellectual properties. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIP();
+  }, [startupId]);
+
+  if (loading) {
     return (
-      <div className="error-container">
-        <h3>Error</h3>
-        <p>Startup information not found</p>
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading intellectual properties...</p>
       </div>
     );
   }
 
-  const intellectualProperties = startup.intellectual_properties || [];
+  if (error) {
+    return (
+      <div className="error-container">
+        <h3>Error</h3>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="ip-container">
@@ -43,7 +90,9 @@ const IntellectualProperties = () => {
 
                 <div className="ip-info-row">
                   <span className="label">Filing Date:</span>
-                  <span className="value">{property.filing_date || 'N/A'}</span>
+                  <span className="value">
+                    {property.filing_date ? new Date(property.filing_date).toLocaleDateString() : 'N/A'}
+                  </span>
                 </div>
 
                 <div className="ip-info-row">
@@ -56,7 +105,9 @@ const IntellectualProperties = () => {
                 {property.grant_date && (
                   <div className="ip-info-row">
                     <span className="label">Grant Date:</span>
-                    <span className="value">{property.grant_date}</span>
+                    <span className="value">
+                      {new Date(property.grant_date).toLocaleDateString()}
+                    </span>
                   </div>
                 )}
               </div>
@@ -75,4 +126,4 @@ const IntellectualProperties = () => {
   );
 };
 
-export default IntellectualProperties; 
+export default IntellectualProperties;

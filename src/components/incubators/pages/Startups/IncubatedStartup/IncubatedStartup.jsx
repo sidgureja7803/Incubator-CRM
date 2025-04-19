@@ -8,7 +8,7 @@ import './StartupInfo.css';
 import StartupBasicInfo from './Tabs/BasicInfo';
 import StartupAwards from '../Awards/Awards';
 import StartupFunding from '../Funding/Funding';
-import StartupTeam from '../Team/Team';
+import StartupTeam from '../Team/StartupTeam';
 import StartupProperties from '../IP/IntellectualProperties';
 import StartupUpdates from '../Updates/Updates';
 import StartupFee from '../Funding/Funding';

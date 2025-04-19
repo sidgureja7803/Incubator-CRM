@@ -1,145 +1,166 @@
 .funding-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  color: #333;
 }
 
-.funding-container h2 {
+.funding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 15px;
+}
+
+.funding-header h2 {
   font-size: 1.5rem;
-  color: #111827;
-  margin-bottom: 1.5rem;
   font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.total-funding {
+  text-align: right;
+}
+
+.total-funding span {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.total-funding h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
 }
 
 .funding-timeline {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 20px;
 }
 
 .funding-round {
-  display: flex;
-  padding: 0.5rem 0;
-}
-
-.round-marker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 1.5rem;
-}
-
-.round-dot {
-  width: 20px;
-  height: 20px;
-  background-color: #4F46E5;
-  border-radius: 50%;
-  margin-bottom: 0.5rem;
-}
-
-.round-line {
-  flex-grow: 1;
-  width: 2px;
-  background-color: #E5E7EB;
-}
-
-.funding-round:last-child .round-line {
-  display: none;
-}
-
-.round-content {
-  flex: 1;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f9fafb;
 }
 
 .round-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  margin-bottom: 15px;
 }
 
 .round-header h3 {
-  margin: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  color: #111827;
+  color: #333;
+  margin: 0;
 }
 
 .round-date {
-  font-size: 0.875rem;
-  color: #6B7280;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .round-details {
-  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 10px;
 }
 
-.round-amount, .round-investor {
+.detail-row {
   display: flex;
   justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
 }
 
 .label {
-  font-size: 0.875rem;
-  color: #6B7280;
+  font-weight: 500;
+  color: #666;
 }
 
 .value {
-  font-size: 0.875rem;
-  color: #111827;
   font-weight: 500;
+  color: #333;
 }
 
-.round-description {
-  margin: 0.5rem 0 0 0;
-  font-size: 0.875rem;
-  color: #4B5563;
+.investors-section {
+  margin-top: 15px;
+}
+
+.investors-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.investors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.investor-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #e7f1ff;
+  color: #1a56db;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.round-notes {
+  margin-top: 15px;
+}
+
+.round-notes h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.round-notes p {
+  font-size: 0.9rem;
+  color: #666;
   line-height: 1.5;
-  padding-top: 0.5rem;
-  border-top: 1px solid #E5E7EB;
 }
 
 .no-funding {
   text-align: center;
-  padding: 3rem;
-  background: #F9FAFB;
-  border-radius: 0.5rem;
-  border: 1px dashed #D1D5DB;
+  padding: 40px 0;
+  color: #666;
 }
 
-.no-funding p {
-  color: #6B7280;
-  font-size: 0.875rem;
-  margin: 0;
-}
-
-.error-container {
-  padding: 1.5rem;
+.loading-container, .error-container {
+  padding: 40px;
   text-align: center;
-  background: #FEF2F2;
-  border-radius: 0.5rem;
-  color: #B91C1C;
 }
 
-.error-container h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.125rem;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
 }
 
-.error-container p {
-  margin: 0;
-  color: #B91C1C;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Responsive styles */

@@ -1,24 +1,95 @@
-import React from 'react';
-import { useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import axios from 'utils/httpClient';
+import config from '../../../../../config';
 import './Funding.css';
 
 const Funding = () => {
-  const { startup } = useOutletContext();
-  const fundingRounds = startup?.funding_rounds || [];
+  const [fundingRounds, setFundingRounds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [startupId, setStartupId] = useState(null);
 
-  if (!startup) {
+  // Get startup ID from URL
+  useEffect(() => {
+    const path = window.location.pathname;
+    const matches = path.match(/\/startups\/(\d+)/);
+    if (matches && matches[1]) {
+      setStartupId(matches[1]);
+    }
+  }, []);
+
+  // Fetch funding data directly
+  useEffect(() => {
+    if (!startupId) return;
+
+    const fetchFunding = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+        const response = await axios.get(
+          `${config.api_base_url}/incubator/startup/${startupId}/funding/`,
+          {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }
+        );
+        
+        // Process and sort funding rounds by date
+        const sortedFunding = response.data
+          .map(round => ({
+            ...round,
+            date: new Date(round.date),
+            formatted_date: new Date(round.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
+          }))
+          .sort((a, b) => b.date - a.date);
+
+        setFundingRounds(sortedFunding);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching funding rounds:", err);
+        setError("Failed to load funding information. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFunding();
+  }, [startupId]);
+
+  if (loading) {
     return (
-      <div className="error-container">
-        <h3>Error</h3>
-        <p>Startup information not found</p>
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading funding information...</p>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="error-container">
+        <h3>Error</h3>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  // Calculate total funding
+  const totalFunding = fundingRounds.reduce((sum, round) => sum + (round.amount || 0), 0);
+
   return (
     <div className="funding-container">
-      <h2>Funding History</h2>
-      
+      <div className="funding-header">
+        <h2>Funding Rounds</h2>
+        <div className="total-funding">
+          <span>Total Funding</span>
+          <h3>₹{totalFunding.toLocaleString()}</h3>
+        </div>
+      </div>
+
       {fundingRounds.length === 0 ? (
         <div className="no-funding">
           <p>No funding rounds have been added yet.</p>
@@ -27,30 +98,48 @@ const Funding = () => {
         <div className="funding-timeline">
           {fundingRounds.map((round, index) => (
             <div key={round.id || index} className="funding-round">
-              <div className="round-marker">
-                <div className="round-dot"></div>
-                <div className="round-line"></div>
+              <div className="round-header">
+                <h3>{round.round_type || `Series ${index + 1}`}</h3>
+                <span className="round-date">{round.formatted_date}</span>
               </div>
-              <div className="round-content">
-                <div className="round-header">
-                  <h3>{round.round_type || 'Funding Round'}</h3>
-                  <span className="round-date">{round.date || 'Unknown date'}</span>
+              
+              <div className="round-details">
+                <div className="detail-row">
+                  <span className="label">Amount Raised:</span>
+                  <span className="value">₹{round.amount?.toLocaleString() || 'N/A'}</span>
                 </div>
-                <div className="round-details">
-                  <div className="round-amount">
-                    <span className="label">Amount Raised:</span>
-                    <span className="value">{round.amount ? `$${round.amount.toLocaleString()}` : 'Undisclosed'}</span>
-                  </div>
-                  {round.lead_investor && (
-                    <div className="round-investor">
-                      <span className="label">Lead Investor:</span>
-                      <span className="value">{round.lead_investor}</span>
+                
+                <div className="detail-row">
+                  <span className="label">Lead Investor:</span>
+                  <span className="value">{round.lead_investor || 'N/A'}</span>
+                </div>
+                
+                <div className="detail-row">
+                  <span className="label">Valuation:</span>
+                  <span className="value">
+                    {round.valuation ? `₹${round.valuation.toLocaleString()}` : 'N/A'}
+                  </span>
+                </div>
+                
+                {round.investors && round.investors.length > 0 && (
+                  <div className="investors-section">
+                    <h4>Participating Investors</h4>
+                    <div className="investors-list">
+                      {round.investors.map((investor, i) => (
+                        <span key={i} className="investor-tag">
+                          {investor}
+                        </span>
+                      ))}
                     </div>
-                  )}
-                  {round.description && (
-                    <p className="round-description">{round.description}</p>
-                  )}
-                </div>
+                  </div>
+                )}
+                
+                {round.notes && (
+                  <div className="round-notes">
+                    <h4>Notes</h4>
+                    <p>{round.notes}</p>
+                  </div>
+                )}
               </div>
             </div>
           ))}

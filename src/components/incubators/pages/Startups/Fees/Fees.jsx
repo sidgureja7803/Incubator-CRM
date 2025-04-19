@@ -3,267 +3,351 @@ import axios from 'utils/httpClient';
 import config from '../../../../../config';
 import { useOutletContext } from 'react-router-dom';
 import './Fees.css';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import { IoCalendarOutline } from 'react-icons/io5';
 
 const Fees = () => {
   const { startup } = useOutletContext();
-  const fees = startup?.fees || [];
-  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
-  const [editCharge, setEditCharge] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [fees, setFees] = useState([]);
+  const [showAddFeeModal, setShowAddFeeModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [formData, setFormData] = useState({
     amount: '',
-    frequency: 'monthly',
+    frequency: 'Monthly',
     dueDate: '',
     feeType: '',
-    status: ''
+    status: 'Pending'
   });
 
-  const handleCreateSchedule = async (totalAmount, frequency) => {
-    const payload = {
-      startup: startup.id,
-      amount: totalAmount,
-      frequency: frequency
-    };
+  // Load real data from API
+  useEffect(() => {
+    fetchFees();
+  }, [startup]);
 
+  const fetchFees = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      const response = await axios.get(
+        `${config.api_base_url}/incubator/startup/${startup?.startup_id}/fees/`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      setFees(response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching fees:", err);
+      setError("Failed to load fee data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateSchedule = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      const payload = {
+        startup: startup?.startup_id,
+        amount: formData.amount,
+        frequency: formData.frequency,
+        due_date: formData.dueDate,
+        type: formData.feeType,
+        status: formData.status
+      };
+      
+      await axios.post(
         `${config.api_base_url}/incubator/create-charges/`,
         payload,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
-      setShowSchedulePopup(false);
-      await fetchSchedule();
-      setLoading(false);
+      
+      setShowAddFeeModal(false);
+      await fetchFees();
+      
+      // Reset form
+      setFormData({
+        amount: '',
+        frequency: 'Monthly',
+        dueDate: '',
+        feeType: '',
+        status: 'Pending'
+      });
     } catch (error) {
-      console.error("Error creating schedule:", error.response ? error.response.data : error.message);
+      console.error("Error creating fee:", error.response ? error.response.data : error.message);
+      setError("Failed to create fee. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleEditCharge = async (updatedCharge) => {
+  const handleEditCharge = async (feeId) => {
+    try {
+      // Logic to get the current fee data and open edit modal
+      const feeToEdit = fees.find(fee => fee.id === feeId);
+      if (feeToEdit) {
+        setFormData({
+          amount: feeToEdit.amount,
+          frequency: feeToEdit.frequency,
+          dueDate: feeToEdit.due_date,
+          feeType: feeToEdit.type,
+          status: feeToEdit.status
+        });
+        setShowAddFeeModal(true);
+      }
+    } catch (error) {
+      console.error("Error preparing edit:", error);
+    }
+  };
+
+  const handleDeleteCharge = async (feeId) => {
     try {
       setLoading(true);
-      await axios.patch(
-        `${config.api_base_url}/incubator/updatecharge/${updatedCharge.id}/`,
-        updatedCharge,
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      
+      await axios.delete(
+        `${config.api_base_url}/incubator/deletecharge/${feeId}/`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
-      setEditCharge(null);
-      await fetchSchedule();
-      setLoading(false);
+      
+      // Refresh fees after deletion
+      await fetchFees();
     } catch (error) {
-      console.error("Error updating charge:", error.response ? error.response.data : error.message);
+      console.error("Error deleting charge:", error.response ? error.response.data : error.message);
+      setError("Failed to delete fee. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteCharge = async (chargeId) => {
-    if (window.confirm("Are you sure you want to delete this fee?")) {
-      try {
-        setLoading(true);
-        await axios.delete(
-          `${config.api_base_url}/incubator/deletecharge/${chargeId}/`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
-            }
-          }
-        );
-        await fetchSchedule();
-        setLoading(false);
-      } catch (error) {
-        console.error("Error deleting charge:", error.response ? error.response.data : error.message);
-        setLoading(false);
-      }
-    }
-  };
-
-  const fetchSchedule = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${config.api_base_url}/incubator/charges/${startup.id}/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token') || sessionStorage.getItem('access_token')}`
-        }
-      });
-      setLoading(false);
-      return response.data.length > 0;
-    } catch (error) {
-      console.error("Error fetching charges:", error.response ? error.response.data : error.message);
-      setLoading(false);
-      return false;
-    }
-  };
-
-  if (!startup) {
-    return (
-      <div className="error-container">
-        <h3>Error</h3>
-        <p>Startup information not found</p>
-      </div>
-    );
-  }
+  // Pagination logic
+  const totalPages = Math.ceil(fees.length / rowsPerPage);
+  const currentFees = fees.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   return (
-    <div className="fees-container">
-      <h2>Fee Records</h2>
-      
-      {fees.length === 0 ? (
-        <div className="no-fees">
-          <p>No fee records have been added yet.</p>
-        </div>
-      ) : (
-        <div className="fees-table-container">
-          <table className="fees-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Fee Type</th>
-                <th>Payment Status</th>
-                <th>Due Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fees.map((fee, index) => (
-                <tr key={fee.id || index} className={fee.status === 'Paid' ? 'paid' : 'unpaid'}>
-                  <td>{fee.payment_date || 'N/A'}</td>
-                  <td className="amount">₹{fee.amount?.toLocaleString() || 'N/A'}</td>
-                  <td>{fee.type || 'Regular Fee'}</td>
-                  <td>
-                    <span className={`status-badge ${fee.status?.toLowerCase() || 'pending'}`}>
-                      {fee.status || 'Pending'}
-                    </span>
-                  </td>
-                  <td>{fee.due_date || 'N/A'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="fee-container">
+      <div className="fee-header">
+        <button className="add-fee-button" onClick={() => setShowAddFeeModal(true)}>
+          Add Fee
+        </button>
+      </div>
+
+      {loading && (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading fees...</p>
         </div>
       )}
 
-      <div className="fees-content">
-        <div className="fees-header">
-          <button className="add-fee-btn" onClick={() => setShowSchedulePopup(true)} disabled={loading}>
-            {loading ? 'Loading...' : 'Add Fee'}
-          </button>
+      {error && (
+        <div className="error-container">
+          <h3>Error</h3>
+          <p>{error}</p>
         </div>
+      )}
 
-        {loading && fees.length === 0 && (
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <p>Loading fees...</p>
+      {!loading && !error && (
+        <>
+          {fees.length === 0 ? (
+            <div className="no-fees">
+              <p>No fee records have been added yet.</p>
+            </div>
+          ) : (
+            <div className="fee-table-container">
+              <table className="fee-table">
+                <thead>
+                  <tr>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Frequency</th>
+                    <th>Fee Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentFees.map((fee) => (
+                    <tr key={fee.id}>
+                      <td>{fee.amount} Rs</td>
+                      <td>{fee.due_date}</td>
+                      <td>{fee.frequency}</td>
+                      <td>{fee.type}</td>
+                      <td>
+                        <span className={`status-badge ${fee.status.toLowerCase()}`}>
+                          {fee.status}
+                        </span>
+                      </td>
+                      <td className="actions-cell">
+                        <button 
+                          className="action-button edit"
+                          onClick={() => handleEditCharge(fee.id)}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button 
+                          className="action-button delete"
+                          onClick={() => handleDeleteCharge(fee.id)}
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="pagination">
+            <div className="page-info">
+              {fees.length > 0 ? `${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, fees.length)} of ${fees.length}` : '0 - 0 of 0'}
+            </div>
+            <div className="rows-per-page">
+              <span>Rows per page:</span>
+              <select 
+                value={rowsPerPage}
+                onChange={(e) => setRowsPerPage(parseInt(e.target.value))}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+            <div className="page-controls">
+              <button 
+                className="page-button prev" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              >
+                &lt;
+              </button>
+              <button 
+                className="page-button next" 
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              >
+                &gt;
+              </button>
+            </div>
           </div>
-        )}
+        </>
+      )}
 
-        {/* Add Fee Modal */}
-        {showSchedulePopup && (
-          <div className="modal">
-            <div className="modal-content">
-              <h2>Add New Fee</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleCreateSchedule(formData.amount, formData.frequency);
-              }}>
-                <div className="form-group">
-                  <label>Amount</label>
+      {/* Add Fee Modal */}
+      {showAddFeeModal && (
+        <div className="fee-modal-overlay">
+          <div className="fee-modal">
+            <div className="fee-modal-header">
+              <h2>Add Fee</h2>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowAddFeeModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleCreateSchedule}>
+              <div className="form-group">
+                <label htmlFor="amount">Amount</label>
+                <input
+                  type="text"
+                  id="amount"
+                  placeholder="Enter amount here"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="dueDate">Due Date</label>
+                <div className="date-input-container">
                   <input
-                    type="number"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    type="date"
+                    id="dueDate"
+                    placeholder="Select the Due date"
+                    value={formData.dueDate}
+                    onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
                     required
                   />
+                  <span className="date-icon">
+                    <IoCalendarOutline />
+                  </span>
                 </div>
-                <div className="form-group">
-                  <label>Frequency</label>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="frequency">Frequency</label>
+                <div className="select-container">
                   <select
+                    id="frequency"
                     value={formData.frequency}
                     onChange={(e) => setFormData({...formData, frequency: e.target.value})}
                     required
                   >
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Quarterly">Quarterly</option>
+                    <option value="Yearly">Yearly</option>
                   </select>
+                  <span className="select-arrow">▼</span>
                 </div>
-                <div className="modal-actions">
-                  <button type="submit" disabled={loading}>
-                    {loading ? 'Saving...' : 'Save'}
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowSchedulePopup(false)}
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+              </div>
 
-        {/* Edit Fee Modal */}
-        {editCharge && (
-          <div className="modal">
-            <div className="modal-content">
-              <h2>Edit Fee</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleEditCharge({
-                  ...editCharge,
-                  amount: formData.amount || editCharge.amount,
-                  frequency: formData.frequency || editCharge.frequency
-                });
-              }}>
-                <div className="form-group">
-                  <label>Amount</label>
-                  <input
-                    type="number"
-                    defaultValue={editCharge.amount}
-                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Frequency</label>
+              <div className="form-group">
+                <label htmlFor="feeType">Fee Type</label>
+                <input
+                  type="text"
+                  id="feeType"
+                  placeholder="Enter fee type"
+                  value={formData.feeType}
+                  onChange={(e) => setFormData({...formData, feeType: e.target.value})}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="status">Status</label>
+                <div className="select-container">
                   <select
-                    defaultValue={editCharge.frequency}
-                    onChange={(e) => setFormData({...formData, frequency: e.target.value})}
+                    id="status"
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value})}
                     required
                   >
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Unpaid">Unpaid</option>
                   </select>
+                  <span className="select-arrow">▼</span>
                 </div>
-                <div className="modal-actions">
-                  <button type="submit" disabled={loading}>
-                    {loading ? 'Updating...' : 'Update'}
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setEditCharge(null)}
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+              </div>
+
+              <div className="modal-actions">
+                <button type="submit" className="save-button" disabled={loading}>
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,24 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import axios from 'utils/httpClient';
-import config from 'config';
+import config from '../../../../../config';
 import './Updates.css';
 
 const Updates = () => {
-  const { startup } = useOutletContext();
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [startupId, setStartupId] = useState(null);
   
+  // Get startup ID from URL
   useEffect(() => {
+    const path = window.location.pathname;
+    const matches = path.match(/\/startups\/(\d+)/);
+    if (matches && matches[1]) {
+      setStartupId(matches[1]);
+    }
+  }, []);
+  
+  // Fetch updates directly
+  useEffect(() => {
+    if (!startupId) return;
+    
     const fetchStartupUpdates = async () => {
-      if (!startup || !startup.startup_id) return;
-      
       try {
         setLoading(true);
         const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
         
-        const response =  await axios.get(`${config.api_base_url}/incubator/view-regular-updates/`, 
+        const response = await axios.get(
+          `${config.api_base_url}/incubator/startup/${startupId}/updates/`, 
           {
             headers: { 'Authorization': `Bearer ${token}` }
           }
@@ -45,16 +55,7 @@ const Updates = () => {
     };
 
     fetchStartupUpdates();
-  }, [startup]);
-
-  if (!startup) {
-    return (
-      <div className="error-container">
-        <h3>Error</h3>
-        <p>Startup information not found</p>
-      </div>
-    );
-  }
+  }, [startupId]);
 
   if (loading) {
     return (
