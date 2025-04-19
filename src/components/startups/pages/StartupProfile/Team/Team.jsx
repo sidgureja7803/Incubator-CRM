@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
 import './Team.css';
-import defaultAvatar from '../../../../../assets/images/default-avatar.png';
-
+import defaultAvatar from './dummyImage.png';
 const Team = () => {
   const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
