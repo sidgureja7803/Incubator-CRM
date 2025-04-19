@@ -1,8 +1,8 @@
 import React from 'react';
 import { useOutletContext } from 'react-router-dom';
-import './Team.css';
+import './StartupTeam.css';
 
-const Team = () => {
+const StartupTeam = () => {
   const { startup } = useOutletContext();
   const teamMembers = startup?.Startup_People || [];
 

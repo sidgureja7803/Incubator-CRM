@@ -1,191 +1,176 @@
 .ip-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 .ip-container h2 {
   font-size: 1.5rem;
-  color: #111827;
-  margin-bottom: 1.5rem;
   font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .ip-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  grid-gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .ip-card {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.ip-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f9fafb;
 }
 
 .ip-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 10px;
 }
 
 .ip-header h3 {
-  margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #111827;
+  color: #333;
+  margin: 0;
 }
 
 .ip-type {
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
   font-weight: 500;
-  text-transform: uppercase;
 }
 
 .ip-type.patent {
-  background: #EFF6FF;
-  color: #1E40AF;
+  background-color: #e7f5ff;
+  color: #1971c2;
 }
 
 .ip-type.trademark {
-  background: #FEF3C7;
-  color: #92400E;
+  background-color: #e6fcf5;
+  color: #0ca678;
 }
 
 .ip-type.copyright {
-  background: #ECFDF5;
-  color: #065F46;
+  background-color: #fff3bf;
+  color: #e67700;
 }
 
 .ip-type.other {
-  background: #F3F4F6;
-  color: #6B7280;
+  background-color: #f1f3f5;
+  color: #495057;
 }
 
 .ip-details {
-  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 10px;
 }
 
 .ip-info-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  padding: 5px 0;
 }
 
 .ip-info-row .label {
-  font-size: 0.875rem;
-  color: #6B7280;
+  color: #6b7280;
+  font-size: 0.9rem;
 }
 
 .ip-info-row .value {
-  font-size: 0.875rem;
-  color: #111827;
+  color: #333;
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .ip-status {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
   font-weight: 500;
+  text-transform: capitalize;
 }
 
 .ip-status.pending {
-  background: #EFF6FF;
-  color: #1E40AF;
+  background-color: #fff3bf;
+  color: #e67700;
 }
 
 .ip-status.approved {
-  background: #ECFDF5;
-  color: #065F46;
+  background-color: #e6fcf5;
+  color: #0ca678;
 }
 
 .ip-status.rejected {
-  background: #FEF2F2;
-  color: #B91C1C;
+  background-color: #ffe3e3;
+  color: #e03131;
+}
+
+.ip-status.granted {
+  background-color: #d3f9d8;
+  color: #2b8a3e;
 }
 
 .ip-description {
-  padding: 1.25rem;
-  border-top: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e8e8e8;
 }
 
 .ip-description h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6B7280;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .ip-description p {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #111827;
+  font-size: 0.9rem;
+  color: #4b5563;
   line-height: 1.5;
 }
 
 .no-ip-items {
   text-align: center;
-  padding: 3rem;
-  background: #F9FAFB;
-  border-radius: 0.5rem;
-  border: 1px dashed #D1D5DB;
+  padding: 40px 0;
+  color: #666;
 }
 
-.no-ip-items p {
-  color: #6B7280;
-  font-size: 0.875rem;
-  margin: 0;
-}
-
-.error-container {
-  padding: 1.5rem;
+.loading-container, .error-container {
+  padding: 40px;
   text-align: center;
-  background: #FEF2F2;
-  border-radius: 0.5rem;
-  color: #B91C1C;
 }
 
-.error-container h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.125rem;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
 }
 
-.error-container p {
-  margin: 0;
-  color: #B91C1C;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
-  .ip-container {
-    padding: 1rem;
-  }
-  
   .ip-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .ip-info-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
   }
 } 

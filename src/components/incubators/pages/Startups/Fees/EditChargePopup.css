@@ -1,0 +1,103 @@
+.edit-charge-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.edit-charge-popup h3 {
+    margin-top: 0;
+}
+
+.edit-charge-popup form {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-charge-popup label {
+    margin-bottom: 10px;
+}
+
+.edit-charge-popup input[type="number"],
+.edit-charge-popup input[type="date"],
+.edit-charge-popup input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+.edit-charge-popup .buttons {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.edit-charge-popup button {
+    margin-left: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.edit-charge-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    z-index: 1001;
+}
+
+.edit-charge-popup h3 {
+    margin-top: 0;
+}
+
+.edit-charge-popup form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.edit-charge-popup form input {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.edit-charge-popup .buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.edit-charge-popup button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.edit-charge-popup button:hover {
+    opacity: 0.9;
+}
+
+.edit-charge-popup button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.edit-charge-popup button[type="button"] {
+    background-color: #f44336;
+    color: white;
+}
