@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
-import './Team.css';
+import './StartupTeam.css';
 import defaultAvatar from './dummyImage.png';
-const Team = () => {
+
+const StartupTeam = () => {
   const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -311,4 +312,4 @@ const Team = () => {
   );
 };
 
-export default Team;
+export default StartupTeam;

@@ -82,4 +82,4 @@ const StartupTeam = () => {
   );
 };
 
-export default Team;
+export default StartupTeam;

@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Modal from 'react-modal';
 import config from 'config';
+import IncubatorApplicationModal from '../Question-Answer/IncubatorApplicationModal';
+import { Add, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import ThaparInnovate from './Incubator.png';
 import './ApplyIncubation.css';
-
-Modal.setAppElement('#root');
 
 const ApplyIncubation = () => {
   const [incubators, setIncubators] = useState([]);
-  const [expandedIncubator, setExpandedIncubator] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [expandedIncubator, setExpandedIncubator] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
-  const [questions, setQuestions] = useState([]);
+  const [showPrograms, setShowPrograms] = useState({});
+  const [currentProgram, setCurrentProgram] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitPopupVisible, setIsSubmitPopupVisible] = useState(false);
+  const [isSuccessPopupVisible, setIsSuccessPopupVisible] = useState(false);
   const [formData, setFormData] = useState({});
+  const [questions, setQuestions] = useState([]);
+  const [selectedIncubator, setSelectedIncubator] = useState(null);
 
   useEffect(() => {
     fetchIncubators();
@@ -27,255 +34,378 @@ const ApplyIncubation = () => {
       const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
       
       const response = await axios.get(
-        `${config.api_base_url}/startup/startupincubator/`,
+        `${config.api_base_url}/startup/incubators/list`, 
         {
           headers: {
             Authorization: `Bearer ${token}`
           }
         }
       );
-
-      if (Array.isArray(response.data)) {
-        setIncubators(response.data);
-      } else {
-        setIncubators([]);
-        setError('Invalid data format received from server');
-      }
-    } catch (error) {
-      console.error('Error fetching incubators:', error);
-      setError('Failed to fetch available incubators');
-    } finally {
+      
+      setIncubators(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching incubators:', err);
+      setError('Failed to load incubators. Please try again later.');
       setLoading(false);
     }
   };
 
-  const toggleIncubator = async (incubatorId) => {
-    if (expandedIncubator === incubatorId) {
-      setExpandedIncubator(null);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      
-      const response = await axios.get(
-        `${config.api_base_url}/startup/incubators/${incubatorId}/programs`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+  const fetchPrograms = (incubatorId) => {
+    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    
+    axios
+      .get(`${config.api_base_url}/startup/incubators/${incubatorId}/programs`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+      })
+      .then((response) => {
+        const updatedIncubators = [...incubators];
+        const incubatorIndex = updatedIncubators.findIndex(inc => inc.id === incubatorId);
+        if (incubatorIndex !== -1) {
+          updatedIncubators[incubatorIndex] = {
+            ...updatedIncubators[incubatorIndex],
+            programs: response.data
+          };
+          setIncubators(updatedIncubators);
+          setSelectedIncubator(updatedIncubators[incubatorIndex]);
         }
-      );
-
-      const updatedIncubator = incubators.find(inc => inc.id === incubatorId);
-      if (updatedIncubator) {
-        updatedIncubator.programs = Array.isArray(response.data) ? response.data : [];
-        setExpandedIncubator(incubatorId);
-      }
-    } catch (error) {
-      console.error('Error fetching programs:', error);
-      setError('Failed to fetch programs');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApply = async (program) => {
-    setSelectedProgram(program);
-    setShowModal(true);
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      
-      const response = await axios.get(
-        `${config.api_base_url}/startup/incubators/program/${program.id}/questions`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      setQuestions(response.data);
-      const initialFormData = {};
-      response.data.forEach(question => {
-        initialFormData[question.id] = '';
+      })
+      .catch((err) => {
+        console.error("Error fetching programs:", err);
       });
-      setFormData(initialFormData);
-    } catch (error) {
-      console.error('Error fetching questions:', error);
-      setError('Failed to fetch application questions');
-    } finally {
-      setLoading(false);
+  };
+
+  const handleIncubatorSelect = (e) => {
+    const selectedIncubatorName = e.target.value;
+    const selected = incubators.find(
+      (incubator) => incubator.incubator_name === selectedIncubatorName
+    );
+    setSelectedIncubator(selected);
+
+    if (selected) {
+      fetchPrograms(selected.id);
     }
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedProgram(null);
+  const togglePrograms = (incubatorId) => {
+    setShowPrograms((prev) => ({
+      ...prev,
+      [incubatorId]: !prev[incubatorId],
+    }));
+    
+    // Fetch programs if they haven't been loaded yet
+    const incubator = incubators.find(inc => inc.id === incubatorId);
+    if (incubator && !incubator.programs) {
+      fetchPrograms(incubatorId);
+    }
+  };
+
+  const openModal = (program) => {
+    setCurrentProgram(program);
+    setModalOpen(true);
+    setIsEditMode(!program.submitted);
+    fetchQuestionsAndAnswers(program.id);
+  };
+
+  const fetchQuestionsAndAnswers = (programId) => {
+    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    
+    axios
+      .get(
+        `${config.api_base_url}/startup/incubators/program/${programId}/questions-answers/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+        }
+      )
+      .then((response) => {
+        if (response.data.length > 0) {
+          const answersData = {};
+          const questionsData = response.data.map((item) => {
+            answersData[item.question_id] = item.answer;
+            return {
+              id: item.question_id,
+              question_name: item.question,
+            };
+          });
+          setFormData(answersData);
+          setQuestions(questionsData);
+        } else {
+          fetchQuestions(programId);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching answers:", error);
+      });
+  };
+
+  const fetchQuestions = (programId) => {
+    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    
+    axios
+      .get(
+        `${config.api_base_url}/startup/incubators/program/${programId}/questions`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+        }
+      )
+      .then((response) => {
+        setQuestions(response.data);
+        const initialFormData = {};
+        response.data.forEach((question) => {
+          initialFormData[question.id] = "";
+        });
+        setFormData(initialFormData);
+      })
+      .catch((error) => {
+        console.error("Error fetching questions:", error);
+      });
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
     setFormData({});
     setQuestions([]);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
-  const handleSubmit = async () => {
-    if (!selectedProgram) return;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitPopupVisible(true);
+  };
 
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      
-      const transformedAnswers = Object.entries(formData).map(([questionId, answer]) => ({
-        program_question_id: parseInt(questionId, 10),
-        answer
-      }));
+  const confirmSubmit = () => {
+    submitAnswers("submit");
+    setIsSubmitPopupVisible(false);
+  };
 
-      await axios.post(
-        `${config.api_base_url}/startup/incubators/program-questions/submit-answers/`,
-        {
-          action: 'submit',
-          answers: transformedAnswers
+  const handleSave = () => {
+    setIsLoading(true);
+    submitAnswers("save").finally(() => {
+      setIsLoading(false);
+    });
+  };
+
+  const submitAnswers = (action) => {
+    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    const transformedPayload = {
+      action: action,
+      answers: Object.entries(formData)
+        .filter(([questionId, answer]) => questionId && answer !== "")
+        .map(([questionId, answer]) => ({
+          program_question_id: parseInt(questionId, 10),
+          answer: answer || "",
+        })),
+    };
+
+    return axios.post(
+      `${config.api_base_url}/startup/incubators/program-questions/submit-answers/`,
+      transformedPayload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+      }
+    )
+    .then((response) => {
+      if (action === "save") {
+        setIsSuccessPopupVisible(true);
+        setTimeout(() => setIsSuccessPopupVisible(false), 3000);
+        if (selectedIncubator && currentProgram) {
+          const updatedPrograms = selectedIncubator.programs.map((program) =>
+            program.id === currentProgram.id
+              ? { ...program, submitted: false }
+              : program
+          );
+          setSelectedIncubator({
+            ...selectedIncubator,
+            programs: updatedPrograms,
+          });
         }
-      );
-
-      handleCloseModal();
-      alert('Application submitted successfully!');
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      alert('Failed to submit application. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+      } else {
+        if (selectedIncubator && currentProgram) {
+          const updatedPrograms = selectedIncubator.programs.map((program) =>
+            program.id === currentProgram.id
+              ? { ...program, submitted: true }
+              : program
+          );
+          setSelectedIncubator({
+            ...selectedIncubator,
+            programs: updatedPrograms,
+          });
+        }
+      }
+      closeModal();
+    })
+    .catch((error) => {
+      console.error("Error saving form:", error.response?.data || error);
+      alert(`Error: ${error.response?.data?.error || "An error occurred"}`);
+    });
   };
-
-  if (loading && !incubators.length) {
-    return <div className="loading">Loading incubators...</div>;
-  }
-
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
 
   return (
-    <div className="apply-incubation-container">
-      <div className="apply-incubation-header">
-        <div className="tab-container">
-          <button className="tab">My Incubators</button>
-          <button className="tab active">Apply For Incubation</button>
+    <div className="apply-incubation-content">
+      {loading ? (
+        <div className="loading">Loading incubators...</div>
+      ) : error ? (
+        <div className="error">{error}</div>
+      ) : incubators.length === 0 ? (
+        <div className="no-incubators">
+          <p>No incubators available for application.</p>
         </div>
-      </div>
-
-      <div className="apply-incubation-content">
-        {incubators.length === 0 ? (
-          <div className="no-incubators">
-            <p>No available incubators found. Please check back later.</p>
-          </div>
-        ) : (
-          incubators.map((incubator) => (
-            <div key={incubator.id} className="apply-incubator-card">
-              <div className="apply-incubator-header" onClick={() => toggleIncubator(incubator.id)}>
-                <div className="apply-incubator-logo">
-                  <img src={incubator.logo || 'https://via.placeholder.com/48'} alt={incubator.name} />
-                </div>
-                <div className="apply-incubator-info">
-                  <h3>{incubator.name}</h3>
-                  <p>{incubator.description || 'No description available'}</p>
+      ) : (
+        <div className="incubators-list">
+          {incubators.map((incubator) => (
+            <div key={incubator.id} className="incubator-container">
+              <div 
+                className="incubator-header"
+                onClick={() => togglePrograms(incubator.id)}
+              >
+                <div className="incubator-info">
+                  <div className="incubator-logo">
+                    <img src={incubator.logo || ThaparInnovate} alt={incubator.incubator_name} />
+                  </div>
+                  <h3>{incubator.incubator_name}</h3>
                 </div>
                 <div className="expand-icon">
-                  {expandedIncubator === incubator.id ? '−' : '+'}
+                  {showPrograms[incubator.id] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                 </div>
               </div>
               
-              {expandedIncubator === incubator.id && (
-                <div className="programs-container">
-                  <h4>Available Programs</h4>
-                  {incubator.programs && incubator.programs.length > 0 ? (
-                    <div className="programs-grid">
-                      {incubator.programs.map((program) => (
-                        <div key={program.id} className="program-item">
-                          <div className="program-info">
-                            <h5>{program.name}</h5>
-                            <p className="program-dates">
-                              <span>Start: {new Date(program.start_date).toLocaleDateString()}</span>
-                              <span>End: {new Date(program.end_date).toLocaleDateString()}</span>
-                            </p>
-                            <p className="program-description">{program.description || 'No description available'}</p>
-                          </div>
-                          <button 
-                            className="apply-btn" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleApply(program);
-                            }}
-                          >
-                            Apply
-                          </button>
-                        </div>
-                      ))}
+              {showPrograms[incubator.id] && incubator.programs && (
+                <div className="programs-section">
+                  {incubator.programs.map((program) => (
+                    <div key={program.id} className="program-item">
+                      <div className="program-info">
+                        <h4>{program.name}</h4>
+                        <p className="last-date">Last Date: {program.last_date}</p>
+                      </div>
+                      <div className="program-actions">
+                        <button 
+                          className="details-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle details view
+                          }}
+                        >
+                          Details
+                        </button>
+                        <button 
+                          className="apply-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openModal(program);
+                          }}
+                          disabled={program.submitted}
+                        >
+                          {program.submitted ? 'Applied' : 'Apply'}
+                        </button>
+                      </div>
                     </div>
-                  ) : (
-                    <p className="no-programs">No active programs available for this incubator.</p>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
-          ))
-        )}
-      </div>
-
-      <Modal
-        isOpen={showModal}
-        onRequestClose={handleCloseModal}
-        className="modal"
-        overlayClassName="modal-overlay"
-      >
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2>{selectedProgram?.name}</h2>
-            <button className="close-button" onClick={handleCloseModal}>×</button>
-          </div>
-
-          <form className="modal-form" onSubmit={(e) => e.preventDefault()}>
-            {questions.map(question => (
-              <div key={question.id} className="form-group">
-                <label>{question.question_name}</label>
-                <textarea
-                  name={question.id}
-                  value={formData[question.id] || ''}
-                  onChange={handleInputChange}
-                  placeholder="Enter your answer here !!"
-                  disabled={loading}
-                />
-              </div>
-            ))}
-
-            <div className="form-actions">
-              <button 
-                type="button" 
-                className="apply-button" 
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                Apply
-              </button>
-            </div>
-          </form>
+          ))}
         </div>
-      </Modal>
+      )}
+
+      {modalOpen && selectedProgram && (
+        <IncubatorApplicationModal
+          isOpen={modalOpen}
+          onClose={handleModalClose}
+          program={selectedProgram}
+          onSubmitSuccess={handleApplicationSubmit}
+        />
+      )}
+
+      {modalOpen && (
+        <div className="modal-overlay">
+          <div className="application-modal">
+            <div className="modal-header">
+              <h2>{currentProgram?.name}</h2>
+              <button className="close-button" onClick={closeModal}>×</button>
+            </div>
+            <div className="modal-content">
+              <form onSubmit={handleSubmit}>
+                {questions.map((question) => (
+                  <div key={question.id} className="form-group">
+                    <label>{question.question_name}</label>
+                    <textarea
+                      name={question.id}
+                      value={formData[question.id] || ''}
+                      onChange={handleInputChange}
+                      placeholder={
+                        question.question_name.includes('funding') ? 'Enter the Fundings' :
+                        question.question_name.includes('Product') ? 'Enter the product' :
+                        'Enter your Update here !!'
+                      }
+                      disabled={!isEditMode || isLoading}
+                      required
+                    />
+                  </div>
+                ))}
+                <div className="form-actions">
+                  {isEditMode && (
+                    <>
+                      <button
+                        type="button" 
+                        className="details-btn"
+                        onClick={handleSave}
+                        disabled={isLoading}
+                        style={{ marginRight: '10px' }}
+                      >
+                        {isLoading ? 'Saving...' : 'Save Draft'}
+                      </button>
+                      <button
+                        type="submit"
+                        className="apply-btn"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Submitting...' : 'Submit Application'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSubmitPopupVisible && (
+        <div className="confirm-dialog">
+          <div className="confirm-content">
+            <h3>Confirm Submission</h3>
+            <p>Are you sure you want to submit? You won't be able to edit after submission.</p>
+            <div className="confirm-actions">
+              <button onClick={confirmSubmit}>Yes, Submit</button>
+              <button onClick={() => setIsSubmitPopupVisible(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSuccessPopupVisible && (
+        <div className="confirm-dialog">
+          <div className="confirm-content">
+            <h3>Saved Successfully</h3>
+            <p>Your answers have been saved as a draft.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

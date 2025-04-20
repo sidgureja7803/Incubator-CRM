@@ -23,13 +23,15 @@ import StartupProfile from './components/startups/pages/StartupProfile/StartupPr
 import StartupInfo from './components/startups/pages/StartupProfile/StartupInfo/StartupInfo';
 import StartupAwards from './components/startups/pages/StartupProfile/Awards/Awards';
 import StartupFunding from './components/startups/pages/StartupProfile/Funding/Funding';
-import StartupTeam from './components/startups/pages/StartupProfile/Team/Team';
+import StartupTeam from './components/startups/pages/StartupProfile/StartupTeam/StartupTeam';
+
 import StartupIntellectualProperties from './components/startups/pages/StartupProfile/IntelluctualProperties/IntelluctualProperties';
 import StartupUpdates from './components/startups/pages/StartupProfile/Updates/Updates';
 import MyIncubators from './components/startups/pages/Incubators/MyIncubators/MyIncubators';
 import ApplyIncubation from './components/startups/pages/Incubators/ApplyIncubation/ApplyIncubation';
 import Incubators from './components/startups/pages/Incubators/Incubators';
 import Cohorts from './components/startups/pages/Incubators/Cohorts/Cohorts';
+import ProgramDetails from './components/startups/pages/Incubators/ProgramDetails/ProgramDetails';
 
 // Incubator Components
 import IncubatorSidebar from './components/incubators/pages/Sidebar/Sidebar';
@@ -121,15 +123,9 @@ function App() {
             <Route path="incubators" element={<Incubators />}>
               <Route index element={<Navigate to="my-incubators" replace />} />
               <Route path="my-incubators" element={<MyIncubators />} />
-              <Route path="apply" element={<ApplyIncubation />} />
-              <Route path=":incubatorId/programs/:programId/cohorts/:cohortId" element={<Cohorts />}>
-                <Route index element={<Navigate to="tasks" replace />} />
-                <Route path="tasks" element={<Tasks />} />
-                <Route path="members" element={<Members />} />
-                <Route path="mentors" element={<Mentors />} />
-                <Route path="admins" element={<Admins />} />
-                <Route path="documents" element={<Documents />} />
-              </Route>
+              <Route path="apply-incubation" element={<ApplyIncubation />} />
+              <Route path=":incubatorId/programs/:programId" element={<ProgramDetails />} />
+              <Route path=":incubatorId/programs/:programId/cohorts/:cohortId/*" element={<Cohorts />} />
             </Route>
             <Route path="accelerators" element={<div>Accelerators</div>} />
           </Route>

@@ -1,11 +1,11 @@
 /* ApplyIncubation.css */
-
 .apply-incubation-container {
+  padding: 20px;
   width: 100%;
 }
 
 .apply-incubation-header {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .tab-container {
@@ -15,79 +15,156 @@
 
 .tab {
   padding: 12px 20px;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 500;
-  color: #333;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
+  color: #333;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
 .tab.active {
-  color: #0056b3;
-  border-bottom: 2px solid #0056b3;
+  color: #2563eb;
+  border-bottom: 2px solid #2563eb;
 }
 
 .apply-incubation-content {
-  padding: 20px 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.incubator-card {
-  margin-bottom: 20px;
+.incubators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.incubator-container {
+  background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
+  margin-bottom: 16px;
   overflow: hidden;
 }
 
 .incubator-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  background-color: #fff;
+  padding: 16px;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.incubator-header:hover {
+  background-color: #f8f9fa;
+}
+
+.incubator-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .incubator-logo {
   width: 40px;
   height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 15px;
 }
 
 .incubator-logo img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
 .incubator-header h3 {
-  flex: 1;
   margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.programs-section {
+  padding: 0 16px 16px;
+}
+
+.program-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+
+.program-info h4 {
+  margin: 0 0 8px;
+  color: #333;
   font-size: 1.1rem;
+}
+
+.last-date {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.program-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.details-btn, .apply-btn {
+  padding: 8px 24px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
   font-weight: 500;
+  transition: all 0.2s;
 }
 
-.expand-icon {
-  font-size: 1.5rem;
-  color: #666;
+.details-btn {
+  background: #fff;
+  border: 1px solid #1a237e;
+  color: #1a237e;
 }
 
-.no-incubators {
+.apply-btn {
+  background: #1a237e;
+  color: #fff;
+}
+
+.details-btn:hover {
+  background: #f5f5f5;
+}
+
+.apply-btn:hover {
+  background: #0d1642;
+}
+
+.apply-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.no-programs, .no-incubators {
+  padding: 2rem;
   text-align: center;
-  padding: 40px 0;
-  color: #666;
+  color: #6b7280;
 }
 
 .loading, .error {
+  padding: 20px;
   text-align: center;
-  padding: 40px 0;
   color: #666;
 }
 
 .error {
-  color: #d32f2f;
+  color: #dc3545;
 }
 
 /* Modal Styles */
@@ -97,91 +174,140 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
 }
 
-.modal {
-  background-color: white;
+.application-modal {
+  background: #fff;
   border-radius: 8px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.modal-content {
-  padding: 20px;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px;
   border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 15px;
-  margin-bottom: 20px;
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  color: #333;
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 24px;
   cursor: pointer;
   color: #666;
 }
 
+.modal-content {
+  padding: 24px;
+}
+
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
+  color: #333;
   font-weight: 500;
 }
 
 .form-group textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
   min-height: 100px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  resize: vertical;
   font-family: inherit;
-  font-size: 0.9rem;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 30px;
+  margin-top: 24px;
 }
 
-.apply-button {
-  background-color: #0056b3;
-  color: white;
-  border: none;
-  padding: 10px 20px;
+/* Confirmation Dialog */
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
+}
+
+.confirm-content {
+  text-align: center;
+}
+
+.confirm-content h3 {
+  margin: 0 0 16px;
+  color: #333;
+}
+
+.confirm-content p {
+  margin: 0 0 24px;
+  color: #666;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.confirm-actions button {
+  padding: 8px 24px;
   border-radius: 4px;
+  border: none;
   cursor: pointer;
   font-weight: 500;
 }
 
-.apply-button:hover {
-  background-color: #004494;
+.confirm-actions button:first-child {
+  background: #1a237e;
+  color: #fff;
 }
 
-.apply-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.confirm-actions button:last-child {
+  background: #fff;
+  border: 1px solid #666;
+  color: #666;
+}
+
+/* Additional styles to match screenshots */
+.breadcrumb {
+  display: flex;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #666;
+  text-decoration: none;
+}
+
+.breadcrumb span {
+  margin: 0 8px;
 }

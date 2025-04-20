@@ -117,8 +117,8 @@ const CohortCard = ({ cohort }) => {
   const [isPending, startTransition] = useTransition();
   const [showAddPeopleModal, setShowAddPeopleModal] = useState(false);
   const [showViewPeopleModal, setShowViewPeopleModal] = useState(false);
-  const [showAssignTaskModal, setShowAssignTaskModal] = useState(false);
   const [showDocumentsModal, setShowDocumentsModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleActionClick = (action) => {
     startTransition(() => {
@@ -129,16 +129,23 @@ const CohortCard = ({ cohort }) => {
         case 'viewPeople':
           setShowViewPeopleModal(true);
           break;
-        case 'assignTask':
-          setShowAssignTaskModal(true);
-          break;
         case 'documents':
           setShowDocumentsModal(true);
+          break;
+        case 'edit':
+          // Handle edit cohort
+          handleEditCohort(cohort);
           break;
         default:
           break;
       }
     });
+  };
+
+  const handleEditCohort = (cohort) => {
+    // Set the cohort to update and show the edit modal
+    setCohortToUpdate({ ...cohort });
+    setShowUpdateCohortModal(true);
   };
 
   // Format date strings
@@ -168,7 +175,7 @@ const CohortCard = ({ cohort }) => {
       
       <div className="action-buttons-grid">
         <div className="action-buttons-row">
-          <button className="action-btn edit-btn">
+          <button className="action-btn edit-btn" onClick={() => handleActionClick('edit')}>
             <Edit fontSize="small" />
             <span>Edit</span>
           </button>
@@ -200,6 +207,260 @@ const CohortCard = ({ cohort }) => {
           </button>
         </div>
       </div>
+
+      {/* Add People Modal */}
+      {showAddPeopleModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>Add People to {cohort.cohort_name}</h2>
+              <button className="close-btn" onClick={() => setShowAddPeopleModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <AddPeopleForm cohortId={cohort.id} onClose={() => setShowAddPeopleModal(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View People Modal */}
+      {showViewPeopleModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>People in {cohort.cohort_name}</h2>
+              <button className="close-btn" onClick={() => setShowViewPeopleModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <ViewPeopleList cohortId={cohort.id} onClose={() => setShowViewPeopleModal(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Documents Modal */}
+      {showDocumentsModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>Documents for {cohort.cohort_name}</h2>
+              <button className="close-btn" onClick={() => setShowDocumentsModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <DocumentsList cohortId={cohort.id} onClose={() => setShowDocumentsModal(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Placeholder components for modals - Add these after the CohortCard component
+const AddPeopleForm = ({ cohortId, onClose }) => {
+  const [selectedPeople, setSelectedPeople] = useState([]);
+  const [availablePeople, setAvailablePeople] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAvailablePeople = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+        const response = await axios.get(
+          `${config.api_base_url}/incubator/people/`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setAvailablePeople(response.data || []);
+      } catch (error) {
+        console.error("Error fetching people:", error);
+        setError("Failed to load people. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAvailablePeople();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (selectedPeople.length === 0) {
+      setError("Please select at least one person");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      await axios.post(
+        `${config.api_base_url}/incubator/cohort/${cohortId}/people/`,
+        { people_ids: selectedPeople },
+        {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      onClose();
+    } catch (error) {
+      console.error("Error adding people to cohort:", error);
+      setError("Failed to add people to cohort. Please try again.");
+    }
+  };
+
+  if (loading) return <div className="loading-spinner">Loading people...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label>Select People</label>
+        <div className="people-list">
+          {availablePeople.length > 0 ? (
+            availablePeople.map(person => (
+              <div key={person.id} className="person-item">
+                <input
+                  type="checkbox"
+                  id={`person-${person.id}`}
+                  value={person.id}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedPeople([...selectedPeople, person.id]);
+                    } else {
+                      setSelectedPeople(selectedPeople.filter(id => id !== person.id));
+                    }
+                  }}
+                />
+                <label htmlFor={`person-${person.id}`}>
+                  {person.first_name} {person.last_name}
+                </label>
+              </div>
+            ))
+          ) : (
+            <p>No people available to add</p>
+          )}
+        </div>
+      </div>
+      <div className="form-actions">
+        <button type="submit" className="submit-btn">Add Selected People</button>
+      </div>
+    </form>
+  );
+};
+
+const ViewPeopleList = ({ cohortId, onClose }) => {
+  const [cohortPeople, setCohortPeople] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCohortPeople = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+        const response = await axios.get(
+          `${config.api_base_url}/incubator/cohort/${cohortId}/people/`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setCohortPeople(response.data || []);
+      } catch (error) {
+        console.error("Error fetching cohort people:", error);
+        setError("Failed to load people in this cohort. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCohortPeople();
+  }, [cohortId]);
+
+  if (loading) return <div className="loading-spinner">Loading cohort members...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+
+  return (
+    <div className="cohort-people-list">
+      {cohortPeople.length > 0 ? (
+        <div className="people-grid">
+          {cohortPeople.map(person => (
+            <div key={person.id} className="person-card">
+              <div className="person-avatar">
+                {person.first_name?.charAt(0) || ''}
+                {person.last_name?.charAt(0) || ''}
+              </div>
+              <div className="person-info">
+                <h4>{person.first_name} {person.last_name}</h4>
+                <p>{person.email}</p>
+                <p>{person.role || 'No role specified'}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>No people added to this cohort yet.</p>
+      )}
+    </div>
+  );
+};
+
+const DocumentsList = ({ cohortId, onClose }) => {
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+        const response = await axios.get(
+          `${config.api_base_url}/incubator/cohort/${cohortId}/documents/`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setDocuments(response.data || []);
+      } catch (error) {
+        console.error("Error fetching documents:", error);
+        setError("Failed to load documents. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocuments();
+  }, [cohortId]);
+
+  if (loading) return <div className="loading-spinner">Loading documents...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+
+  return (
+    <div className="documents-list">
+      {documents.length > 0 ? (
+        <div className="documents-grid">
+          {documents.map(doc => (
+            <div key={doc.id} className="document-card">
+              <div className="document-icon">
+                <Description />
+              </div>
+              <div className="document-info">
+                <h4>{doc.title || 'Untitled Document'}</h4>
+                <p>Uploaded: {new Date(doc.created_at).toLocaleDateString()}</p>
+                <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="download-link">
+                  Download
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>No documents added to this cohort yet.</p>
+      )}
     </div>
   );
 };
@@ -755,6 +1016,86 @@ const Programs = () => {
                   </div>
                   <div className="form-actions">
                     <button type="submit" className="submit-btn">Update Program</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Update Cohort Modal */}
+        {showUpdateCohortModal && cohortToUpdate && (
+          <div className="modal-overlay">
+            <div className="modal-container">
+              <div className="modal-header">
+                <h2>Update Cohort</h2>
+                <button className="close-btn" onClick={() => setShowUpdateCohortModal(false)}>×</button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  // Logic to update cohort
+                  updateCohort(cohortToUpdate)
+                    .then(() => {
+                      setSuccessMessage('Cohort updated successfully!');
+                      setShowUpdateCohortModal(false);
+                      // Invalidate and refetch cohorts data
+                      queryClient.invalidateQueries(['cohorts', selectedProgram?.id]);
+                      setTimeout(() => setSuccessMessage(''), 3000);
+                    })
+                    .catch(error => {
+                      console.error("Error updating cohort:", error);
+                      const apiErrorMessage = error.response?.data?.message || error.response?.data?.detail || 'Failed to update cohort.';
+                      setErrorMessage(apiErrorMessage);
+                    });
+                }}>
+                  <div className="form-group">
+                    <label htmlFor="update_cohort_name">Cohort Name</label>
+                    <input
+                      id="update_cohort_name"
+                      type="text"
+                      value={cohortToUpdate.cohort_name}
+                      onChange={(e) => setCohortToUpdate({ ...cohortToUpdate, cohort_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="update_start_date">Start Date</label>
+                    <input
+                      id="update_start_date"
+                      type="date"
+                      value={cohortToUpdate.start_date}
+                      onChange={(e) => setCohortToUpdate({ ...cohortToUpdate, start_date: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="update_end_date">End Date</label>
+                    <input
+                      id="update_end_date"
+                      type="date"
+                      value={cohortToUpdate.end_date}
+                      onChange={(e) => setCohortToUpdate({ ...cohortToUpdate, end_date: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Status</label>
+                    <div className="status-toggle">
+                      <button
+                        type="button"
+                        className={`status-btn ${cohortToUpdate.status === 'active' ? 'active' : ''}`}
+                        onClick={() => setCohortToUpdate({ ...cohortToUpdate, status: 'active' })}
+                      >Active</button>
+                      <button
+                        type="button"
+                        className={`status-btn ${cohortToUpdate.status === 'closed' ? 'active' : ''}`}
+                        onClick={() => setCohortToUpdate({ ...cohortToUpdate, status: 'closed' })}
+                      >Closed</button>
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="submit-btn">Update Cohort</button>
                   </div>
                 </form>
               </div>

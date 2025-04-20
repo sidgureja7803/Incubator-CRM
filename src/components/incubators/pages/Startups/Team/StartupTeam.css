@@ -84,9 +84,8 @@
 
 .team-container {
   width: 100%;
-  min-height: 100vh;
   background-color: #f9fafb;
-  padding: 20px;
+  padding: 20px 30px;
 }
 
 .team-content {
@@ -98,18 +97,19 @@
 
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  gap: 24px;
   margin-top: 20px;
 }
 
 .team-card {
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
   display: flex;
   gap: 20px;
   background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .profile-image {
@@ -118,6 +118,14 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 36px;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .profile-image img {
@@ -128,13 +136,21 @@
 
 .member-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .member-name {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.member-role {
+  font-size: 16px;
+  color: #4b5563;
+  margin-bottom: 16px;
 }
 
 .member-roles {
@@ -170,11 +186,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-bottom: 6px;
 }
 
 .contact-label {
   font-weight: 500;
-  color: #4b5563;
+  color: #6b7280;
   min-width: 150px;
 }
 
@@ -186,6 +203,7 @@
   display: flex;
   gap: 10px;
   margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 .social-button {
@@ -219,21 +237,24 @@
 .action-buttons {
   display: flex;
   gap: 10px;
-  margin-top: 15px;
+  margin-top: auto;
 }
 
 .edit-button, .invite-button {
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .edit-button {
   background-color: #f9fafb;
-  border: 1px solid #d1d5db;
   color: #374151;
 }
 
@@ -243,12 +264,79 @@
 
 .invite-button {
   background-color: #f9fafb;
-  border: 1px solid #d1d5db;
   color: #374151;
 }
 
 .invite-button:hover {
   background-color: #f3f4f6;
+}
+
+/* Duplicate name cards - match the UI in the image */
+.team-members-container {
+  margin-top: 20px;
+}
+
+.team-members-header {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+.team-member-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #fff;
+}
+
+.member-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.primary-secondary-roles {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.role-container {
+  margin-bottom: 10px;
+}
+
+.role-title {
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.role-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.phone-email-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.contact-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-title {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.contact-detail {
+  color: #1f2937;
 }
 
 @media (max-width: 1024px) {
