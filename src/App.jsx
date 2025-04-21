@@ -124,6 +124,7 @@ function App() {
               <Route index element={<Navigate to="my-incubators" replace />} />
               <Route path="my-incubators" element={<MyIncubators />} />
               <Route path="apply-incubation" element={<ApplyIncubation />} />
+              <Route path=":incubatorId/programs" element={<ProgramDetails />} />
               <Route path=":incubatorId/programs/:programId" element={<ProgramDetails />} />
               <Route path=":incubatorId/programs/:programId/cohorts/:cohortId/*" element={<Cohorts />} />
             </Route>

@@ -20,7 +20,15 @@ const StartupInfo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
+  const tabs = [
+    { id: 'info', label: 'Basic Info', path: `/incubator/startups/incubated/${startupId}/info` },
+    { id: 'awards', label: 'Awards', path: `/incubator/startups/incubated/${startupId}/awards` },
+    { id: 'funding', label: 'Funding', path: `/incubator/startups/incubated/${startupId}/funding` },
+    { id: 'team', label: 'Team', path: `/incubator/startups/incubated/${startupId}/team` },
+    { id: 'properties', label: 'Intellectual Properties', path: `/incubator/startups/incubated/${startupId}/properties` },
+    { id: 'updates', label: 'Updates', path: `/incubator/startups/incubated/${startupId}/updates` },
+    { id: 'fee', label: 'Fee', path: `/incubator/startups/incubated/${startupId}/fee` },
+  ];
 
   const goBack = () => {
     navigate('/incubator/startups/incubated');
@@ -53,37 +61,25 @@ const StartupInfo = () => {
   return (
     <div className="startup-info-container">
       <div className="startup-info-header">
-        <button className="back-button" onClick={goBack}>
-          <span>←</span> Back
-        </button>
         <div className="startup-info-title">
+          <button className="back-button" onClick={goBack}>
+            <span>←</span> Back
+          </button>
           <h2>{startup?.name || 'Startup Details'}</h2>
           <p className="startup-sector">{startup?.sector || 'Technology'}</p>
         </div>
       </div>
 
       <div className="startup-tabs">
-        <NavLink to={`/incubator/startups/incubated/${startupId}/info`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
-          Basic Info
-        </NavLink>
-        <NavLink to={`/incubator/startups/incubated/${startupId}/awards`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
-          Awards
-        </NavLink>
-        <NavLink to={`/incubator/startups/incubated/${startupId}/funding`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
-          Funding
-        </NavLink>
-        <NavLink to={`/incubator/startups/incubated/${startupId}/team`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
-          Team
-        </NavLink>
-        <NavLink to={`/incubator/startups/incubated/${startupId}/properties`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
-          Intellectual Properties
-        </NavLink>
-        <NavLink to={`/incubator/startups/incubated/${startupId}/updates`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
-          Updates
-        </NavLink>
-        <NavLink to={`/incubator/startups/incubated/${startupId}/fee`} className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}>
-          Fee
-        </NavLink>
+        {tabs.map((tab) => (
+          <NavLink
+            key={tab.id}
+            to={tab.path}
+            className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}
+          >
+            {tab.label}
+          </NavLink>
+        ))}
       </div>
 
       <div className="startup-tab-content">

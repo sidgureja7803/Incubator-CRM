@@ -1,14 +1,13 @@
 .startups-container {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 2px;
+  background-color: #f9fafb;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1A202C;
-  margin-bottom: 16px;
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
 .breadcrumb {
@@ -29,9 +28,14 @@
 }
 
 .tabs-container {
-  display: flex;
-  border-bottom: 1px solid #E2E8F0;
-  margin-bottom: 24px;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  font-size: 0.875rem;
+  color: #6b7280;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s;
 }
 
 .tab-item {

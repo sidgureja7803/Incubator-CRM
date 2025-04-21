@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import config from 'config';
-import IncubatorApplicationModal from '../Question-Answer/IncubatorApplicationModal';
-import { Add, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { KeyboardArrowDown, KeyboardArrowUp, Close } from '@mui/icons-material';
 import ThaparInnovate from './Incubator.png';
 import './ApplyIncubation.css';
 
@@ -10,10 +9,8 @@ const ApplyIncubation = () => {
   const [incubators, setIncubators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedIncubator, setExpandedIncubator] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedProgram, setSelectedProgram] = useState(null);
   const [showPrograms, setShowPrograms] = useState({});
+  const [modalIsOpen, setModalIsOpen] = useState(false);
   const [currentProgram, setCurrentProgram] = useState(null);
   const [isEditMode, setIsEditMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,18 +74,6 @@ const ApplyIncubation = () => {
       });
   };
 
-  const handleIncubatorSelect = (e) => {
-    const selectedIncubatorName = e.target.value;
-    const selected = incubators.find(
-      (incubator) => incubator.incubator_name === selectedIncubatorName
-    );
-    setSelectedIncubator(selected);
-
-    if (selected) {
-      fetchPrograms(selected.id);
-    }
-  };
-
   const togglePrograms = (incubatorId) => {
     setShowPrograms((prev) => ({
       ...prev,
@@ -104,7 +89,7 @@ const ApplyIncubation = () => {
 
   const openModal = (program) => {
     setCurrentProgram(program);
-    setModalOpen(true);
+    setModalIsOpen(true);
     setIsEditMode(!program.submitted);
     fetchQuestionsAndAnswers(program.id);
   };
@@ -168,7 +153,7 @@ const ApplyIncubation = () => {
   };
 
   const closeModal = () => {
-    setModalOpen(false);
+    setModalIsOpen(false);
     setFormData({});
     setQuestions([]);
   };
@@ -322,34 +307,28 @@ const ApplyIncubation = () => {
         </div>
       )}
 
-      {modalOpen && selectedProgram && (
-        <IncubatorApplicationModal
-          isOpen={modalOpen}
-          onClose={handleModalClose}
-          program={selectedProgram}
-          onSubmitSuccess={handleApplicationSubmit}
-        />
-      )}
-
-      {modalOpen && (
+      {modalIsOpen && (
         <div className="modal-overlay">
           <div className="application-modal">
             <div className="modal-header">
-              <h2>{currentProgram?.name}</h2>
-              <button className="close-button" onClick={closeModal}>×</button>
+              <h2>{currentProgram?.name || 'Application Questions'}</h2>
+              <button className="close-button" onClick={closeModal}>
+                <Close />
+              </button>
             </div>
             <div className="modal-content">
               <form onSubmit={handleSubmit}>
                 {questions.map((question) => (
                   <div key={question.id} className="form-group">
-                    <label>{question.question_name}</label>
+                    <label className="question-label">{question.question_name}</label>
                     <textarea
                       name={question.id}
                       value={formData[question.id] || ''}
                       onChange={handleInputChange}
+                      className="question-textarea"
                       placeholder={
-                        question.question_name.includes('funding') ? 'Enter the Fundings' :
-                        question.question_name.includes('Product') ? 'Enter the product' :
+                        question.question_name.toLowerCase().includes('funding') ? 'Enter the Fundings' :
+                        question.question_name.toLowerCase().includes('product') ? 'Enter the product' :
                         'Enter your Update here !!'
                       }
                       disabled={!isEditMode || isLoading}
@@ -362,10 +341,9 @@ const ApplyIncubation = () => {
                     <>
                       <button
                         type="button" 
-                        className="details-btn"
+                        className="save-btn"
                         onClick={handleSave}
                         disabled={isLoading}
-                        style={{ marginRight: '10px' }}
                       >
                         {isLoading ? 'Saving...' : 'Save Draft'}
                       </button>
@@ -374,7 +352,7 @@ const ApplyIncubation = () => {
                         className="apply-btn"
                         disabled={isLoading}
                       >
-                        {isLoading ? 'Submitting...' : 'Submit Application'}
+                        {isLoading ? 'Submitting...' : 'Apply'}
                       </button>
                     </>
                   )}

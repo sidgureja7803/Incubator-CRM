@@ -1,7 +1,9 @@
 /* MyIncubators.css */
 .my-incubators-container {
   padding: 20px;
-  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f9fafb;
 }
 
 .tab-container {
@@ -36,54 +38,37 @@
   margin-bottom: 24px;
   color: #333;
   font-size: 1.8rem;
+  font-weight: 600;
 }
 
-.loading, .error, .no-incubators {
-  text-align: center;
-  padding: 20px;
-  color: #666;
+.incubators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
 }
 
-.error {
-  color: #dc3545;
-}
-
-.incubators-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Incubator Item */
-.incubator-item {
+.incubator-card {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  overflow: hidden;
-}
-
-.incubator-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
+  padding: 20px;
   cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.incubator-header:hover {
-  background-color: #f8f9fa;
-}
-
-.incubator-info {
+  transition: all 0.3s ease;
   display: flex;
-  align-items: center;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.incubator-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .incubator-logo {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
 }
 
 .incubator-logo img {
@@ -93,23 +78,57 @@
   border-radius: 4px;
 }
 
-.incubator-header h3 {
-  margin: 0;
-  color: #333;
+.incubator-info {
+  flex: 1;
+}
+
+.incubator-name {
+  margin: 0 0 12px;
+  color: #111827;
   font-size: 1.2rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-.joining-info {
+.joining-date {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #666;
-  font-size: 0.9rem;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.expand-icon {
-  color: #1a237e;
+.joining-date p:first-child {
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.joining-date p:last-child {
+  color: #374151;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.loading, .error, .no-incubators {
+  text-align: center;
+  padding: 40px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.error {
+  color: #dc3545;
+}
+
+.no-incubators {
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.incubators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Programs Container */
@@ -223,9 +242,13 @@
   font-size: 0.9rem;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .incubators-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .incubator-card {
+    padding: 16px;
   }
 }
 

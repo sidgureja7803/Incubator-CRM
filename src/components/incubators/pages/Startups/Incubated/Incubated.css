@@ -1,6 +1,9 @@
 .incubated-container {
   padding: 2rem;
   background: #FFFFFF;
+  margin: 0 auto;
+  border : 2px solid black;
+  border-radius: 10px;
 }
 
 .incubated-header {
@@ -16,10 +19,11 @@
 }
 
 .incubated-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 1.5rem;
   padding: 1rem;
+  border : 1px solid black;
+  border-radius: 10px;
 }
 
 .incubated-card {
