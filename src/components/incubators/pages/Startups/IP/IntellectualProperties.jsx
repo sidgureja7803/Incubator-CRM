@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
 import './IntellectualProperties.css';
@@ -7,21 +8,7 @@ const IntellectualProperties = () => {
   const [intellectualProperties, setIntellectualProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [startupId, setStartupId] = useState(null);
-
-  // Get startup ID from URL
-  useEffect(() => {
-    const path = window.location.pathname;
-    const matches = path.match(/\/startups\/(\d+)/);
-    if (matches && matches[1]) {
-      setStartupId(matches[1]);
-    } else {
-      // If no ID is found in the URL, you might want to use a default or show an error
-      console.error("No startup ID found in URL");
-      setError("No startup ID found. Please navigate to a valid startup page.");
-      setLoading(false);
-    }
-  }, []);
+  const { startupId } = useParams();
 
   // Fetch IP data directly
   useEffect(() => {
@@ -45,33 +32,12 @@ const IntellectualProperties = () => {
         console.log("Intellectual Properties data:", response.data);
         setIntellectualProperties(response.data || []);
         setError(null);
-      } catch (err) {
-        console.error("Error fetching intellectual properties:", err);
+      } catch (error) {
+        console.error("Error fetching intellectual properties:", error);
         
         // Add mock data for testing if API fails
         console.log("Using mock data for intellectual properties");
-        const mockData = [
-          {
-            id: 1,
-            title: "Smart Energy Distribution System",
-            type: "Patent",
-            application_number: "US2023/12345",
-            filing_date: "2023-05-15",
-            status: "Pending",
-            description: "A novel system for optimizing energy distribution in smart grids using machine learning algorithms."
-          },
-          {
-            id: 2,
-            title: "ThinkWave Analytics Platform",
-            type: "Trademark",
-            application_number: "TM2023/78901",
-            filing_date: "2023-03-10",
-            status: "Granted",
-            grant_date: "2023-09-22",
-            description: "Trademark for our analytics software platform that processes and visualizes IoT data."
-          }
-        ];
-        setIntellectualProperties(mockData);
+        
       } finally {
         setLoading(false);
       }

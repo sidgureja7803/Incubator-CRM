@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
 import './Funding.css';
@@ -7,20 +8,7 @@ const Funding = () => {
   const [fundingRounds, setFundingRounds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [startupId, setStartupId] = useState(null);
-
-  // Get startup ID from URL
-  useEffect(() => {
-    const path = window.location.pathname;
-    const matches = path.match(/\/startups\/(\d+)/);
-    if (matches && matches[1]) {
-      setStartupId(matches[1]);
-    } else {
-      console.error("No startup ID found in URL");
-      setError("No startup ID found. Please navigate to a valid startup page.");
-      setLoading(false);
-    }
-  }, []);
+  const { startupId } = useParams();
 
   // Fetch funding data directly
   useEffect(() => {
@@ -58,8 +46,8 @@ const Funding = () => {
 
         setFundingRounds(sortedFunding);
         setError(null);
-      } catch (err) {
-        console.error("Error fetching funding rounds:", err);
+      } catch (error) {
+        console.error("Error fetching funding rounds:", error);
         
         // Add mock data for testing if API fails
         console.log("Using mock data for funding rounds");

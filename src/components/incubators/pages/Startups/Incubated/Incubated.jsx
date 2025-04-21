@@ -6,7 +6,7 @@ import './Incubated.css';
 import ThaparInnovate from './TIETInnovate.png';
 import { ArrowForward } from '@mui/icons-material';
 
-const Incubated = () => {
+export const Incubated = () => {
   const navigate = useNavigate();
   const [startups, setStartups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

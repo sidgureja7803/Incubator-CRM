@@ -1,95 +1,187 @@
 .startups-container {
-  padding: 2px;
-  background-color: #f9fafb;
+  width: 100%;
+  min-height: calc(100vh - 64px);
+  background-color: white;
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+.profile-header {
+  padding: 1.5rem 2rem;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* Breadcrumb navigation */
+.breadcrumb-nav {
+  padding: 0.75rem 2rem;
+  background-color: #f9fafb;
 }
 
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 24px;
+  gap: 0.25rem;
   font-size: 0.875rem;
-  color: #718096;
-  padding: 8px 16px;
-  background-color: #F9FAFB;
-  border-radius: 8px;
 }
 
 .breadcrumb-item {
-  display: inline-flex;
-  align-items: center;
+  color: #6b7280;
+  font-weight: 400;
 }
 
+.breadcrumb-item:last-child {
+  color: #111827;
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: #9ca3af;
+  margin: 0 0.25rem;
+}
+
+/* Tabs Container */
 .tabs-container {
-  padding: 1rem 1.5rem;
-  border: none;
-  background: none;
-  font-size: 0.875rem;
-  color: #6b7280;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.3s;
+  display: flex;
+  gap: 2rem;
+  padding: 0 2rem;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .tab-item {
-  padding: 12px 24px;
-  color: #4A5568;
+  padding: 1rem 0;
+  color: #6b7280;
   text-decoration: none;
-  font-weight: 500;
+  font-size: 0.875rem;
   position: relative;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
+}
+
+.tab-item:hover {
+  color: #111827;
 }
 
 .tab-item.active {
-  color: #2B3F6C;
-  font-weight: 600;
+  color: #2563eb;
+  font-weight: 500;
 }
 
 .tab-item.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -1px;
   left: 0;
-  width: 100%;
+  right: 0;
   height: 2px;
-  background-color: #2B3F6C;
+  background-color: #2563eb;
 }
 
-.tab-item:hover:not(.active) {
-  color: #2B3F6C;
-  background-color: #F9FAFB;
-}
-
+/* Content Container */
 .content-container {
-  margin-top: 24px;
+  padding: 2rem;
+  background-color: white;
 }
 
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-radius: 50%;
+  border-top-color: #2563eb;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Startup Card Styles */
+.startup-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.startup-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.startup-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.startup-details h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.startup-details p {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.view-button {
+  padding: 0.5rem 1rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  color: #111827;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-button:hover {
+  background-color: #f9fafb;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
-  .startups-container {
-    padding: 16px;
-  }
-  
   .tabs-container {
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 16px;
+    padding: 0 1rem;
+    gap: 1rem;
   }
-  
-  .tab-item {
-    padding: 12px 16px;
+
+  .content-container {
+    padding: 1rem;
   }
-  
-  .breadcrumb {
-    flex-wrap: wrap;
-    padding: 8px 12px;
-    font-size: 0.8rem;
+
+  .startup-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .startup-info {
+    width: 100%;
   }
 }

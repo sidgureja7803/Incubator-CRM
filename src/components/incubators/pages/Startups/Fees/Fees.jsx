@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from '../../../../../config';
-import { useOutletContext } from 'react-router-dom';
 import './Fees.css';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { IoCalendarOutline } from 'react-icons/io5';
 
 const Fees = () => {
-  const { startup } = useOutletContext();
+  const { startupId } = useParams();
   const [fees, setFees] = useState([]);
   const [showAddFeeModal, setShowAddFeeModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -24,15 +24,16 @@ const Fees = () => {
 
   // Load real data from API
   useEffect(() => {
+    if (!startupId) return;
     fetchFees();
-  }, [startup]);
+  }, [startupId]);
 
   const fetchFees = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
       const response = await axios.get(
-        `${config.api_base_url}/incubator/startup/${startup?.startup_id}/fees/`,
+        `${config.api_base_url}/incubator/startup/${startupId}/fees/`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }
@@ -54,7 +55,7 @@ const Fees = () => {
       setLoading(true);
       const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
       const payload = {
-        startup: startup?.startup_id,
+        startup: startupId,
         amount: formData.amount,
         frequency: formData.frequency,
         due_date: formData.dueDate,

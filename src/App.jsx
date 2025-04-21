@@ -45,6 +45,7 @@ import IncubatorInfrastructure from './components/incubators/pages/IncubatorProf
 import IncubatorAwards from './components/incubators/pages/IncubatorProfile/Awards/Awards';
 import IncubatorPrograms from './components/incubators/pages/Programs/Programs';
 import IncubatorStartups from './components/incubators/pages/Startups/Startup';
+import { Incubated } from './components/incubators/pages/Startups/Incubated/Incubated';
 
 // Startup Detail View components
 import StartupDetailView from './components/incubators/pages/Startups/Startups/StartupDetailView';
@@ -151,9 +152,11 @@ function App() {
               <Route path="awards" element={<IncubatorAwards />} />
             </Route>
             <Route path="programs" element={<IncubatorPrograms/>} />
-            <Route path="startups/*" element={<IncubatorStartups />} />
             
-            {/* Add explicit routes for startup detail view with nested tabs */}
+            {/* Startups Routes */}
+            <Route path="startups/*" element={<IncubatorStartups />} />
+
+            {/* Separate route for startup details */}
             <Route path="startups/incubated/:startupId" element={<StartupDetailView />}>
               <Route index element={<Navigate to="info" replace />} />
               <Route path="info" element={<StartupBasicInfo />} />

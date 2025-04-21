@@ -1,25 +1,118 @@
-.info-container {
-  padding: 24px;
-  background-color: #fff;
-  border-radius: 8px;
+.startup-info-container {
+  padding: 2rem;
+  background-color: #f9fafb;
+  min-height: calc(100vh - 64px);
 }
 
-.loading-container {
+.startup-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.startup-info-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.startup-sector {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+.startup-tabs {
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
+  background-color: white;
+  padding: 0 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.tab-item {
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  font-size: 0.875rem;
+  color: #6b7280;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s;
+  text-decoration: none;
+}
+
+.tab-item::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: transparent;
+  transition: background-color 0.3s;
+}
+
+.tab-item:hover {
+  color: #111827;
+}
+
+.tab-item.active {
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+.tab-item.active::after {
+  background-color: #1e3a8a;
+}
+
+.startup-tab-content {
+  background-color: white;
+  border-radius: 0 0 0.5rem 0.5rem;
+  padding: 2rem;
+  min-height: 400px;
+}
+
+/* Loading state */
+.startup-info-loading {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  min-height: 200px;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(43, 63, 108, 0.2);
+  border: 3px solid #e5e7eb;
   border-radius: 50%;
-  border-top-color: #2B3F6C;
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 16px;
+  border-top-color: #1e3a8a;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -28,99 +121,43 @@
   }
 }
 
-.error-container {
+/* Error state */
+.startup-info-error {
   text-align: center;
-  padding: 40px;
-  color: #E53E3E;
+  padding: 2rem;
 }
 
-.info-header {
-  margin-bottom: 24px;
+.startup-info-error h3 {
+  color: #dc2626;
+  margin-bottom: 1rem;
 }
 
-.startup-logo-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.retry-button {
+  padding: 0.5rem 1rem;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  margin-right: 1rem;
+  cursor: pointer;
 }
 
-.startup-logo {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.startup-logo-container h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #1A202C;
-}
-
-.info-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.info-section {
-  margin-bottom: 16px;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1A202C;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #2B3F6C;
-  margin-bottom: 16px;
-  display: inline-block;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px 32px;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.info-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #4A5568;
-}
-
-.info-value {
-  font-size: 16px;
-  color: #1A202C;
-}
-
-.info-value a {
-  color: #2B3F6C;
-  text-decoration: none;
-}
-
-.info-value a:hover {
-  text-decoration: underline;
-}
-
+/* Responsive styles */
 @media (max-width: 768px) {
-  .info-container {
-    padding: 16px;
+  .startup-info-container {
+    padding: 1rem;
   }
-  
-  .info-grid {
-    grid-template-columns: 1fr;
+
+  .startup-tabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
-  
-  .startup-logo-container {
-    flex-direction: column;
-    align-items: flex-start;
+
+  .tab-item {
+    padding: 0.75rem 1rem;
   }
-}
+
+  .startup-tab-content {
+    padding: 1rem;
+  }
+} 
