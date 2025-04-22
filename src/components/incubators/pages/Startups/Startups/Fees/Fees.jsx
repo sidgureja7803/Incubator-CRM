@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'utils/httpClient';
-import config from '../../../../../config';
+import config from '../../../../../../config';
 import './Fees.css';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { IoCalendarOutline } from 'react-icons/io5';

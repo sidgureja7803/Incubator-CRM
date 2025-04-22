@@ -1,10 +1,7 @@
 import React from 'react';
-import { useOutletContext } from 'react-router-dom';
 import './Info.css';
 
-const Info = () => {
-  const { startup } = useOutletContext();
-
+const Info = ({ startup }) => {
   if (!startup) {
     return (
       <div className="error-container">

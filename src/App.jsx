@@ -49,13 +49,13 @@ import { Incubated } from './components/incubators/pages/Startups/Incubated/Incu
 
 // Startup Detail View components
 import StartupDetailView from './components/incubators/pages/Startups/Startups/StartupDetailView';
-import StartupBasicInfo from './components/incubators/pages/Startups/Info/Info';
-import IncubatedStartupAwards from './components/incubators/pages/Startups/Awards/Awards';
-import IncubatedStartupFunding from './components/incubators/pages/Startups/Funding/Funding';
-import IncubatedStartupTeam from './components/incubators/pages/Startups/Team/StartupTeam';
-import IncubatedStartupProperties from './components/incubators/pages/Startups/IP/IntellectualProperties';
-import IncubatedStartupUpdates from './components/incubators/pages/Startups/Updates/Updates';
-import IncubatedStartupFees from './components/incubators/pages/Startups/Fees/Fees';
+import StartupBasicInfo from './components/incubators/pages/Startups/Startups/Info/Info';
+import IncubatedStartupAwards from './components/incubators/pages/Startups/Startups/Awards/Awards';
+import IncubatedStartupFunding from './components/incubators/pages/Startups/Startups/Funding/Funding';
+import IncubatedStartupTeam from './components/incubators/pages/Startups/Startups/Team/StartupTeam';
+import IncubatedStartupProperties from './components/incubators/pages/Startups/Startups/IP/IntellectualProperties';
+import IncubatedStartupUpdates from './components/incubators/pages/Startups/Startups/Updates/Updates';
+import IncubatedStartupFees from './components/incubators/pages/Startups/Startups/Fees/Fees';
 
 // Cohort Components
 import Tasks from './components/startups/pages/Incubators/Cohorts/Tasks/Tasks';

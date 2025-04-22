@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'utils/httpClient';
-import config from '../../../../../config';
+import config from '../../../../../../config';
 import './Updates.css';
 
 const Updates = () => {

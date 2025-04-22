@@ -1,57 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'utils/httpClient';
 import config from 'config';
 import './Incubated.css';
 import ThaparInnovate from './TIETInnovate.png';
 import { ArrowForward } from '@mui/icons-material';
+import { useIncubatorContext } from '../../../../../context/IncubatorContext';
 
 export const Incubated = () => {
   const navigate = useNavigate();
-  const [startups, setStartups] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Use useCallback to memoize the fetch function
-  const fetchData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      
-      const response = await axios.get(`${config.api_base_url}/incubator/startupincubator/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      setStartups(response.data || []);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching startups:", err);
-      setError('Failed to load startups. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const { startups, isLoading, error, refetchStartups } = useIncubatorContext();
 
   const handleStartupClick = (startup) => {
     navigate(`/incubator/startups/incubated/${startup.startup_id}/info`);
   };
 
-  if (isLoading) {
+  if (isLoading.startups) {
     return <div className="loading-container">
       <div className="spinner"></div>
       <p>Loading incubated startups...</p>
     </div>;
   }
 
-  if (error) {
+  if (error?.startups) {
     return <div className="error-container">
       <h3>Error loading incubated startups</h3>
-      <p>{error}</p>
-      <button onClick={fetchData} className="retry-button">Retry</button>
+      <p>{error.startups.message}</p>
+      <button onClick={refetchStartups} className="retry-button">Retry</button>
     </div>;
   }
 
@@ -66,14 +41,14 @@ export const Incubated = () => {
         ) : (
           startups.map((startup) => (
             <div 
-              key={startup.id} 
+              key={startup.startup_id} 
               className="incubated-card"
               onClick={() => handleStartupClick(startup)}
             >
               <div className="startup-logo-container">
                 <img 
-                  src={ThaparInnovate} 
-                  alt={startup.startup} 
+                  src={startup.details?.image_url || ThaparInnovate} 
+                  alt={startup.details?.startup_name} 
                   className="startup-logo"
                   loading="lazy"
                 />
@@ -82,12 +57,12 @@ export const Incubated = () => {
               <div className="startup-info">
                 <div className="startup-name-section">
                   <span className="label">Startup Name:</span>
-                  <h3 className="startup-name">{startup.startup}</h3>
+                  <h3 className="startup-name">{startup.details?.startup_name}</h3>
                 </div>
                 
                 <div className="founder-section">
                   <span className="label">Founder:</span>
-                  <p className="founder-name">Kanishk Dadwal</p>
+                  <p className="founder-name">{startup.details?.founder_name || 'Not specified'}</p>
                 </div>
               </div>
               

@@ -26,10 +26,23 @@
   flex: 0.95;
   padding: 3rem;
   background-color: #f8fafc;
-  border-right: 1px solid #e2e8f0;
+  border: 2px solid black;
+  border-right: 1px solid black;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+
+.right-section {
+  flex: 0.95;
+  padding: 3rem;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 2px solid black;
+  border-left: 1px solid black;
 }
 
 .left-content {
@@ -121,13 +134,6 @@
   font-weight: 600;
 }
 
-.right-section {
-  flex: 1.05;
-  padding: 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
 
 .form-container {
   max-width: 400px;
