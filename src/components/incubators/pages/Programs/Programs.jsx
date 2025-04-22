@@ -11,6 +11,7 @@ import ErrorBoundary from '../../../common/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../hooks/useAuth';
 
+
 // Separate components for better code splitting and error boundaries
 const LoadingSpinner = () => (
   <div className="loading-container">

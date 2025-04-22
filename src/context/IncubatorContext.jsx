@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import axios from 'utils/httpClient';
 import config from 'config';
 import { 
@@ -57,11 +57,10 @@ const fetchIncubatorInfo = async () => {
         }
       }
     );
-    // Return the first incubator in the list
-    return response.data && response.data.length > 0 ? response.data[0] : {};
+    return response.data?.[0] || {};
   } catch (error) {
     console.error("Error fetching incubator info:", error);
-    return {}; // Return empty object instead of null
+    return {};
   }
 };
 
@@ -84,7 +83,7 @@ const fetchIncubatorTeam = async () => {
     return response.data || [];
   } catch (error) {
     console.error("Error fetching incubator team:", error);
-    return []; // Return empty array instead of null
+    return [];
   }
 };
 
@@ -105,7 +104,6 @@ const fetchProgramsWithCohorts = async () => {
       }
     );
     
-    // Fetch cohorts for each program
     const programsWithCohorts = await Promise.all(
       response.data.map(async (program) => {
         try {
@@ -118,7 +116,7 @@ const fetchProgramsWithCohorts = async () => {
           console.error(`Error fetching cohorts for program ${program.id}:`, error);
           return {
             ...program,
-            cohorts: [] // Empty array if cohorts can't be fetched
+            cohorts: []
           };
         }
       })
@@ -127,7 +125,7 @@ const fetchProgramsWithCohorts = async () => {
     return programsWithCohorts;
   } catch (error) {
     console.error("Error fetching programs with cohorts:", error);
-    return []; // Return empty array instead of null
+    return [];
   }
 };
 
@@ -139,7 +137,6 @@ const fetchStartups = async () => {
       return [];
     }
     
-    // First fetch the list of startups
     const response = await axios.get(
       `${config.api_base_url}/incubator/startupincubator/`,
       {
@@ -149,7 +146,6 @@ const fetchStartups = async () => {
       }
     );
 
-    // Then fetch detailed data for each startup
     const startupsWithDetails = await Promise.all(
       response.data.map(async (startup) => {
         try {
@@ -163,7 +159,7 @@ const fetchStartups = async () => {
           );
           return {
             ...startup,
-            details: detailsResponse.data[0] // API returns an array, we take the first item
+            details: detailsResponse.data[0]
           };
         } catch (error) {
           console.error(`Error fetching details for startup ${startup.startup_id}:`, error);
@@ -174,23 +170,54 @@ const fetchStartups = async () => {
         }
       })
     );
-
+    
     return startupsWithDetails;
   } catch (error) {
     console.error("Error fetching startups:", error);
-    return []; // Return empty array instead of null
+    return [];
+  }
+};
+
+const fetchStartupDetails = async (startupId) => {
+  try {
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return null;
+    }
+    
+    const response = await axios.get(
+      `${config.api_base_url}/startup/list/?startup_id=${startupId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return response.data?.[0] || null;
+  } catch (error) {
+    console.error("Error fetching startup details:", error);
+    return null;
   }
 };
 
 export const IncubatorProvider = ({ children }) => {
   const queryClient = useQueryClient();
+  const [selectedCohort, setSelectedCohort] = useState(null);
+  const [showAssignTaskModal, setShowAssignTaskModal] = useState(false);
+  const [showAddDocumentModal, setShowAddDocumentModal] = useState(false);
+  const [documentData, setDocumentData] = useState({ name: '', description: '', file: null });
+  const [isEditingDoc, setIsEditingDoc] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   // Queries
   const incubatorInfoQuery = useQuery({
     queryKey: ['incubatorInfo'],
     queryFn: fetchIncubatorInfo,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false
   });
@@ -226,10 +253,6 @@ export const IncubatorProvider = ({ children }) => {
   const addProgramMutation = useMutation({
     mutationFn: async (programData) => {
       const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-      
       const response = await axios.post(
         `${config.api_base_url}/incubator/programs/`,
         programData,
@@ -244,23 +267,18 @@ export const IncubatorProvider = ({ children }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      setSuccessMessage('Program added successfully!');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
     }
   });
 
   const updateProgramMutation = useMutation({
     mutationFn: async (programData) => {
       const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-      
       const response = await axios.patch(
         `${config.api_base_url}/incubator/programs/${programData.id}`,
-        {
-          program_name: programData.program_name,
-          description: programData.description,
-          is_active: programData.is_active
-        },
+        programData,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -272,25 +290,18 @@ export const IncubatorProvider = ({ children }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
+      setSuccessMessage('Program updated successfully!');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
     }
   });
 
   const addCohortMutation = useMutation({
     mutationFn: async (cohortData) => {
       const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-      
       const response = await axios.post(
         `${config.api_base_url}/incubator/program/${cohortData.program_id}/cohort/`,
-        {
-          cohort_name: cohortData.cohort_name,
-          start_date: cohortData.start_date,
-          end_date: cohortData.end_date,
-          status: cohortData.status,
-          incubatorprogram: cohortData.program_id
-        },
+        cohortData,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -303,24 +314,18 @@ export const IncubatorProvider = ({ children }) => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
       queryClient.invalidateQueries({ queryKey: ['cohorts', variables.program_id] });
+      setSuccessMessage('Cohort added successfully!');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
     }
   });
 
   const updateCohortMutation = useMutation({
     mutationFn: async (cohortData) => {
       const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-      
       const response = await axios.patch(
         `${config.api_base_url}/incubator/program/cohort/${cohortData.id}`,
-        {
-          cohort_name: cohortData.cohort_name,
-          start_date: cohortData.start_date,
-          end_date: cohortData.end_date,
-          status: cohortData.status
-        },
+        cohortData,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -330,14 +335,80 @@ export const IncubatorProvider = ({ children }) => {
       );
       return response.data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
       queryClient.invalidateQueries({ queryKey: ['cohorts'] });
+      setSuccessMessage('Cohort updated successfully!');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
     }
   });
 
+  // Document handling functions
+  const handleAddDocument = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', documentData.name);
+    formData.append('description', documentData.description);
+    formData.append('file', documentData.file);
+
+    try {
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      await axios.post(
+        `${config.api_base_url}/programadmin/docs/${selectedCohort.id}`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      
+      setSuccessMessage('Document added successfully!');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
+      setShowAddDocumentModal(false);
+      queryClient.invalidateQueries({ queryKey: ['cohortDocuments', selectedCohort.id] });
+    } catch (error) {
+      console.error("Error adding document:", error);
+      setErrorMessage(error.response?.data?.message || 'Error adding document');
+    }
+  };
+
+  const handleUpdateDocument = async (documentId, updatedData) => {
+    const formData = new FormData();
+    formData.append('name', updatedData.name);
+    formData.append('description', updatedData.description);
+    if (updatedData.file) {
+      formData.append('file', updatedData.file);
+    }
+
+    try {
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+      await axios.patch(
+        `${config.api_base_url}/programadmin/docs/${documentId}`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      setSuccessMessage('Document updated successfully!');
+      setShowSuccessPopup(true);
+      setTimeout(() => setShowSuccessPopup(false), 3000);
+      queryClient.invalidateQueries({ queryKey: ['cohortDocuments', selectedCohort.id] });
+      setIsEditingDoc(false);
+    } catch (error) {
+      console.error("Error updating document:", error);
+      setErrorMessage(error.response?.data?.message || 'Error updating document');
+    }
+  };
+
   const value = {
-    // Data and loading states
+    // Data
     incubatorInfo: incubatorInfoQuery.data || {},
     incubatorTeam: incubatorTeamQuery.data || [],
     incubatorPrograms: programsQuery.data || [],
@@ -348,11 +419,7 @@ export const IncubatorProvider = ({ children }) => {
       incubatorInfo: incubatorInfoQuery.isLoading,
       incubatorTeam: incubatorTeamQuery.isLoading,
       programs: programsQuery.isLoading,
-      startups: startupsQuery.isLoading,
-      addProgram: addProgramMutation.isPending,
-      updateProgram: updateProgramMutation.isPending,
-      addCohort: addCohortMutation.isPending,
-      updateCohort: updateCohortMutation.isPending
+      startups: startupsQuery.isLoading
     },
     
     // Error states
@@ -360,11 +427,7 @@ export const IncubatorProvider = ({ children }) => {
       incubatorInfo: incubatorInfoQuery.error,
       incubatorTeam: incubatorTeamQuery.error,
       programs: programsQuery.error,
-      startups: startupsQuery.error,
-      addProgram: addProgramMutation.error,
-      updateProgram: updateProgramMutation.error,
-      addCohort: addCohortMutation.error,
-      updateCohort: updateCohortMutation.error
+      startups: startupsQuery.error
     },
     
     // Refetch functions
@@ -379,8 +442,31 @@ export const IncubatorProvider = ({ children }) => {
     addCohort: addCohortMutation.mutate,
     updateCohort: updateCohortMutation.mutate,
     
+    // Document handling
+    handleAddDocument,
+    handleUpdateDocument,
+    
+    // State management
+    selectedCohort,
+    setSelectedCohort,
+    showAssignTaskModal,
+    setShowAssignTaskModal,
+    showAddDocumentModal,
+    setShowAddDocumentModal,
+    documentData,
+    setDocumentData,
+    isEditingDoc,
+    setIsEditingDoc,
+    errorMessage,
+    setErrorMessage,
+    successMessage,
+    setSuccessMessage,
+    showSuccessPopup,
+    setShowSuccessPopup,
+    
     // Helper functions
-    fetchProgramCohorts
+    fetchProgramCohorts,
+    fetchStartupDetails
   };
 
   return (

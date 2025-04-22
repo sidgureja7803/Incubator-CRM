@@ -1,19 +1,14 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, NavLink, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, NavLink, useLocation, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../../hooks/useAuth';
+import { useIncubatorContext } from '../../../../context/IncubatorContext';
+import Breadcrumbs from '../../../common/Breadcrumbs/Breadcrumbs';
 import './Startup.css';
 
 // Lazy load components for better performance
 const Incubated = React.lazy(() => import('./Incubated/Incubated'));
 const Applications = React.lazy(() => import('./Applications/Applications'));
 const StartupDetailView = React.lazy(() => import('./Startups/StartupDetailView'));
-const StartupBasicInfo = React.lazy(() => import('./Info/Info'));
-const StartupAwards = React.lazy(() => import('./Awards/Awards'));
-const StartupFunding = React.lazy(() => import('./Funding/Funding'));
-const StartupTeam = React.lazy(() => import('./Team/StartupTeam'));
-const StartupProperties = React.lazy(() => import('./IP/IntellectualProperties'));
-const StartupUpdates = React.lazy(() => import('./Updates/Updates'));
-const StartupFees = React.lazy(() => import('./Fees/Fees'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -26,17 +21,27 @@ const LoadingFallback = () => (
 const Startup = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { startupId } = useParams();
   const { isAuthenticated, loading: authLoading } = useAuth();
+  const { startups } = useIncubatorContext();
   
-  // Define tabs array
-  const tabs = [
-    { id: 'incubated', label: 'Incubated', path: '/startups/incubated' },
-    { id: 'applications', label: 'Applications', path: '/startups/applications' },
+  // Define main tabs array
+  const mainTabs = [
+    { id: 'incubated', label: 'Incubated', path: '/incubator/startups/incubated' },
+    { id: 'applications', label: 'Applications', path: '/incubator/startups/applications' },
   ];
+
+  // Get current path for breadcrumb
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const isStartupView = pathSegments.includes('incubated') && startupId;
   
-  // Determine if we're on a detailed path
-  const isDetailView = location.pathname.includes('/incubated/') && location.pathname.split('/').length > 4;
-  
+  // Function to get startup name from context
+  const getStartupName = () => {
+    if (!startupId) return '';
+    const startup = startups?.find(s => s.startup_id === startupId);
+    return startup?.details?.startup_name || 'Startup';
+  };
+
   // Handle authentication
   if (authLoading) {
     return <LoadingFallback />;
@@ -48,46 +53,46 @@ const Startup = () => {
 
   return (
     <div className="startups-container">
-      <div className = "profile-header">
+      {/* Header */}
+      <div className="profile-header">
         <h1>Startups</h1>
       </div>
-      
-      {!isDetailView && (
+
+      {/* Breadcrumbs */}
+      <Breadcrumbs getStartupName={getStartupName} />
+
+      {/* Tabs */}
+      {!isStartupView && (
         <div className="tabs-container">
-          {tabs.map((tab) => (
-            <NavLink 
-              key={tab.id}
-              to={tab.id}
-              className={({ isActive }) => 
-                isActive ? "tab-item active" : "tab-item"
-              }
-            >
-              {tab.label}
-            </NavLink>
-          ))}
+          <div className="main-tabs">
+            {mainTabs.map((tab) => (
+              <NavLink
+                key={tab.id}
+                to={tab.path}
+                className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}
+                end
+              >
+                {tab.label}
+              </NavLink>
+            ))}
+          </div>
         </div>
       )}
 
+      {/* Content */}
       <div className="content-container">
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            <Route path="/" element={<Navigate to="incubated" replace />} />
+            {/* Main routes */}
+            <Route index element={<Navigate to="/incubator/startups/incubated" replace />} />
             <Route path="incubated" element={<Incubated />} />
             <Route path="applications" element={<Applications />} />
             
-            {/* Detailed startup view with nested routes */}
-            <Route path="incubated/:startupId" element={<StartupDetailView />}>
-              <Route index element={<Navigate to="info" replace />} />
-              <Route path="info" element={<StartupBasicInfo />} />
-              <Route path="awards" element={<StartupAwards />} />
-              <Route path="funding" element={<StartupFunding />} />
-              <Route path="team" element={<StartupTeam />} />
-              <Route path="properties" element={<StartupProperties />} />
-              <Route path="updates" element={<StartupUpdates />} />
-              <Route path="fee" element={<StartupFees />} />
-            </Route>
+            {/* Startup detail route */}
+            <Route path="incubated/:startupId/*" element={<StartupDetailView />} />
             
-            <Route path="*" element={<Navigate to="incubated" replace />} />
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/incubator/startups/incubated" replace />} />
           </Routes>
         </Suspense>
       </div>

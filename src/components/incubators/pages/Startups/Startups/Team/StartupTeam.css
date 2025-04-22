@@ -1,0 +1,324 @@
+.main-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.loading, .error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #374151;
+}
+
+.error {
+  color: #dc2626;
+}
+
+.startups-header {
+  padding: 1.5rem 2rem;
+  background-color: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.startups-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.breadcrumb {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.breadcrumb span:not(:last-child)::after {
+  content: "/";
+  margin: 0 0.5rem;
+  color: #9ca3af;
+}
+
+.content-container {
+  padding: 1.5rem 2rem;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.nav-tab {
+  padding: 0.75rem 0;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: #4b5563;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+  color: #1e40af;
+}
+
+.nav-tab.active {
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #1e40af;
+}
+
+.team-container {
+  padding: 24px;
+  background-color: #fff;
+}
+
+.team-header {
+  margin-bottom: 24px;
+}
+
+.team-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1A202C;
+  margin: 0;
+}
+
+.team-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.team-card {
+  display: flex;
+  gap: 24px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.card-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.member-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.member-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.social-links {
+  display: flex;
+  gap: 8px;
+}
+
+.social-link {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.social-link.linkedin {
+  background-color: #0077B5;
+}
+
+.social-link.instagram {
+  background-color: #E4405F;
+}
+
+.social-link.twitter {
+  background-color: #1DA1F2;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #4A5568;
+}
+
+.action-btn:hover {
+  background-color: #F7FAFC;
+}
+
+.card-right {
+  flex: 1;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.member-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1A202C;
+  margin: 0;
+}
+
+.member-roles {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.role-item {
+  flex: 1;
+}
+
+.role-label {
+  display: block;
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.role-value {
+  font-size: 16px;
+  color: #2D3748;
+  font-weight: 500;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-row {
+  display: flex;
+  gap: 24px;
+}
+
+.contact-item {
+  flex: 1;
+}
+
+.contact-label {
+  display: block;
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.contact-value {
+  font-size: 14px;
+  color: #2D3748;
+}
+
+.error-container {
+  text-align: center;
+  padding: 48px;
+  background-color: #FFF5F5;
+  border-radius: 12px;
+  color: #E53E3E;
+}
+
+.error-container h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.error-container p {
+  margin: 0;
+  color: #822727;
+}
+
+@media (max-width: 1200px) {
+  .team-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .team-card {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card-left {
+    width: 100%;
+  }
+
+  .member-roles,
+  .contact-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #E5E7EB;
+  border-top: 3px solid #2563EB;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-team {
+  text-align: center;
+  padding: 2rem;
+  color: #6B7280;
+}
+

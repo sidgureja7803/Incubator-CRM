@@ -31,6 +31,9 @@
 .right-section {
   flex: 1;
   padding: 3rem;
+  background-color: #f8fafc;
+  border-radius: 0 20px 20px 0;
+  border: 2px solid black;
 }
 
 .form-container {

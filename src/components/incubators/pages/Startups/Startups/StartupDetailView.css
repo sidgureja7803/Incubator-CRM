@@ -1,6 +1,53 @@
 .startup-detail-container {
+  background-color: white;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+}
+
+.startup-detail-header {
+  padding: 24px;
+  border-bottom: 1px solid #E2E8F0;
+  background-color: white;
+}
+
+.startup-detail-tabs {
+  padding: 0 24px;
+  background-color: white;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.startup-detail-tab-list {
+  display: flex;
+  gap: 32px;
+  margin: 0;
   padding: 0;
-  width: 100%;
+  list-style: none;
+}
+
+.startup-detail-tab-item {
+  padding: 12px 0;
+  color: #64748B;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.startup-detail-tab-item:hover {
+  color: #2B3F6C;
+}
+
+.startup-detail-tab-item.active {
+  color: #2B3F6C;
+  border-bottom-color: #2B3F6C;
+}
+
+.startup-detail-content {
+  flex: 1;
+  padding: 24px;
+  background-color: #F8FAFC;
 }
 
 .startup-detail-loading,

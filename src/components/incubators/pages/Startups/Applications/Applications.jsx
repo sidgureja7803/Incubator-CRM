@@ -6,6 +6,7 @@ import Modal from 'react-modal';
 import ThaparInnovate from './IncuabtorImage.png';
 import { KeyboardArrowDown, KeyboardArrowUp, ArrowForward } from '@mui/icons-material';
 import { useAuth } from '../../../../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 // Set the app element for the modal
 if (typeof window !== 'undefined') {
@@ -28,6 +29,7 @@ const Applications = () => {
   const [isLoadingApplications, setIsLoadingApplications] = useState({});
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
+  const navigate = useNavigate();
 
   const fetchPrograms = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -160,6 +162,10 @@ const Applications = () => {
     } finally {
       setIsSubmittingStatus(false);
     }
+  };
+
+  const handleViewApplication = (applicationId) => {
+    navigate(`/incubator/startups/applications/${applicationId}/info`);
   };
 
   if (isLoadingPrograms) {
