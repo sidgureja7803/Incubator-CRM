@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { useParams, NavLink, Outlet, useNavigate, Navigate, useLocation, Routes, Route } from 'react-router-dom';
+import { useParams, NavLink, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useIncubatorContext } from '../../../../../context/IncubatorContext';
 import { useAuth } from '../../../../../hooks/useAuth';
 import Breadcrumbs from '../../../../common/Breadcrumbs/Breadcrumbs';
@@ -8,7 +8,7 @@ import ThaparInnovate from '../Incubated/TIETInnovate.png';
 
 // Lazy load tab components
 const StartupBasicInfo = React.lazy(() => import('./Info/Info'));
-const StartupAwards = React.lazy(() => import('./Awards/Awards'));
+const StartupAwards = React.lazy(() => import('./Awards/StartupAwards'));
 const StartupFunding = React.lazy(() => import('./Funding/Funding'));
 const StartupTeam = React.lazy(() => import('./Team/StartupTeam'));
 const StartupProperties = React.lazy(() => import('./IP/IntellectualProperties'));
@@ -80,44 +80,51 @@ const StartupDetailView = () => {
 
       <div className="startup-tabs">
         <NavLink 
-          to={`/incubator/startups/incubated/${startupId}/info`} 
+          to={`info`}
           className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}
+          end
         >
           Overview
         </NavLink>
         <NavLink 
-          to={`/incubator/startups/incubated/${startupId}/awards`} 
+          to={`awards`}
           className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}
+          end
         >
           Awards
         </NavLink>
         <NavLink 
-          to={`/incubator/startups/incubated/${startupId}/funding`} 
+          to={`funding`}
           className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}
+          end
         >
           Funding
         </NavLink>
         <NavLink 
-          to={`/incubator/startups/incubated/${startupId}/team`} 
+          to={`team`}
           className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}
+          end
         >
           Team
         </NavLink>
         <NavLink 
-          to={`/incubator/startups/incubated/${startupId}/properties`} 
+          to={`properties`}
           className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}
+          end
         >
           Intellectual Properties
         </NavLink>
         <NavLink 
-          to={`/incubator/startups/incubated/${startupId}/updates`} 
+          to={`updates`}
           className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}
+          end
         >
           Updates
         </NavLink>
         <NavLink 
-          to={`/incubator/startups/incubated/${startupId}/fee`} 
+          to={`fee`}
           className={({ isActive }) => isActive ? "tab-item active" : "tab-item"}
+          end
         >
           Fee
         </NavLink>
@@ -134,6 +141,7 @@ const StartupDetailView = () => {
             <Route path="properties" element={<StartupProperties startup={startup} />} />
             <Route path="updates" element={<StartupUpdates startup={startup} />} />
             <Route path="fee" element={<StartupFees startup={startup} />} />
+            <Route path="*" element={<Navigate to="info" replace />} />
           </Routes>
         </Suspense>
       </div>

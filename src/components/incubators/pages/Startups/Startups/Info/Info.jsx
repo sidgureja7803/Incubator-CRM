@@ -107,7 +107,13 @@ const Info = ({ startup }) => {
           </div>
           <div className="info-item">
             <span className="info-label">Website:</span>
-            <span className="info-value">{startup.website || 'Not provided'}</span>
+            <span className="info-value">
+              {startup.website ? (
+                <a href={startup.website} target="_blank" rel="noopener noreferrer">
+                  {startup.website}
+                </a>
+              ) : 'Not provided'}
+            </span>
           </div>
         </div>
       </div>

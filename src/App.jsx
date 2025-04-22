@@ -50,7 +50,7 @@ import { Incubated } from './components/incubators/pages/Startups/Incubated/Incu
 // Startup Detail View components
 import StartupDetailView from './components/incubators/pages/Startups/Startups/StartupDetailView';
 import StartupBasicInfo from './components/incubators/pages/Startups/Startups/Info/Info';
-import IncubatedStartupAwards from './components/incubators/pages/Startups/Startups/Awards/Awards';
+import IncubatedStartupAwards from './components/incubators/pages/Startups/Startups/Awards/StartupAwards';
 import IncubatedStartupFunding from './components/incubators/pages/Startups/Startups/Funding/Funding';
 import IncubatedStartupTeam from './components/incubators/pages/Startups/Startups/Team/StartupTeam';
 import IncubatedStartupProperties from './components/incubators/pages/Startups/Startups/IP/IntellectualProperties';

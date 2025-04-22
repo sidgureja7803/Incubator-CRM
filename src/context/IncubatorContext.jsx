@@ -178,6 +178,29 @@ const fetchStartups = async () => {
   }
 };
 
+const fetchStartupDetails = async (startupId) => {
+  try {
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return null;
+    }
+    
+    const response = await axios.get(
+      `${config.api_base_url}/startup/list/?startup_id=${startupId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    return response.data?.[0] || null;
+  } catch (error) {
+    console.error("Error fetching startup details:", error);
+    return null;
+  }
+};
+
 export const IncubatorProvider = ({ children }) => {
   const queryClient = useQueryClient();
   const [selectedCohort, setSelectedCohort] = useState(null);
@@ -442,7 +465,8 @@ export const IncubatorProvider = ({ children }) => {
     setShowSuccessPopup,
     
     // Helper functions
-    fetchProgramCohorts
+    fetchProgramCohorts,
+    fetchStartupDetails
   };
 
   return (

@@ -1,11 +1,7 @@
 import React from 'react';
-import { useOutletContext } from 'react-router-dom';
-import './Awards.css';
+import './StartupAwards.css';
 
-const Awards = () => {
-  const { startup } = useOutletContext();
-  const awards = startup?.awards || [];
-
+const StartupAwards = ({ startup }) => {
   if (!startup) {
     return (
       <div className="error-container">
@@ -14,6 +10,8 @@ const Awards = () => {
       </div>
     );
   }
+
+  const awards = startup.awards || [];
 
   return (
     <div className="awards-container">
@@ -46,4 +44,4 @@ const Awards = () => {
   );
 };
 
-export default Awards;
+export default StartupAwards;

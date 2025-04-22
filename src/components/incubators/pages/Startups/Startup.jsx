@@ -27,8 +27,8 @@ const Startup = () => {
   
   // Define main tabs array
   const mainTabs = [
-    { id: 'incubated', label: 'Incubated', path: 'incubated' },
-    { id: 'applications', label: 'Applications', path: 'applications' },
+    { id: 'incubated', label: 'Incubated', path: '/incubator/startups/incubated' },
+    { id: 'applications', label: 'Applications', path: '/incubator/startups/applications' },
   ];
 
   // Get current path for breadcrumb
@@ -70,6 +70,7 @@ const Startup = () => {
                 key={tab.id}
                 to={tab.path}
                 className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}
+                end
               >
                 {tab.label}
               </NavLink>
@@ -83,7 +84,7 @@ const Startup = () => {
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Main routes */}
-            <Route index element={<Navigate to="incubated" replace />} />
+            <Route index element={<Navigate to="/incubator/startups/incubated" replace />} />
             <Route path="incubated" element={<Incubated />} />
             <Route path="applications" element={<Applications />} />
             
@@ -91,7 +92,7 @@ const Startup = () => {
             <Route path="incubated/:startupId/*" element={<StartupDetailView />} />
             
             {/* Fallback route */}
-            <Route path="*" element={<Navigate to="incubated" replace />} />
+            <Route path="*" element={<Navigate to="/incubator/startups/incubated" replace />} />
           </Routes>
         </Suspense>
       </div>
